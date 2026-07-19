@@ -1,0 +1,272 @@
+// ─── Organization core ───────────────────────────────────────────────────────
+
+model Organization {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  timezone  String    @default("UTC")
+  /// Default currency code (ISO 4217), e.g. INR
+  currency  String    @default("USD") @db.Char(3)
+  locale    String    @default("en-US")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  settings              OrganizationSettings?
+  offices               OfficeLocation[]
+  financialYears        FinancialYear[]
+  departments           Department[]
+  teams                 Team[]
+  jobRoles              JobRole[]
+  designations          Designation[]
+  users                 User[]
+  memberships           Membership[]
+  userProfiles          UserProfile[]
+  employees             Employee[]
+  roles                 Role[]
+  permissions           Permission[]
+  auditLogs             AuditLog[]
+  accounts              Account[]
+  sessions              Session[]
+  userSessions          UserSession[]
+  notificationPrefs     NotificationPreference[]
+  currencies            Currency[]
+  taxRates              TaxRate[]
+  serviceOfferings      ServiceOffering[]
+  leadSources           LeadSource[]
+  leadStatuses          LeadStatus[]
+  pipelines             Pipeline[]
+  tags                  Tag[]
+  lostReasons           LostReason[]
+  competitors           Competitor[]
+  campaigns             Campaign[]
+  referralPartners      ReferralPartner[]
+  clientIndustries      ClientIndustry[]
+  clientCompanies       ClientCompany[]
+  contacts              Contact[]
+  leads                 Lead[]
+  deals                 Deal[]
+  objectives            Objective[]
+  kpis                  KPI[]
+  companyTargets        CompanyTarget[]
+  departmentTargets     DepartmentTarget[]
+  milestones            Milestone[]
+  initiatives           Initiative[]
+  businessReviews       BusinessReview[]
+  risks                 RiskRegister[]
+  issues                Issue[]
+  decisionLogs          DecisionLog[]
+  xymeCycles            XYMECycle[]
+  xymePlans             XYMEPlan[]
+  salesTargets          SalesTarget[]
+  commissionPlans       SalesCommissionPlan[]
+  revenueRules          RevenueAttributionRule[]
+  shifts                Shift[]
+  holidays              Holiday[]
+  leaveTypes            LeaveType[]
+  documentTypes         DocumentType[]
+  policies              Policy[]
+  announcements         Announcement[]
+  recruitmentJobs       RecruitmentJob[]
+  candidates            Candidate[]
+  companyAssets         CompanyAsset[]
+  salaryComponents      SalaryComponent[]
+  payrollPeriods        PayrollPeriod[]
+  quotes                Quote[]
+  invoices              Invoice[]
+  creditNotes           CreditNote[]
+  payments              Payment[]
+  paymentReminders      PaymentReminder[]
+  recurringTemplates    RecurringInvoiceTemplate[]
+  expenses              Expense[]
+  expenseCategories     ExpenseCategory[]
+  vendors               Vendor[]
+  purchaseOrders        PurchaseOrder[]
+  vendorBills           VendorBill[]
+  vendorPayments        VendorPayment[]
+  financialAttachments  FinancialAttachment[]
+  clientAccounts        ClientAccount[]
+  retainers             Retainer[]
+  contracts             Contract[]
+  statementsOfWork      StatementOfWork[]
+  projects              Project[]
+  serviceCatalog        ServiceCatalog[]
+  fileAttachments       FileAttachment[]
+  activityFeeds         ActivityFeed[]
+  approvalRequests      ApprovalRequest[]
+  notifications         Notification[]
+  savedViews            SavedView[]
+  customFieldDefs       CustomFieldDefinition[]
+  importJobs            ImportJob[]
+  exportJobs            ExportJob[]
+  webhookEndpoints      WebhookEndpoint[]
+  integrationCreds      IntegrationCredentialReference[]
+  scheduledJobs         ScheduledJob[]
+  systemSettings        SystemSetting[]
+  exchangeRates         ExchangeRate[]
+
+  @@index([deletedAt])
+  @@map("organizations")
+}
+
+model OrganizationSettings {
+  id                      String   @id @default(cuid())
+  organizationId          String   @unique
+  fiscalYearStartMonth    Int      @default(4)
+  dateFormat              String   @default("dd/MM/yyyy")
+  weekStartsOn            Int      @default(1)
+  defaultWorkMode         WorkMode @default(HYBRID)
+  invoicePrefix           String   @default("INV")
+  quotePrefix             String   @default("QT")
+  employeeCodePrefix      String   @default("DP")
+  allowNegativeLeave      Boolean  @default(false)
+  metadata                Json?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("organization_settings")
+}
+
+model OfficeLocation {
+  id             String    @id @default(cuid())
+  organizationId String
+  name           String
+  code           String
+  addressLine1   String?
+  addressLine2   String?
+  city           String?
+  state          String?
+  country        String?
+  postalCode     String?
+  timezone       String?
+  isPrimary      Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  employees    Employee[]
+  holidays     Holiday[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId, deletedAt])
+  @@map("office_locations")
+}
+
+model FinancialYear {
+  id             String    @id @default(cuid())
+  organizationId String
+  name           String
+  code           String
+  startDate      DateTime  @db.Date
+  endDate        DateTime  @db.Date
+  isCurrent      Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  xymeCycles   XYMECycle[]
+  companyTargets CompanyTarget[]
+  departmentTargets DepartmentTarget[]
+  salesTargets SalesTarget[]
+  payrollPeriods PayrollPeriod[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId, isCurrent])
+  @@map("financial_years")
+}
+
+model Department {
+  id             String    @id @default(cuid())
+  organizationId String
+  name           String
+  code           String
+  description    String?
+  parentId       String?
+  headEmployeeId String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+  createdById    String?
+  updatedById    String?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  parent       Department?  @relation("DepartmentTree", fields: [parentId], references: [id])
+  children     Department[] @relation("DepartmentTree")
+  teams        Team[]
+  employees    Employee[]   @relation("EmployeeDepartment")
+  departmentHistory EmployeeDepartmentHistory[]
+  objectives   Objective[]  @relation("ObjectiveDepartment")
+  departmentTargets DepartmentTarget[]
+  users        User[]       @relation("UserDepartment")
+
+  @@unique([organizationId, code])
+  @@index([organizationId, deletedAt])
+  @@index([parentId])
+  @@map("departments")
+}
+
+model Team {
+  id             String    @id @default(cuid())
+  organizationId String
+  departmentId   String?
+  name           String
+  code           String
+  description    String?
+  leadEmployeeId String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  department   Department?  @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  employees    Employee[]   @relation("EmployeeTeam")
+  leads        Lead[]       @relation("LeadAssignedTeam")
+  objectives   Objective[]  @relation("ObjectiveTeam")
+
+  @@unique([organizationId, code])
+  @@index([organizationId, departmentId])
+  @@index([deletedAt])
+  @@map("teams")
+}
+
+model JobRole {
+  id             String    @id @default(cuid())
+  organizationId String
+  name           String
+  code           String
+  description    String?
+  isSalesRole    Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  employees    Employee[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId, deletedAt])
+  @@map("job_roles")
+}
+
+model Designation {
+  id             String    @id @default(cuid())
+  organizationId String
+  name           String
+  code           String
+  level          Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  employees    Employee[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId, deletedAt])
+  @@map("designations")
+}
+

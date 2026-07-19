@@ -1,0 +1,306 @@
+// ─── Shared platform models ──────────────────────────────────────────────────
+
+model FileAttachment {
+  id             String    @id @default(cuid())
+  organizationId String
+  storageKey     String
+  fileName       String
+  contentType    String?
+  sizeBytes      Int?
+  checksum       String?
+  uploadedById   String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  uploadedBy   User?        @relation("FileUploader", fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+  @@index([storageKey])
+  @@map("file_attachments")
+}
+
+model Comment {
+  id             String    @id @default(cuid())
+  organizationId String
+  entityType     String
+  entityId       String
+  body           String    @db.Text
+  authorId       String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  author   User?     @relation("CommentAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  mentions Mention[]
+
+  @@index([organizationId, entityType, entityId])
+  @@map("comments")
+}
+
+model Mention {
+  id             String   @id @default(cuid())
+  organizationId String
+  commentId      String
+  mentionedUserId String
+  createdAt      DateTime @default(now())
+
+  comment       Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  mentionedUser User    @relation("MentionedUser", fields: [mentionedUserId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, mentionedUserId])
+  @@map("mentions")
+}
+
+model ActivityFeed {
+  id             String   @id @default(cuid())
+  organizationId String
+  actorId        String?
+  entityType     String
+  entityId       String?
+  action         String
+  summary        String?
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, createdAt])
+  @@index([entityType, entityId])
+  @@map("activity_feeds")
+}
+
+model ApprovalRequest {
+  id             String         @id @default(cuid())
+  organizationId String
+  entityType     String
+  entityId       String
+  title          String
+  status         ApprovalStatus @default(PENDING)
+  requestedById  String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  steps        ApprovalStep[]
+  actions      ApprovalAction[]
+
+  @@index([organizationId, status])
+  @@index([entityType, entityId])
+  @@map("approval_requests")
+}
+
+model ApprovalStep {
+  id             String         @id @default(cuid())
+  organizationId String
+  requestId      String
+  stepOrder      Int
+  approverRole   String?
+  approverUserId String?
+  status         ApprovalStatus @default(PENDING)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  request ApprovalRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@unique([requestId, stepOrder])
+  @@map("approval_steps")
+}
+
+model ApprovalAction {
+  id             String         @id @default(cuid())
+  organizationId String
+  requestId      String
+  actorId        String?
+  status         ApprovalStatus
+  comment        String?
+  createdAt      DateTime       @default(now())
+
+  request ApprovalRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  actor   User?           @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([requestId, createdAt])
+  @@map("approval_actions")
+}
+
+model Notification {
+  id             String    @id @default(cuid())
+  organizationId String
+  userId         String
+  title          String
+  body           String?
+  entityType     String?
+  entityId       String?
+  readAt         DateTime?
+  createdAt      DateTime  @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  user         User         @relation("NotificationRecipient", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+  @@index([organizationId, createdAt])
+  @@map("notifications")
+}
+
+model SavedView {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String
+  module         String
+  name           String
+  filters        Json
+  isDefault      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, module])
+  @@map("saved_views")
+}
+
+model CustomFieldDefinition {
+  id             String    @id @default(cuid())
+  organizationId String
+  entityType     String
+  key            String
+  label          String
+  fieldType      String
+  options        Json?
+  isRequired     Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  values       CustomFieldValue[]
+
+  @@unique([organizationId, entityType, key])
+  @@map("custom_field_definitions")
+}
+
+model CustomFieldValue {
+  id             String   @id @default(cuid())
+  organizationId String
+  definitionId   String
+  entityType     String
+  entityId       String
+  valueText      String?
+  valueNumber    Decimal? @db.Decimal(18, 4)
+  valueJson      Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  definition CustomFieldDefinition @relation(fields: [definitionId], references: [id], onDelete: Cascade)
+
+  @@unique([definitionId, entityId])
+  @@index([organizationId, entityType, entityId])
+  @@map("custom_field_values")
+}
+
+model ImportJob {
+  id             String   @id @default(cuid())
+  organizationId String
+  module         String
+  status         String   @default("PENDING")
+  fileAttachmentId String?
+  rowCount       Int?
+  errorCount     Int?
+  result         Json?
+  createdById    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, status])
+  @@map("import_jobs")
+}
+
+model ExportJob {
+  id             String   @id @default(cuid())
+  organizationId String
+  module         String
+  status         String   @default("PENDING")
+  fileAttachmentId String?
+  filters        Json?
+  createdById    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, status])
+  @@map("export_jobs")
+}
+
+model WebhookEndpoint {
+  id             String    @id @default(cuid())
+  organizationId String
+  url            String
+  secretEnc      String?
+  events         Json
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, isActive])
+  @@map("webhook_endpoints")
+}
+
+/// Stores references/metadata only — never raw secrets in plaintext in app logs
+model IntegrationCredentialReference {
+  id             String    @id @default(cuid())
+  organizationId String
+  provider       String
+  label          String
+  vaultRef       String
+  metadata       Json?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  @@unique([organizationId, provider, label])
+  @@map("integration_credential_references")
+}
+
+model ScheduledJob {
+  id             String    @id @default(cuid())
+  organizationId String?
+  name           String
+  jobType        String
+  cronExpression String?
+  payload        Json?
+  nextRunAt      DateTime?
+  lastRunAt      DateTime?
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([nextRunAt, isActive])
+  @@map("scheduled_jobs")
+}
+
+model SystemSetting {
+  id             String   @id @default(cuid())
+  organizationId String?
+  key            String
+  value          Json
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, key])
+  @@map("system_settings")
+}
