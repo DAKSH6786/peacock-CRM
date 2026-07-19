@@ -16,7 +16,8 @@ Peacock One is the internal business operating system for **Digital Peacock**. I
 - Vitest + Playwright
 - Docker Compose for local infrastructure
 
-See [`docs/design-system.md`](./docs/design-system.md) for UI tokens and interaction rules.
+See [`docs/design-system.md`](./docs/design-system.md) for UI tokens and interaction rules.  
+See [`docs/database-model.md`](./docs/database-model.md) for the full entity relationship model.
 
 ## Prerequisites
 

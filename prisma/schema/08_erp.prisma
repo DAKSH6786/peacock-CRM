@@ -1,0 +1,538 @@
+// ─── Agency ERP / delivery ───────────────────────────────────────────────────
+
+model ClientAccount {
+  id             String    @id @default(cuid())
+  organizationId String
+  companyId      String
+  name           String
+  accountManagerId String?
+  status         String    @default("ACTIVE")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  company      ClientCompany @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  retainers    Retainer[]
+  contracts    Contract[]
+  projects     Project[]
+
+  @@index([organizationId, companyId])
+  @@map("client_accounts")
+}
+
+model Retainer {
+  id             String    @id @default(cuid())
+  organizationId String
+  clientAccountId String
+  name           String
+  amountMinor    Int
+  currencyCode   String    @default("INR") @db.Char(3)
+  startDate      DateTime? @db.Date
+  endDate        DateTime? @db.Date
+  billingCadence String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization  Organization  @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  clientAccount ClientAccount @relation(fields: [clientAccountId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("retainers")
+}
+
+model Contract {
+  id             String    @id @default(cuid())
+  organizationId String
+  clientAccountId String
+  title          String
+  startDate      DateTime? @db.Date
+  endDate        DateTime? @db.Date
+  valueMinor     Int?
+  currencyCode   String?   @db.Char(3)
+  fileAttachmentId String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization     Organization      @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  clientAccount    ClientAccount     @relation(fields: [clientAccountId], references: [id], onDelete: Cascade)
+  statementsOfWork StatementOfWork[]
+
+  @@index([organizationId])
+  @@map("contracts")
+}
+
+model StatementOfWork {
+  id             String    @id @default(cuid())
+  organizationId String
+  contractId     String?
+  title          String
+  scope          String?   @db.Text
+  startDate      DateTime? @db.Date
+  endDate        DateTime? @db.Date
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  contract     Contract?    @relation(fields: [contractId], references: [id], onDelete: SetNull)
+  projects     Project[]
+
+  @@index([organizationId])
+  @@map("statements_of_work")
+}
+
+model ServiceCatalog {
+  id             String    @id @default(cuid())
+  organizationId String
+  name           String
+  code           String
+  category       String?
+  description    String?   @db.Text
+  defaultRateMinor Int?
+  currencyCode   String    @default("INR") @db.Char(3)
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  @@unique([organizationId, code])
+  @@map("service_catalog")
+}
+
+model Project {
+  id             String    @id @default(cuid())
+  organizationId String
+  clientAccountId String?
+  companyId      String?
+  dealId         String?
+  sowId          String?
+  name           String
+  code           String
+  status         String    @default("PLANNED")
+  startDate      DateTime? @db.Date
+  endDate        DateTime? @db.Date
+  budgetMinor    Int?
+  currencyCode   String    @default("INR") @db.Char(3)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+  createdById    String?
+  updatedById    String?
+
+  organization  Organization   @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  clientAccount ClientAccount? @relation(fields: [clientAccountId], references: [id], onDelete: SetNull)
+  deal          Deal?          @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  sow           StatementOfWork? @relation(fields: [sowId], references: [id], onDelete: SetNull)
+  services      ProjectService[]
+  members       ProjectMember[]
+  phases        ProjectPhase[]
+  milestones    ProjectMilestone[]
+  deliverables  Deliverable[]
+  tasks         Task[]
+  timeEntries   TimeEntry[]
+  allocations   ResourceAllocation[]
+  capacityPlans CapacityPlan[]
+  budgets       ProjectBudget[]
+  costs         ProjectCost[]
+  revenues      ProjectRevenue[]
+  profitability ProjectProfitabilitySnapshot[]
+  changeRequests ChangeRequest[]
+  feedback      ClientFeedback[]
+  qualityChecklists QualityChecklist[]
+  invoices      Invoice[]
+  quotes        Quote[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId, status])
+  @@index([deletedAt])
+  @@map("projects")
+}
+
+model ProjectService {
+  id             String @id @default(cuid())
+  organizationId String
+  projectId      String
+  serviceOfferingId String?
+  name           String
+  description    String?
+
+  project         Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  serviceOffering ServiceOffering? @relation(fields: [serviceOfferingId], references: [id], onDelete: SetNull)
+
+  @@index([projectId])
+  @@map("project_services")
+}
+
+model ProjectMember {
+  id             String    @id @default(cuid())
+  organizationId String
+  projectId      String
+  employeeId     String
+  role           String?
+  allocationPct  Int?
+  startDate      DateTime? @db.Date
+  endDate        DateTime? @db.Date
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  project  Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+
+  @@unique([projectId, employeeId])
+  @@index([organizationId])
+  @@map("project_members")
+}
+
+model ProjectPhase {
+  id             String    @id @default(cuid())
+  organizationId String
+  projectId      String
+  name           String
+  sortOrder      Int       @default(0)
+  startDate      DateTime? @db.Date
+  endDate        DateTime? @db.Date
+  status         String    @default("PLANNED")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, sortOrder])
+  @@map("project_phases")
+}
+
+model ProjectMilestone {
+  id             String    @id @default(cuid())
+  organizationId String
+  projectId      String
+  title          String
+  dueDate        DateTime? @db.Date
+  status         String    @default("PENDING")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, dueDate])
+  @@map("project_milestones")
+}
+
+model Deliverable {
+  id             String    @id @default(cuid())
+  organizationId String
+  projectId      String
+  title          String
+  description    String?   @db.Text
+  status         String    @default("DRAFT")
+  dueDate        DateTime? @db.Date
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  project    Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  versions   DeliverableVersion[]
+  approvals  DeliverableApproval[]
+
+  @@index([projectId, status])
+  @@map("deliverables")
+}
+
+model DeliverableVersion {
+  id             String   @id @default(cuid())
+  organizationId String
+  deliverableId  String
+  version        Int
+  fileAttachmentId String?
+  notes          String?
+  createdById    String?
+  createdAt      DateTime @default(now())
+
+  deliverable Deliverable @relation(fields: [deliverableId], references: [id], onDelete: Cascade)
+
+  @@unique([deliverableId, version])
+  @@map("deliverable_versions")
+}
+
+model DeliverableApproval {
+  id             String         @id @default(cuid())
+  organizationId String
+  deliverableId  String
+  status         ApprovalStatus @default(PENDING)
+  reviewerId     String?
+  comment        String?
+  decidedAt      DateTime?
+  createdAt      DateTime       @default(now())
+
+  deliverable Deliverable @relation(fields: [deliverableId], references: [id], onDelete: Cascade)
+
+  @@index([deliverableId])
+  @@map("deliverable_approvals")
+}
+
+model Task {
+  id             String    @id @default(cuid())
+  organizationId String
+  projectId      String?
+  title          String
+  description    String?   @db.Text
+  status         String    @default("TODO")
+  priority       Priority  @default(MEDIUM)
+  assigneeId     String?
+  dueDate        DateTime? @db.Date
+  estimateHours  Decimal?  @db.Decimal(8, 2)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+  createdById    String?
+
+  project      Project?          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  dependencies TaskDependency[]  @relation("TaskDependent")
+  dependents   TaskDependency[]  @relation("TaskDependencyOf")
+  comments     TaskComment[]
+  attachments  TaskAttachment[]
+  timeEntries  TimeEntry[]
+
+  @@index([organizationId, status])
+  @@index([projectId, assigneeId])
+  @@index([deletedAt])
+  @@map("tasks")
+}
+
+model TaskDependency {
+  id             String @id @default(cuid())
+  organizationId String
+  taskId         String
+  dependsOnId    String
+  dependencyType String @default("BLOCKS")
+
+  task      Task @relation("TaskDependent", fields: [taskId], references: [id], onDelete: Cascade)
+  dependsOn Task @relation("TaskDependencyOf", fields: [dependsOnId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, dependsOnId])
+  @@map("task_dependencies")
+}
+
+model TaskComment {
+  id             String   @id @default(cuid())
+  organizationId String
+  taskId         String
+  body           String   @db.Text
+  authorId       String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId, createdAt])
+  @@map("task_comments")
+}
+
+model TaskAttachment {
+  id             String   @id @default(cuid())
+  organizationId String
+  taskId         String
+  fileAttachmentId String
+  createdAt      DateTime @default(now())
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@map("task_attachments")
+}
+
+model TimeEntry {
+  id             String   @id @default(cuid())
+  organizationId String
+  projectId      String?
+  taskId         String?
+  employeeId     String
+  date           DateTime @db.Date
+  hours          Decimal  @db.Decimal(8, 2)
+  billable       Boolean  @default(true)
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  project  Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  task     Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, date])
+  @@index([employeeId, date])
+  @@map("time_entries")
+}
+
+model ResourceAllocation {
+  id             String    @id @default(cuid())
+  organizationId String
+  projectId      String
+  employeeId     String
+  startDate      DateTime  @db.Date
+  endDate        DateTime? @db.Date
+  allocationPct  Int       @default(100)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  project  Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, employeeId, startDate])
+  @@map("resource_allocations")
+}
+
+model CapacityPlan {
+  id             String   @id @default(cuid())
+  organizationId String
+  projectId      String?
+  name           String
+  periodStart    DateTime @db.Date
+  periodEnd      DateTime @db.Date
+  plannedHours   Decimal  @db.Decimal(10, 2)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  project Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, periodStart])
+  @@map("capacity_plans")
+}
+
+model ProjectBudget {
+  id             String   @id @default(cuid())
+  organizationId String
+  projectId      String
+  category       String?
+  amountMinor    Int
+  currencyCode   String   @default("INR") @db.Char(3)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("project_budgets")
+}
+
+model ProjectCost {
+  id             String   @id @default(cuid())
+  organizationId String
+  projectId      String
+  category       String?
+  amountMinor    Int
+  currencyCode   String   @default("INR") @db.Char(3)
+  incurredAt     DateTime? @db.Date
+  notes          String?
+  createdAt      DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, incurredAt])
+  @@map("project_costs")
+}
+
+model ProjectRevenue {
+  id             String   @id @default(cuid())
+  organizationId String
+  projectId      String
+  amountMinor    Int
+  currencyCode   String   @default("INR") @db.Char(3)
+  recognizedAt   DateTime? @db.Date
+  source         String?
+  createdAt      DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("project_revenues")
+}
+
+model ProjectProfitabilitySnapshot {
+  id             String   @id @default(cuid())
+  organizationId String
+  projectId      String
+  asOfDate       DateTime @db.Date
+  revenueMinor   Int      @default(0)
+  costMinor      Int      @default(0)
+  profitMinor    Int      @default(0)
+  currencyCode   String   @default("INR") @db.Char(3)
+  createdAt      DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, asOfDate])
+  @@map("project_profitability_snapshots")
+}
+
+model ChangeRequest {
+  id             String         @id @default(cuid())
+  organizationId String
+  projectId      String
+  title          String
+  description    String?        @db.Text
+  status         ApprovalStatus @default(PENDING)
+  impactMinor    Int?
+  currencyCode   String?        @db.Char(3)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  deletedAt      DateTime?
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, status])
+  @@map("change_requests")
+}
+
+model ClientFeedback {
+  id             String   @id @default(cuid())
+  organizationId String
+  projectId      String
+  rating         Int?
+  body           String?  @db.Text
+  submittedAt    DateTime @default(now())
+  createdAt      DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("client_feedback")
+}
+
+model QualityChecklist {
+  id             String   @id @default(cuid())
+  organizationId String
+  projectId      String
+  title          String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  project Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  reviews QualityReview[]
+
+  @@index([projectId])
+  @@map("quality_checklists")
+}
+
+model QualityReview {
+  id             String   @id @default(cuid())
+  organizationId String
+  checklistId    String
+  reviewerId     String?
+  outcome        String?
+  notes          String?  @db.Text
+  reviewedAt     DateTime @default(now())
+  createdAt      DateTime @default(now())
+
+  checklist QualityChecklist @relation(fields: [checklistId], references: [id], onDelete: Cascade)
+
+  @@index([checklistId])
+  @@map("quality_reviews")
+}
