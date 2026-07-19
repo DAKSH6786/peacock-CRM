@@ -3,7 +3,9 @@
 // Timestamps: UTC; soft-delete via deletedAt on important records
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  // native = local/CI; rhel-openssl-3.0.x = Vercel serverless runtime
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {

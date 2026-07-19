@@ -2,10 +2,10 @@
   "name": "peacock-one",
   "version": "0.1.0",
   "private": true,
-  "description": "Peacock One — Digital Peacock internal business operating system",
+  "description": "Peacock One \u2014 Digital Peacock internal business operating system",
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && next build --webpack",
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -23,7 +23,8 @@
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset --force",
     "check:env": "tsx scripts/check-env.ts",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "vercel-build": "prisma generate && next build --webpack"
   },
   "prisma": {
     "schema": "prisma/schema",
@@ -60,7 +61,8 @@
     "server-only": "^0.0.1",
     "tailwind-merge": "^3.6.0",
     "uuid": "^14.0.1",
-    "zod": "^4.4.3"
+    "zod": "^4.4.3",
+    "prisma": "^6.19.3"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
@@ -80,10 +82,12 @@
     "jsdom": "^29.1.1",
     "prettier": "^3.9.5",
     "prettier-plugin-tailwindcss": "^0.8.1",
-    "prisma": "^6.19.3",
     "tailwindcss": "^4",
     "tsx": "^4.23.1",
     "typescript": "^5",
     "vitest": "^4.1.10"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }
