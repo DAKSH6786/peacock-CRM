@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+:root {
+  /* Neo-Brutalist Peacock One palette */
+  --yellow: #ffe17c;
+  --charcoal: #171e19;
+  --sage: #b7c6c2;
+  --white: #ffffff;
+  --black: #000000;
+  --gray-dark: #272727;
+  --gray-muted: #f4f4f5;
+  --star: #ffbc2e;
+  --danger: #ff5f57;
+  --success: #28c840;
+
+  --background: var(--yellow);
+  --foreground: var(--black);
+  --surface: var(--white);
+  --surface-muted: var(--gray-muted);
+  --sidebar: var(--charcoal);
+  --border: var(--black);
+  --muted: #3a423c;
+  --brand: var(--yellow);
+  --brand-foreground: var(--black);
+  --accent: var(--sage);
+  --ring: var(--black);
+
+  --radius-btn: 0.75rem;
+  --shadow-brutal: 4px 4px 0 0 var(--black);
+  --shadow-brutal-lg: 8px 8px 0 0 var(--black);
+  --shadow-brutal-xl: 12px 12px 0 0 var(--black);
+  --ease-press: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-yellow: var(--yellow);
+  --color-charcoal: var(--charcoal);
+  --color-sage: var(--sage);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+}
+
+body {
+  background: var(--yellow);
+  color: var(--foreground);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-weight: 500;
+}
+
+h1,
+h2,
+h3,
+h4,
+.font-display {
+  font-family: var(--font-display), system-ui, sans-serif;
+  letter-spacing: -0.04em;
+  font-weight: 800;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--black);
+  outline-offset: 2px;
+}
+
+/* 32×32 radial dot pattern @ 10% opacity on yellow */
+.bg-dot-pattern {
+  background-color: var(--yellow);
+  background-image: radial-gradient(
+    rgba(0, 0, 0, 0.1) 1.25px,
+    transparent 1.25px
+  );
+  background-size: 32px 32px;
+}
+
+.shadow-brutal {
+  box-shadow: var(--shadow-brutal);
+}
+
+.shadow-brutal-lg {
+  box-shadow: var(--shadow-brutal-lg);
+}
+
+.shadow-brutal-xl {
+  box-shadow: var(--shadow-brutal-xl);
+}
+
+.text-stroke {
+  color: transparent;
+  -webkit-text-stroke: 2px var(--black);
+  paint-order: stroke fill;
+}
+
+.card-asymmetric {
+  border-radius: 2px 1.5rem 2px 1.5rem;
+}
