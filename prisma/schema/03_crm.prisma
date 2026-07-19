@@ -1,0 +1,616 @@
+// ─── CRM ─────────────────────────────────────────────────────────────────────
+
+model LeadSource {
+  id             String    @id @default(cuid())
+  organizationId String
+  name           String
+  code           String
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  leads        Lead[]
+
+  @@unique([organizationId, code])
+  @@map("lead_sources")
+}
+
+model LeadStatus {
+  id             String    @id @default(cuid())
+  organizationId String
+  name           String
+  code           String
+  isWon          Boolean   @default(false)
+  isLost         Boolean   @default(false)
+  sortOrder      Int       @default(0)
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  leads        Lead[]
+
+  @@unique([organizationId, code])
+  @@map("lead_statuses")
+}
+
+model Pipeline {
+  id             String    @id @default(cuid())
+  organizationId String
+  name           String
+  code           String
+  isDefault      Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  stages       PipelineStage[]
+  leads        Lead[]
+  deals        Deal[]
+
+  @@unique([organizationId, code])
+  @@map("pipelines")
+}
+
+model PipelineStage {
+  id             String    @id @default(cuid())
+  organizationId String
+  pipelineId     String
+  name           String
+  code           String
+  sortOrder      Int       @default(0)
+  probability    Int       @default(0)
+  isClosedWon    Boolean   @default(false)
+  isClosedLost   Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  pipeline          Pipeline @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  leads             Lead[]
+  deals             Deal[]
+  leadStageHistory  LeadStageHistory[]
+  dealStageHistory  DealStageHistory[]
+
+  @@unique([pipelineId, code])
+  @@index([organizationId, pipelineId])
+  @@map("pipeline_stages")
+}
+
+model Tag {
+  id             String    @id @default(cuid())
+  organizationId String
+  name           String
+  color          String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  leadTags     LeadTag[]
+
+  @@unique([organizationId, name])
+  @@map("tags")
+}
+
+model LostReason {
+  id             String    @id @default(cuid())
+  organizationId String
+  name           String
+  code           String
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  leads        Lead[]
+  deals        Deal[]
+
+  @@unique([organizationId, code])
+  @@map("lost_reasons")
+}
+
+model Competitor {
+  id             String    @id @default(cuid())
+  organizationId String
+  name           String
+  website        String?
+  notes          String?   @db.Text
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  @@unique([organizationId, name])
+  @@map("competitors")
+}
+
+model Campaign {
+  id             String    @id @default(cuid())
+  organizationId String
+  name           String
+  code           String
+  channel        String?
+  startDate      DateTime? @db.Date
+  endDate        DateTime? @db.Date
+  budgetMinor    Int?
+  currencyCode   String    @default("INR") @db.Char(3)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization  Organization  @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  leads         Lead[]
+  campaignLeads CampaignLead[]
+
+  @@unique([organizationId, code])
+  @@map("campaigns")
+}
+
+model ReferralPartner {
+  id             String    @id @default(cuid())
+  organizationId String
+  name           String
+  email          String?
+  phone          String?
+  companyName    String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  leads        Lead[]
+
+  @@index([organizationId, name])
+  @@map("referral_partners")
+}
+
+model ClientIndustry {
+  id             String    @id @default(cuid())
+  organizationId String
+  name           String
+  code           String
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  companies    ClientCompany[]
+
+  @@unique([organizationId, code])
+  @@map("client_industries")
+}
+
+model ClientCompany {
+  id             String    @id @default(cuid())
+  organizationId String
+  name           String
+  legalName      String?
+  website        String?
+  industryId     String?
+  domain         String?
+  /// Duplicate detection helpers
+  normalizedName String?
+  normalizedDomain String?
+  phone          String?
+  taxIdentifier  String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+  createdById    String?
+  updatedById    String?
+
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  industry     ClientIndustry? @relation(fields: [industryId], references: [id], onDelete: SetNull)
+  addresses    ClientAddress[]
+  contacts     Contact[]
+  leads        Lead[]
+  deals        Deal[]
+  clientAccounts ClientAccount[]
+  quotes       Quote[]
+  invoices     Invoice[]
+
+  @@index([organizationId, normalizedName])
+  @@index([organizationId, normalizedDomain])
+  @@index([organizationId, deletedAt])
+  @@map("client_companies")
+}
+
+model ClientAddress {
+  id             String    @id @default(cuid())
+  organizationId String
+  companyId      String
+  label          String?
+  line1          String
+  line2          String?
+  city           String?
+  state          String?
+  country        String?
+  postalCode     String?
+  isBilling      Boolean   @default(false)
+  isShipping     Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  company ClientCompany @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([organizationId])
+  @@map("client_addresses")
+}
+
+model Contact {
+  id             String    @id @default(cuid())
+  organizationId String
+  companyId      String?
+  firstName      String
+  lastName       String?
+  email          String?
+  phone          String?
+  title          String?
+  normalizedEmail String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  company      ClientCompany? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  leads        Lead[]
+
+  @@index([organizationId, normalizedEmail])
+  @@index([companyId])
+  @@map("contacts")
+}
+
+model ServiceOffering {
+  id             String    @id @default(cuid())
+  organizationId String
+  name           String
+  code           String
+  description    String?   @db.Text
+  defaultUnitPriceMinor Int?
+  currencyCode   String    @default("INR") @db.Char(3)
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  dealProducts DealProduct[]
+  projectServices ProjectService[]
+
+  @@unique([organizationId, code])
+  @@map("service_offerings")
+}
+
+model Lead {
+  id             String    @id @default(cuid())
+  organizationId String
+  personName     String
+  companyName    String?
+  email          String?
+  phone          String?
+  country        String?
+  city           String?
+  website        String?
+  sourceId       String?
+  statusId       String?
+  campaignId     String?
+  pipelineId     String?
+  stageId        String?
+  contactId      String?
+  companyId      String?
+  referralPartnerId String?
+  estimatedValueMinor Int?
+  currencyCode   String    @default("INR") @db.Char(3)
+  probability    Int?
+  expectedClosingDate DateTime? @db.Date
+  assignedUserId String?
+  assignedTeamId String?
+  nextFollowUpAt DateTime?
+  leadScore      Int       @default(0)
+  lastContactedAt DateTime?
+  consentMarketing Boolean  @default(false)
+  contactPreference String?
+  lostReasonId   String?
+  notes          String?   @db.Text
+  /// Duplicate detection
+  normalizedEmail String?
+  normalizedPhone String?
+  normalizedCompany String?
+  interestedServices Json?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+  createdById    String?
+  updatedById    String?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  source       LeadSource?  @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+  status       LeadStatus?  @relation(fields: [statusId], references: [id], onDelete: SetNull)
+  campaign     Campaign?    @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  pipeline     Pipeline?    @relation(fields: [pipelineId], references: [id], onDelete: SetNull)
+  stage        PipelineStage? @relation(fields: [stageId], references: [id], onDelete: SetNull)
+  contact      Contact?     @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  company      ClientCompany? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  referralPartner ReferralPartner? @relation(fields: [referralPartnerId], references: [id], onDelete: SetNull)
+  lostReason   LostReason?  @relation(fields: [lostReasonId], references: [id], onDelete: SetNull)
+  assignedUser User?        @relation("LeadAssignee", fields: [assignedUserId], references: [id], onDelete: SetNull)
+  assignedTeam Team?        @relation("LeadAssignedTeam", fields: [assignedTeamId], references: [id], onDelete: SetNull)
+  createdBy    User?        @relation("LeadCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  stageHistory      LeadStageHistory[]
+  assignmentHistory LeadAssignmentHistory[]
+  activities        LeadActivity[]
+  callLogs          CallLog[]
+  meetings          Meeting[]
+  notesList         Note[]
+  emailActivities   EmailActivity[]
+  followUps         FollowUp[]
+  leadTags          LeadTag[]
+  campaignLinks     CampaignLead[]
+  deals             Deal[]
+
+  @@index([organizationId, stageId])
+  @@index([organizationId, assignedUserId])
+  @@index([organizationId, normalizedEmail])
+  @@index([organizationId, nextFollowUpAt])
+  @@index([deletedAt])
+  @@map("leads")
+}
+
+model LeadStageHistory {
+  id             String   @id @default(cuid())
+  organizationId String
+  leadId         String
+  fromStageId    String?
+  toStageId      String
+  changedById    String?
+  note           String?
+  createdAt      DateTime @default(now())
+
+  lead     Lead          @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  toStage  PipelineStage @relation(fields: [toStageId], references: [id], onDelete: Restrict)
+
+  @@index([leadId, createdAt])
+  @@index([organizationId])
+  @@map("lead_stage_history")
+}
+
+model LeadAssignmentHistory {
+  id             String   @id @default(cuid())
+  organizationId String
+  leadId         String
+  fromUserId     String?
+  toUserId       String?
+  fromTeamId     String?
+  toTeamId       String?
+  changedById    String?
+  reason         String?
+  createdAt      DateTime @default(now())
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId, createdAt])
+  @@index([organizationId])
+  @@map("lead_assignment_history")
+}
+
+model LeadActivity {
+  id             String   @id @default(cuid())
+  organizationId String
+  leadId         String
+  type           String
+  subject        String?
+  body           String?  @db.Text
+  occurredAt     DateTime @default(now())
+  createdById    String?
+  createdAt      DateTime @default(now())
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId, occurredAt])
+  @@index([organizationId])
+  @@map("lead_activities")
+}
+
+model CallLog {
+  id             String   @id @default(cuid())
+  organizationId String
+  leadId         String?
+  dealId         String?
+  direction      String
+  durationSec    Int?
+  outcome        String?
+  notes          String?  @db.Text
+  occurredAt     DateTime @default(now())
+  createdById    String?
+  createdAt      DateTime @default(now())
+
+  lead Lead? @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, occurredAt])
+  @@map("call_logs")
+}
+
+model Meeting {
+  id             String   @id @default(cuid())
+  organizationId String
+  leadId         String?
+  dealId         String?
+  title          String
+  startsAt       DateTime
+  endsAt         DateTime?
+  location       String?
+  notes          String?  @db.Text
+  createdById    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  lead Lead? @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, startsAt])
+  @@map("meetings")
+}
+
+model Note {
+  id             String    @id @default(cuid())
+  organizationId String
+  leadId         String?
+  dealId         String?
+  body           String    @db.Text
+  createdById    String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  lead Lead? @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId])
+  @@index([organizationId])
+  @@map("notes")
+}
+
+model EmailActivity {
+  id             String   @id @default(cuid())
+  organizationId String
+  leadId         String?
+  direction      String
+  subject        String?
+  body           String?  @db.Text
+  occurredAt     DateTime @default(now())
+  createdById    String?
+  createdAt      DateTime @default(now())
+
+  lead Lead? @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId, occurredAt])
+  @@map("email_activities")
+}
+
+model FollowUp {
+  id             String    @id @default(cuid())
+  organizationId String
+  leadId         String
+  dueAt          DateTime
+  completedAt    DateTime?
+  notes          String?
+  assignedUserId String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, dueAt])
+  @@index([leadId])
+  @@map("follow_ups")
+}
+
+model LeadTag {
+  id     String @id @default(cuid())
+  leadId String
+  tagId  String
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([leadId, tagId])
+  @@map("lead_tags")
+}
+
+model CampaignLead {
+  id         String   @id @default(cuid())
+  campaignId String
+  leadId     String
+  linkedAt   DateTime @default(now())
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  lead     Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, leadId])
+  @@map("campaign_leads")
+}
+
+model Deal {
+  id             String    @id @default(cuid())
+  organizationId String
+  name           String
+  leadId         String?
+  companyId      String?
+  pipelineId     String?
+  stageId        String?
+  ownerUserId    String?
+  valueMinor     Int       @default(0)
+  currencyCode   String    @default("INR") @db.Char(3)
+  probability    Int?
+  expectedCloseDate DateTime? @db.Date
+  closedAt       DateTime?
+  lostReasonId   String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+  createdById    String?
+  updatedById    String?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  lead         Lead?        @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  company      ClientCompany? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  pipeline     Pipeline?    @relation(fields: [pipelineId], references: [id], onDelete: SetNull)
+  stage        PipelineStage? @relation(fields: [stageId], references: [id], onDelete: SetNull)
+  lostReason   LostReason?  @relation(fields: [lostReasonId], references: [id], onDelete: SetNull)
+  stageHistory DealStageHistory[]
+  products     DealProduct[]
+  quotes       Quote[]
+  invoices     Invoice[]
+  revenueAttributions EmployeeRevenueAttribution[]
+  projects     Project[]
+
+  @@index([organizationId, stageId])
+  @@index([organizationId, ownerUserId])
+  @@index([deletedAt])
+  @@map("deals")
+}
+
+model DealStageHistory {
+  id             String   @id @default(cuid())
+  organizationId String
+  dealId         String
+  fromStageId    String?
+  toStageId      String
+  changedById    String?
+  note           String?
+  createdAt      DateTime @default(now())
+
+  deal    Deal          @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  toStage PipelineStage @relation(fields: [toStageId], references: [id], onDelete: Restrict)
+
+  @@index([dealId, createdAt])
+  @@map("deal_stage_history")
+}
+
+model DealProduct {
+  id             String @id @default(cuid())
+  organizationId String
+  dealId         String
+  serviceOfferingId String?
+  name           String
+  quantity       Int    @default(1)
+  unitPriceMinor Int    @default(0)
+  discountMinor  Int    @default(0)
+  currencyCode   String @default("INR") @db.Char(3)
+
+  deal            Deal             @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  serviceOffering ServiceOffering? @relation(fields: [serviceOfferingId], references: [id], onDelete: SetNull)
+
+  @@index([dealId])
+  @@map("deal_products")
+}
