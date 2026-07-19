@@ -1,0 +1,16 @@
+node_modules
+.next
+.git
+coverage
+playwright-report
+test-results
+.env
+.env.*
+!.env.example
+*.md
+docs
+tests
+.vscode
+.cursor
+AGENTS.md
+CLAUDE.md

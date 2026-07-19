@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f3f6f4;
+  --foreground: #14241c;
+  --surface: #ffffff;
+  --surface-muted: #e8efe9;
+  --sidebar: #0f1f18;
+  --border: #d5e0d8;
+  --muted: #5d7166;
+  --brand: #0f6b4c;
+  --brand-hover: #0c5740;
+  --brand-soft: #d8f0e4;
+  --brand-foreground: #ffffff;
+  --ring: #1f8f68;
+  --danger: #b42318;
+  --danger-hover: #912018;
+  --accent: #c4a35a;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+}
+
+body {
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(15, 107, 76, 0.08),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(196, 163, 90, 0.12),
+      transparent 35%
+    ),
+    var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body), Georgia, serif;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
