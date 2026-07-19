@@ -35,7 +35,10 @@ export function ForgotPasswordForm() {
 
   if (submitted) {
     return (
-      <p className="text-sm text-[var(--muted)]" role="status">
+      <p
+        className="rounded-[0.75rem] border-2 border-black bg-[#b7c6c2] px-3 py-3 text-sm font-bold text-black shadow-[4px_4px_0_0_#000000]"
+        role="status"
+      >
         If an account exists for that email, password reset instructions will be
         sent shortly.
       </p>
@@ -57,7 +60,7 @@ export function ForgotPasswordForm() {
         {errors.email ? (
           <p
             id="email-error"
-            className="text-sm text-[var(--danger)]"
+            className="text-sm font-bold text-[#ff5f57]"
             role="alert"
           >
             {errors.email.message}

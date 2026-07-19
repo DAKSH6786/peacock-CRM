@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { Logo } from "@/components/brand/logo";
 import { primaryNav } from "@/components/layout/nav-items";
 import { cn } from "@/lib/utils";
 import { hasPermission, type Permission } from "@/permissions/types";
@@ -23,19 +24,15 @@ export function AppSidebar({ role }: AppSidebarProps) {
   });
 
   return (
-    <aside className="flex w-64 shrink-0 flex-col border-r border-[var(--border)] bg-[var(--sidebar)]">
-      <div className="border-b border-[var(--border)] px-5 py-6">
-        <Link href="/dashboard" className="block focus-visible:outline-none">
-          <p className="font-[family-name:var(--font-display)] text-2xl tracking-tight text-[var(--brand)]">
-            Peacock One
-          </p>
-          <p className="mt-1 text-xs text-[var(--muted)]">
-            Digital Peacock operating system
-          </p>
-        </Link>
+    <aside className="flex w-72 shrink-0 flex-col border-r-2 border-black bg-[#171e19] text-white">
+      <div className="border-b-2 border-black bg-[#ffe17c] px-5 py-5">
+        <Logo />
+        <p className="mt-2 font-[family-name:var(--font-body)] text-xs font-bold text-black/70">
+          Digital Peacock OS
+        </p>
       </div>
       <nav aria-label="Primary" className="flex-1 overflow-y-auto px-3 py-4">
-        <ul className="space-y-1">
+        <ul className="space-y-2">
           {visible.map((item) => {
             const active =
               pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -44,10 +41,10 @@ export function AppSidebar({ role }: AppSidebarProps) {
                 <Link
                   href={item.href}
                   className={cn(
-                    "block rounded-md px-3 py-2 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:outline-none",
+                    "block rounded-[0.75rem] border-2 px-3 py-2 font-[family-name:var(--font-body)] text-sm font-bold transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[#ffe17c] focus-visible:outline-none",
                     active
-                      ? "bg-[var(--brand-soft)] font-medium text-[var(--brand)]"
-                      : "text-[var(--foreground)] hover:bg-[var(--surface-muted)]",
+                      ? "border-black bg-[#ffe17c] text-black shadow-[4px_4px_0_0_#000000]"
+                      : "border-transparent text-[#b7c6c2] hover:border-black hover:bg-[#272727] hover:text-white",
                   )}
                   aria-current={active ? "page" : undefined}
                 >
@@ -58,6 +55,16 @@ export function AppSidebar({ role }: AppSidebarProps) {
           })}
         </ul>
       </nav>
+      <div className="border-t-2 border-black p-4">
+        <div className="rounded-[0.75rem] border-2 border-black bg-[#272727] p-3">
+          <p className="font-[family-name:var(--font-display)] text-sm font-extrabold tracking-tighter text-[#ffe17c]">
+            Neo-Brutal Ops
+          </p>
+          <p className="mt-1 text-xs font-medium text-[#b7c6c2]">
+            High contrast. Zero blur. Full clarity.
+          </p>
+        </div>
+      </div>
     </aside>
   );
 }

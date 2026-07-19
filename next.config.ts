@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "2mb",
     },
   },
+  images: {
+    remotePatterns: [],
+  },
 };
 
 export default nextConfig;

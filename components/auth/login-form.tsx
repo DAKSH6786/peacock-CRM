@@ -64,7 +64,7 @@ export function LoginForm() {
         {errors.email ? (
           <p
             id="email-error"
-            className="text-sm text-[var(--danger)]"
+            className="text-sm font-bold text-[#ff5f57]"
             role="alert"
           >
             {errors.email.message}
@@ -85,7 +85,7 @@ export function LoginForm() {
         {errors.password ? (
           <p
             id="password-error"
-            className="text-sm text-[var(--danger)]"
+            className="text-sm font-bold text-[#ff5f57]"
             role="alert"
           >
             {errors.password.message}
@@ -94,7 +94,10 @@ export function LoginForm() {
       </div>
 
       {error ? (
-        <p className="text-sm text-[var(--danger)]" role="alert">
+        <p
+          className="rounded-[0.75rem] border-2 border-black bg-[#ff5f57] px-3 py-2 text-sm font-bold text-white"
+          role="alert"
+        >
           {error}
         </p>
       ) : null}
