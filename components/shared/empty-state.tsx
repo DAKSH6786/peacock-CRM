@@ -1,27 +1,40 @@
 import { Inbox } from "lucide-react";
 
+import { cn } from "@/lib/utils";
+
 type EmptyStateProps = {
   title: string;
   description: string;
+  action?: React.ReactNode;
+  className?: string;
 };
 
-export function EmptyState({ title, description }: EmptyStateProps) {
+export function EmptyState({
+  title,
+  description,
+  action,
+  className,
+}: EmptyStateProps) {
   return (
     <div
-      className="flex flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed border-black bg-white px-6 py-16 text-center shadow-[4px_4px_0_0_#000000]"
+      className={cn(
+        "peacock-card flex flex-col items-center justify-center gap-3 px-6 py-16 text-center",
+        className,
+      )}
       role="status"
     >
-      <span className="flex h-16 w-16 items-center justify-center rounded-xl border-2 border-black bg-[#b7c6c2] shadow-[4px_4px_0_0_#000000] transition-colors hover:bg-[#ffe17c]">
-        <Inbox className="h-7 w-7 text-black" aria-hidden />
+      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent-teal)]">
+        <Inbox className="h-5 w-5" aria-hidden />
       </span>
       <div>
-        <h2 className="font-[family-name:var(--font-display)] text-2xl font-extrabold tracking-tighter">
+        <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold">
           {title}
         </h2>
-        <p className="mt-2 max-w-md font-[family-name:var(--font-body)] text-sm font-medium text-black/70">
+        <p className="mt-1 max-w-md text-sm text-[var(--muted)]">
           {description}
         </p>
       </div>
+      {action}
     </div>
   );
 }

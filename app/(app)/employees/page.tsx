@@ -1,16 +1,11 @@
 import type { Metadata } from "next";
 
-import { ModulePlaceholder } from "@/components/shared/module-placeholder";
+import { EmployeeDirectory } from "@/components/employees/employee-directory";
 
 export const metadata: Metadata = {
   title: "Employees",
 };
 
-export default function Page() {
-  return (
-    <ModulePlaceholder
-      title="Employees"
-      description="Directory, roles, and performance context."
-    />
-  );
+export default function EmployeesPage() {
+  return <EmployeeDirectory />;
 }

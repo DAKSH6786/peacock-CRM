@@ -7,8 +7,8 @@ Peacock One is the internal business operating system for **Digital Peacock**. I
 - Next.js (App Router) + TypeScript (strict)
 - PostgreSQL + Prisma ORM
 - Auth.js (NextAuth v5)
-- Tailwind CSS + Neo-Brutalist shadcn-style UI (`#ffe17c` / `#171e19` / `#b7c6c2`)
-- Cabinet Grotesk + Satoshi (Fontshare)
+- Tailwind CSS + premium Peacock OS UI (dark-default, light mode supported)
+- Manrope + Source Sans 3
 - React Hook Form + Zod
 - TanStack Table + Recharts
 - S3-compatible storage abstraction

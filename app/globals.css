@@ -1,52 +1,110 @@
 @import "tailwindcss";
 
 :root {
-  /* Neo-Brutalist Peacock One palette */
-  --yellow: #ffe17c;
-  --charcoal: #171e19;
-  --sage: #b7c6c2;
-  --white: #ffffff;
-  --black: #000000;
-  --gray-dark: #272727;
-  --gray-muted: #f4f4f5;
-  --star: #ffbc2e;
-  --danger: #ff5f57;
-  --success: #28c840;
+  color-scheme: dark;
 
-  --background: var(--yellow);
-  --foreground: var(--black);
-  --surface: var(--white);
-  --surface-muted: var(--gray-muted);
-  --sidebar: var(--charcoal);
-  --border: var(--black);
-  --muted: #3a423c;
-  --brand: var(--yellow);
-  --brand-foreground: var(--black);
-  --accent: var(--sage);
-  --ring: var(--black);
+  --background: #0b1220;
+  --background-elevated: #111a2e;
+  --foreground: #e8eef7;
+  --muted: #8b9bb4;
+  --muted-foreground: #8b9bb4;
+  --surface: #121b2f;
+  --surface-hover: #182338;
+  --surface-muted: #0f1729;
+  --border: #243049;
+  --border-strong: #334155;
+  --ring: #2dd4bf;
 
-  --radius-btn: 0.75rem;
-  --shadow-brutal: 4px 4px 0 0 var(--black);
-  --shadow-brutal-lg: 8px 8px 0 0 var(--black);
-  --shadow-brutal-xl: 12px 12px 0 0 var(--black);
-  --ease-press: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --primary: #14b8a6;
+  --primary-foreground: #041016;
+  --accent-blue: #38bdf8;
+  --accent-teal: #2dd4bf;
+  --accent-turquoise: #5eead4;
+  --accent-violet: #8b5cf6;
+  --accent-soft: rgba(45, 212, 191, 0.12);
+
+  --success: #34d399;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --info: #60a5fa;
+
+  --sidebar: #0a101c;
+  --sidebar-foreground: #d7e0ee;
+  --sidebar-active: rgba(45, 212, 191, 0.14);
+  --topbar: rgba(11, 18, 32, 0.85);
+
+  --card: #121b2f;
+  --card-foreground: #e8eef7;
+  --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.28);
+  --shadow-glow: 0 0 0 1px rgba(45, 212, 191, 0.12);
+
+  --radius: 0.875rem;
+  --feather: rgba(56, 189, 248, 0.06);
+}
+
+html.light {
+  color-scheme: light;
+
+  --background: #f4f7fb;
+  --background-elevated: #ffffff;
+  --foreground: #0f172a;
+  --muted: #64748b;
+  --muted-foreground: #64748b;
+  --surface: #ffffff;
+  --surface-hover: #f1f5f9;
+  --surface-muted: #eef2f7;
+  --border: #d9e2ec;
+  --border-strong: #cbd5e1;
+  --ring: #0f766e;
+
+  --primary: #0f766e;
+  --primary-foreground: #f0fdfa;
+  --accent-blue: #0284c7;
+  --accent-teal: #0d9488;
+  --accent-turquoise: #14b8a6;
+  --accent-violet: #7c3aed;
+  --accent-soft: rgba(15, 118, 110, 0.08);
+
+  --sidebar: #0b1220;
+  --sidebar-foreground: #e2e8f0;
+  --sidebar-active: rgba(45, 212, 191, 0.16);
+  --topbar: rgba(244, 247, 251, 0.9);
+
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --shadow-soft: 0 12px 28px rgba(15, 23, 42, 0.08);
+  --shadow-glow: 0 0 0 1px rgba(15, 118, 110, 0.08);
+  --feather: rgba(2, 132, 199, 0.05);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-yellow: var(--yellow);
-  --color-charcoal: var(--charcoal);
-  --color-sage: var(--sage);
+  --color-muted: var(--muted);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-card: var(--card);
   --font-sans: var(--font-body);
   --font-display: var(--font-display);
 }
 
+* {
+  border-color: var(--border);
+}
+
 body {
-  background: var(--yellow);
+  background:
+    radial-gradient(1200px 600px at 0% -10%, var(--feather), transparent 55%),
+    radial-gradient(
+      900px 500px at 100% 0%,
+      rgba(139, 92, 246, 0.08),
+      transparent 50%
+    ),
+    var(--background);
   color: var(--foreground);
-  font-family: var(--font-body), system-ui, sans-serif;
-  font-weight: 500;
+  font-family: var(--font-body), "Segoe UI", sans-serif;
+  font-weight: 450;
 }
 
 h1,
@@ -54,44 +112,47 @@ h2,
 h3,
 h4,
 .font-display {
-  font-family: var(--font-display), system-ui, sans-serif;
-  letter-spacing: -0.04em;
-  font-weight: 800;
+  font-family: var(--font-display), var(--font-body), sans-serif;
+  letter-spacing: -0.03em;
+  font-weight: 650;
 }
 
 *:focus-visible {
-  outline: 2px solid var(--black);
+  outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
 
-/* 32×32 radial dot pattern @ 10% opacity on yellow */
-.bg-dot-pattern {
-  background-color: var(--yellow);
-  background-image: radial-gradient(
-    rgba(0, 0, 0, 0.1) 1.25px,
-    transparent 1.25px
-  );
-  background-size: 32px 32px;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
-.shadow-brutal {
-  box-shadow: var(--shadow-brutal);
+.peacock-card {
+  background:
+    linear-gradient(180deg, rgba(45, 212, 191, 0.04), transparent 40%),
+    var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
 }
 
-.shadow-brutal-lg {
-  box-shadow: var(--shadow-brutal-lg);
+.feather-motif {
+  background-image:
+    radial-gradient(
+      circle at 20% 20%,
+      rgba(56, 189, 248, 0.08),
+      transparent 35%
+    ),
+    radial-gradient(circle at 80% 0%, rgba(139, 92, 246, 0.07), transparent 40%);
 }
 
-.shadow-brutal-xl {
-  box-shadow: var(--shadow-brutal-xl);
-}
-
-.text-stroke {
-  color: transparent;
-  -webkit-text-stroke: 2px var(--black);
-  paint-order: stroke fill;
-}
-
-.card-asymmetric {
-  border-radius: 2px 1.5rem 2px 1.5rem;
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
 }

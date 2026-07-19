@@ -19,7 +19,7 @@ export default function ForgotPasswordPage() {
   return (
     <div className="mx-auto w-full max-w-md space-y-6">
       <Logo href="/login" />
-      <Card className="shadow-[8px_8px_0_0_#000000]">
+      <Card>
         <CardHeader>
           <CardTitle>Reset password</CardTitle>
           <CardDescription>
@@ -29,11 +29,11 @@ export default function ForgotPasswordPage() {
         </CardHeader>
         <CardContent className="space-y-6">
           <ForgotPasswordForm />
-          <p className="text-sm font-medium text-black/70">
+          <p className="text-sm text-[var(--muted)]">
             Remembered your password?{" "}
             <Link
               href="/login"
-              className="font-bold text-black underline decoration-2 underline-offset-4"
+              className="font-semibold text-[var(--accent-teal)] underline-offset-4 hover:underline"
             >
               Back to sign in
             </Link>

@@ -1,22 +1,24 @@
-import { EmptyState } from "@/components/shared/empty-state";
 import { PageHeader } from "@/components/shared/page-header";
+import { EmptyState } from "@/components/shared/empty-state";
 
 type ModulePlaceholderProps = {
   title: string;
   description: string;
   emptyTitle?: string;
   emptyDescription?: string;
+  actions?: React.ReactNode;
 };
 
 export function ModulePlaceholder({
   title,
   description,
   emptyTitle = "No records yet",
-  emptyDescription = "Data for this module will appear here once it is connected to the service layer and seed script.",
+  emptyDescription = "Connect this module to the service layer and seed data to populate live records.",
+  actions,
 }: ModulePlaceholderProps) {
   return (
     <div>
-      <PageHeader title={title} description={description} />
+      <PageHeader title={title} description={description} actions={actions} />
       <EmptyState title={emptyTitle} description={emptyDescription} />
     </div>
   );

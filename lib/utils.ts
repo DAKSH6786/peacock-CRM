@@ -21,3 +21,17 @@ export function formatMoney(
 export function toMinorUnits(amount: number): number {
   return Math.round(amount * 100);
 }
+
+export function formatPercent(value: number, digits = 1): string {
+  return `${value.toFixed(digits)}%`;
+}
+
+export function initials(name?: string | null): string {
+  if (!name) return "?";
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
+}

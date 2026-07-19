@@ -17,13 +17,13 @@ export default function AppError({
 
   return (
     <div
-      className="mx-auto max-w-lg rounded-xl border-2 border-black bg-[#ffe17c] px-6 py-12 text-center shadow-[8px_8px_0_0_#000000]"
+      className="peacock-card mx-auto max-w-lg px-6 py-12 text-center"
       role="alert"
     >
-      <h1 className="font-[family-name:var(--font-display)] text-3xl font-extrabold tracking-tighter">
+      <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold">
         Something went wrong
       </h1>
-      <p className="mt-3 font-[family-name:var(--font-body)] text-sm font-medium text-black/70">
+      <p className="mt-2 text-sm text-[var(--muted)]">
         An unexpected error occurred while loading this section. You can try
         again, or contact an administrator if it persists.
       </p>

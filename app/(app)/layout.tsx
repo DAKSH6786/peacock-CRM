@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
-import { AppHeader } from "@/components/layout/app-header";
-import { AppSidebar } from "@/components/layout/app-sidebar";
+import { AppShell } from "@/components/layout/app-shell";
 
 export default async function AppLayout({
   children,
@@ -16,15 +15,12 @@ export default async function AppLayout({
   }
 
   return (
-    <div className="flex min-h-screen bg-[#f4f4f5]">
-      <AppSidebar role={session.user.role} />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <AppHeader
-          userName={session.user.name}
-          userEmail={session.user.email}
-        />
-        <main className="flex-1 px-6 py-8 lg:px-10">{children}</main>
-      </div>
-    </div>
+    <AppShell
+      role={session.user.role}
+      userName={session.user.name}
+      userEmail={session.user.email}
+    >
+      {children}
+    </AppShell>
   );
 }
