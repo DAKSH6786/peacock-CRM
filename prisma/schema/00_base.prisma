@@ -94,6 +94,8 @@ enum MetricType {
   CURRENCY
   BOOLEAN
   TEXT
+  MILESTONE
+  CUSTOM
 }
 
 enum Priority {
@@ -130,4 +132,5 @@ enum HealthStatus {
   GREEN
   AMBER
   RED
+  GREY
 }

@@ -1,58 +1,127 @@
 // ─── Company / department progress + XYME ────────────────────────────────────
 
 model Objective {
-  id             String         @id @default(cuid())
-  organizationId String
-  title          String
-  description    String?        @db.Text
-  scope          OwnershipScope @default(COMPANY)
-  departmentId   String?
-  teamId         String?
-  startDate      DateTime?      @db.Date
-  dueDate        DateTime?      @db.Date
-  status         ProgressStatus @default(NOT_STARTED)
-  progressPct    Int            @default(0)
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  deletedAt      DateTime?
-  createdById    String?
-  updatedById    String?
+  id               String         @id @default(cuid())
+  organizationId   String
+  title            String
+  description      String?        @db.Text
+  /// COMPANY | DEPARTMENT | TEAM | INDIVIDUAL
+  scope            OwnershipScope @default(COMPANY)
+  parentId         String?
+  departmentId     String?
+  teamId           String?
+  primaryOwnerId   String?
+  financialYearId  String?
+  /// e.g. Q1, Q2, H1, FY
+  quarter          String?
+  startDate        DateTime?      @db.Date
+  dueDate          DateTime?      @db.Date
+  priority         Priority       @default(MEDIUM)
+  status           ProgressStatus @default(NOT_STARTED)
+  health           HealthStatus   @default(GREY)
+  healthOverridden Boolean        @default(false)
+  healthOverrideReason String?
+  progressPct      Int            @default(0)
+  /// ORGANIZATION | DEPARTMENT | TEAM | PRIVATE
+  visibility       String         @default("ORGANIZATION")
+  tags             String[]       @default([])
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  deletedAt        DateTime?
+  createdById      String?
+  updatedById      String?
 
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
-  department   Department?  @relation("ObjectiveDepartment", fields: [departmentId], references: [id], onDelete: SetNull)
-  team         Team?        @relation("ObjectiveTeam", fields: [teamId], references: [id], onDelete: SetNull)
-  keyResults   KeyResult[]
-  owners       ObjectiveOwner[]
-  updates      ObjectiveUpdate[]
-  initiatives  Initiative[]
-  milestones   Milestone[]
+  organization  Organization     @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  parent        Objective?       @relation("ObjectiveAlignment", fields: [parentId], references: [id], onDelete: SetNull)
+  children      Objective[]      @relation("ObjectiveAlignment")
+  department    Department?      @relation("ObjectiveDepartment", fields: [departmentId], references: [id], onDelete: SetNull)
+  team          Team?            @relation("ObjectiveTeam", fields: [teamId], references: [id], onDelete: SetNull)
+  primaryOwner  User?            @relation("ObjectivePrimaryOwner", fields: [primaryOwnerId], references: [id], onDelete: SetNull)
+  financialYear FinancialYear?   @relation(fields: [financialYearId], references: [id], onDelete: SetNull)
+  keyResults    KeyResult[]
+  owners        ObjectiveOwner[]
+  updates       ObjectiveUpdate[]
+  initiatives   Initiative[]
+  milestones    Milestone[]
+  progressUpdates ProgressUpdate[]
 
   @@index([organizationId, scope, status])
+  @@index([organizationId, parentId])
+  @@index([organizationId, health])
   @@index([deletedAt])
   @@map("objectives")
 }
 
 model KeyResult {
-  id             String         @id @default(cuid())
-  organizationId String
-  objectiveId    String
-  title          String
-  metricType     MetricType     @default(NUMBER)
-  baseline       Decimal?       @db.Decimal(18, 4)
-  target         Decimal?       @db.Decimal(18, 4)
-  currentValue   Decimal?       @db.Decimal(18, 4)
-  unit           String?
-  progressPct    Int            @default(0)
-  status         ProgressStatus @default(NOT_STARTED)
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  deletedAt      DateTime?
+  id               String         @id @default(cuid())
+  organizationId   String
+  objectiveId      String
+  title            String
+  metricType       MetricType     @default(NUMBER)
+  baseline         Decimal?       @db.Decimal(18, 4)
+  target           Decimal?       @db.Decimal(18, 4)
+  currentValue     Decimal?       @db.Decimal(18, 4)
+  unit             String?
+  progressPct      Int            @default(0)
+  status           ProgressStatus @default(NOT_STARTED)
+  ownerUserId      String?
+  /// WEEKLY | MONTHLY | QUARTERLY | AD_HOC
+  updateFrequency  String         @default("WEEKLY")
+  confidenceScore  Int?
+  dueDate          DateTime?      @db.Date
+  evidence         String?        @db.Text
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  deletedAt        DateTime?
 
-  objective Objective @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+  objective Objective          @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+  owner     User?              @relation("KeyResultOwner", fields: [ownerUserId], references: [id], onDelete: SetNull)
+  updates   KeyResultUpdate[]
+  comments  KeyResultComment[]
 
   @@index([objectiveId])
   @@index([organizationId])
   @@map("key_results")
+}
+
+/// Append-only progress history — never silently overwrite
+model KeyResultUpdate {
+  id             String   @id @default(cuid())
+  organizationId String
+  keyResultId    String
+  previousValue  Decimal? @db.Decimal(18, 4)
+  newValue       Decimal  @db.Decimal(18, 4)
+  previousProgressPct Int?
+  progressPct    Int?
+  confidenceScore Int?
+  note           String?  @db.Text
+  evidence       String?  @db.Text
+  createdById    String?
+  createdAt      DateTime @default(now())
+
+  keyResult KeyResult @relation(fields: [keyResultId], references: [id], onDelete: Cascade)
+  createdBy User?     @relation("KeyResultUpdateAuthor", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([keyResultId, createdAt])
+  @@index([organizationId])
+  @@map("key_result_updates")
+}
+
+model KeyResultComment {
+  id             String   @id @default(cuid())
+  organizationId String
+  keyResultId    String
+  body           String   @db.Text
+  createdById    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  keyResult KeyResult @relation(fields: [keyResultId], references: [id], onDelete: Cascade)
+  createdBy User?     @relation("KeyResultCommentAuthor", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([keyResultId, createdAt])
+  @@map("key_result_comments")
 }
 
 model ObjectiveOwner {
@@ -62,6 +131,8 @@ model ObjectiveOwner {
   userId         String?
   employeeId     String?
   scope          OwnershipScope @default(INDIVIDUAL)
+  /// OWNER | CONTRIBUTOR
+  role           String         @default("OWNER")
   createdAt      DateTime       @default(now())
 
   objective Objective @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
@@ -88,6 +159,40 @@ model ObjectiveUpdate {
   @@map("objective_updates")
 }
 
+/// Structured weekly/monthly progress check-ins
+model ProgressUpdate {
+  id             String   @id @default(cuid())
+  organizationId String
+  objectiveId    String?
+  /// WEEKLY | MONTHLY
+  cadence        String   @default("WEEKLY")
+  periodStart    DateTime @db.Date
+  periodEnd      DateTime @db.Date
+  body           String   @db.Text
+  progressPct    Int?
+  confidenceScore Int?
+  health         HealthStatus?
+  riskFlag       Boolean  @default(false)
+  blocker        String?  @db.Text
+  evidence       String?  @db.Text
+  /// DRAFT | SUBMITTED | REVIEWED
+  reviewStatus   String   @default("SUBMITTED")
+  reviewedById   String?
+  reviewedAt     DateTime?
+  reviewNote     String?
+  createdById    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  objective  Objective? @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+  createdBy  User?      @relation("ProgressUpdateAuthor", fields: [createdById], references: [id], onDelete: SetNull)
+  reviewedBy User?      @relation("ProgressUpdateReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, cadence, periodStart])
+  @@index([objectiveId, createdAt])
+  @@map("progress_updates")
+}
+
 model KPI {
   id             String     @id @default(cuid())
   organizationId String
@@ -96,14 +201,21 @@ model KPI {
   description    String?
   metricType     MetricType @default(NUMBER)
   unit           String?
+  /// Optional department binding for scorecards
+  departmentId   String?
+  category       String?
+  isActive       Boolean    @default(true)
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
   deletedAt      DateTime?
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  department   Department?  @relation("DepartmentKpis", fields: [departmentId], references: [id], onDelete: SetNull)
   values       KPIValue[]
+  scorecardLinks ScorecardKpi[]
 
   @@unique([organizationId, code])
+  @@index([organizationId, departmentId])
   @@map("kpis")
 }
 
@@ -206,18 +318,106 @@ model BusinessReview {
   id             String   @id @default(cuid())
   organizationId String
   title          String
+  /// MONTHLY | QUARTERLY
+  reviewType     String   @default("MONTHLY")
   periodStart    DateTime @db.Date
   periodEnd      DateTime @db.Date
   summary        String?  @db.Text
+  majorWins      String?  @db.Text
+  missedTargets  String?  @db.Text
+  /// Frozen snapshot JSON of KPI/objective values at review time
+  snapshot       Json?
   heldAt         DateTime?
+  createdById    String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   deletedAt      DateTime?
 
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  organization Organization         @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  createdBy    User?                @relation("BusinessReviewAuthor", fields: [createdById], references: [id], onDelete: SetNull)
+  items        BusinessReviewItem[]
 
   @@index([organizationId, periodStart])
+  @@index([organizationId, reviewType])
   @@map("business_reviews")
+}
+
+model BusinessReviewItem {
+  id             String    @id @default(cuid())
+  organizationId String
+  reviewId       String
+  /// WIN | MISS | RISK | DECISION | ACTION
+  itemType       String
+  title          String
+  body           String?   @db.Text
+  ownerUserId    String?
+  dueDate        DateTime? @db.Date
+  status         String    @default("OPEN")
+  sortOrder      Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  review BusinessReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  owner  User?          @relation("BusinessReviewItemOwner", fields: [ownerUserId], references: [id], onDelete: SetNull)
+
+  @@index([reviewId, itemType])
+  @@map("business_review_items")
+}
+
+/// Configurable department scorecards with selected KPIs
+model DepartmentScorecard {
+  id             String    @id @default(cuid())
+  organizationId String
+  departmentId   String
+  name           String
+  description    String?
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  department   Department    @relation("DepartmentScorecards", fields: [departmentId], references: [id], onDelete: Cascade)
+  kpis         ScorecardKpi[]
+
+  @@unique([organizationId, departmentId, name])
+  @@index([organizationId, departmentId])
+  @@map("department_scorecards")
+}
+
+model ScorecardKpi {
+  id           String @id @default(cuid())
+  scorecardId  String
+  kpiId        String
+  sortOrder    Int    @default(0)
+  /// Optional target override for this scorecard context
+  targetValue  Decimal? @db.Decimal(18, 4)
+
+  scorecard DepartmentScorecard @relation(fields: [scorecardId], references: [id], onDelete: Cascade)
+  kpi       KPI                 @relation(fields: [kpiId], references: [id], onDelete: Cascade)
+
+  @@unique([scorecardId, kpiId])
+  @@map("scorecard_kpis")
+}
+
+/// Configurable health calculation rules
+model ProgressHealthRule {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  /// GREEN | AMBER | RED | GREY
+  health         HealthStatus
+  /// JSON match: { minProgress?, maxProgress?, maxDaysOverdue?, requireUpdates?, statuses? }
+  match          Json
+  sortOrder      Int      @default(0)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, isActive])
+  @@map("progress_health_rules")
 }
 
 model RiskRegister {

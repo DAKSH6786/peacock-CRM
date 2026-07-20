@@ -54,6 +54,8 @@ model Organization {
   milestones            Milestone[]
   initiatives           Initiative[]
   businessReviews       BusinessReview[]
+  departmentScorecards  DepartmentScorecard[]
+  progressHealthRules   ProgressHealthRule[]
   risks                 RiskRegister[]
   issues                Issue[]
   decisionLogs          DecisionLog[]
@@ -185,6 +187,7 @@ model FinancialYear {
   departmentTargets DepartmentTarget[]
   salesTargets SalesTarget[]
   payrollPeriods PayrollPeriod[]
+  objectives   Objective[]
 
   @@unique([organizationId, code])
   @@index([organizationId, isCurrent])
@@ -213,6 +216,8 @@ model Department {
   departmentHistory EmployeeDepartmentHistory[]
   objectives   Objective[]  @relation("ObjectiveDepartment")
   departmentTargets DepartmentTarget[]
+  kpis         KPI[]        @relation("DepartmentKpis")
+  scorecards   DepartmentScorecard[] @relation("DepartmentScorecards")
   users        User[]       @relation("UserDepartment")
 
   @@unique([organizationId, code])

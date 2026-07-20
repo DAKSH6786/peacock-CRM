@@ -18,6 +18,9 @@ export type Permission =
   | "finance:view_profitability"
   | "xyme:view"
   | "xyme:manage"
+  | "progress:view"
+  | "progress:manage"
+  | "progress:review"
   | "reports:view"
   | "reports:export"
   | "imports:run"
@@ -57,6 +60,9 @@ const ALL_PERMISSIONS: Permission[] = [
   "finance:view_profitability",
   "xyme:view",
   "xyme:manage",
+  "progress:view",
+  "progress:manage",
+  "progress:review",
   "reports:view",
   "reports:export",
   "imports:run",
@@ -83,6 +89,9 @@ const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "hr:view",
     "xyme:view",
     "xyme:manage",
+    "progress:view",
+    "progress:manage",
+    "progress:review",
     "reports:view",
     "imports:run",
     "documents:view",
@@ -99,6 +108,8 @@ const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "employees:view",
     "xyme:view",
     "xyme:manage",
+    "progress:view",
+    "progress:manage",
     "reports:view",
     "imports:run",
     "documents:view",
@@ -110,6 +121,7 @@ const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "dashboard:view",
     "projects:view",
     "xyme:view",
+    "progress:view",
     "documents:view",
     "notifications:view",
   ],
@@ -118,6 +130,7 @@ const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "finance:view",
     "finance:manage",
     "finance:view_profitability",
+    "progress:view",
     "reports:view",
     "reports:export",
     "imports:run",
@@ -133,6 +146,7 @@ const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "employees:view_compensation",
     "hr:view",
     "hr:manage",
+    "progress:view",
     "reports:view",
     "imports:run",
     "documents:view",
@@ -147,6 +161,7 @@ const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "crm:manage",
     "sales:view",
     "sales:manage",
+    "progress:view",
     "reports:view",
     "imports:run",
     "documents:view",
@@ -157,6 +172,7 @@ const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "projects:view",
     "projects:manage",
     "employees:view",
+    "progress:view",
     "reports:view",
     "imports:run",
     "documents:view",
@@ -165,6 +181,7 @@ const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
   CREATIVE: [
     "dashboard:view",
     "projects:view",
+    "progress:view",
     "documents:view",
     "notifications:view",
   ],

@@ -1,6 +1,8 @@
 import type { PrismaClient } from "@prisma/client";
 import {
+  HealthStatus,
   MembershipRole,
+  MetricType,
   OwnershipScope,
   ProgressStatus,
   XYMECategory,
@@ -1446,18 +1448,30 @@ export async function seedDemoMetrics(
     update: {
       organizationId,
       title: "Grow retainer revenue",
+      description: "Increase recurring revenue across retainers this FY.",
       scope: OwnershipScope.COMPANY,
       progressPct: 62,
       status: ProgressStatus.IN_PROGRESS,
+      health: HealthStatus.AMBER,
+      quarter: "Q2",
+      priority: "HIGH",
+      primaryOwnerId: adminUserId,
+      tags: ["revenue", "retainers"],
       deletedAt: null,
     },
     create: {
       id: "seed-obj-company",
       organizationId,
       title: "Grow retainer revenue",
+      description: "Increase recurring revenue across retainers this FY.",
       scope: OwnershipScope.COMPANY,
       progressPct: 62,
       status: ProgressStatus.IN_PROGRESS,
+      health: HealthStatus.AMBER,
+      quarter: "Q2",
+      priority: "HIGH",
+      primaryOwnerId: adminUserId,
+      tags: ["revenue", "retainers"],
       createdById: adminUserId,
     },
   });
@@ -1467,20 +1481,30 @@ export async function seedDemoMetrics(
     update: {
       organizationId,
       title: "Improve win rate",
+      description: "Lift qualified-to-won conversion for enterprise deals.",
       scope: OwnershipScope.DEPARTMENT,
       departmentId: departments.sales.id,
+      parentId: "seed-obj-company",
       progressPct: 48,
       status: ProgressStatus.IN_PROGRESS,
+      health: HealthStatus.AMBER,
+      quarter: "Q2",
+      primaryOwnerId: salesperson.user.id,
       deletedAt: null,
     },
     create: {
       id: "seed-obj-sales",
       organizationId,
       title: "Improve win rate",
+      description: "Lift qualified-to-won conversion for enterprise deals.",
       scope: OwnershipScope.DEPARTMENT,
       departmentId: departments.sales.id,
+      parentId: "seed-obj-company",
       progressPct: 48,
       status: ProgressStatus.IN_PROGRESS,
+      health: HealthStatus.AMBER,
+      quarter: "Q2",
+      primaryOwnerId: salesperson.user.id,
       createdById: salesperson.user.id,
     },
   });
@@ -1490,21 +1514,447 @@ export async function seedDemoMetrics(
     update: {
       organizationId,
       title: "On-time delivery",
+      description: "Keep delivery SLAs green across active projects.",
       scope: OwnershipScope.DEPARTMENT,
       departmentId: departments.operations.id,
+      parentId: "seed-obj-company",
       progressPct: 71,
       status: ProgressStatus.IN_PROGRESS,
+      health: HealthStatus.GREEN,
+      quarter: "Q2",
+      primaryOwnerId: manager.user.id,
       deletedAt: null,
     },
     create: {
       id: "seed-obj-ops",
       organizationId,
       title: "On-time delivery",
+      description: "Keep delivery SLAs green across active projects.",
       scope: OwnershipScope.DEPARTMENT,
       departmentId: departments.operations.id,
+      parentId: "seed-obj-company",
       progressPct: 71,
       status: ProgressStatus.IN_PROGRESS,
+      health: HealthStatus.GREEN,
+      quarter: "Q2",
+      primaryOwnerId: manager.user.id,
       createdById: manager.user.id,
+    },
+  });
+
+  await prisma.objective.upsert({
+    where: { id: "seed-obj-individual" },
+    update: {
+      organizationId,
+      title: "Close two enterprise retainers",
+      scope: OwnershipScope.INDIVIDUAL,
+      parentId: "seed-obj-sales",
+      departmentId: departments.sales.id,
+      progressPct: 50,
+      status: ProgressStatus.IN_PROGRESS,
+      health: HealthStatus.AMBER,
+      quarter: "Q2",
+      primaryOwnerId: salesperson.user.id,
+      deletedAt: null,
+    },
+    create: {
+      id: "seed-obj-individual",
+      organizationId,
+      title: "Close two enterprise retainers",
+      scope: OwnershipScope.INDIVIDUAL,
+      parentId: "seed-obj-sales",
+      departmentId: departments.sales.id,
+      progressPct: 50,
+      status: ProgressStatus.IN_PROGRESS,
+      health: HealthStatus.AMBER,
+      quarter: "Q2",
+      primaryOwnerId: salesperson.user.id,
+      createdById: salesperson.user.id,
+    },
+  });
+
+  await prisma.keyResult.upsert({
+    where: { id: "seed-kr-revenue" },
+    update: {
+      organizationId,
+      objectiveId: "seed-obj-company",
+      title: "Retainer ARR",
+      metricType: MetricType.CURRENCY,
+      baseline: 8000000,
+      target: 12000000,
+      currentValue: 9800000,
+      unit: "INR",
+      progressPct: 45,
+      ownerUserId: adminUserId,
+      updateFrequency: "MONTHLY",
+      confidenceScore: 70,
+      evidence: "Finance ARR export Q2",
+      deletedAt: null,
+    },
+    create: {
+      id: "seed-kr-revenue",
+      organizationId,
+      objectiveId: "seed-obj-company",
+      title: "Retainer ARR",
+      metricType: MetricType.CURRENCY,
+      baseline: 8000000,
+      target: 12000000,
+      currentValue: 9800000,
+      unit: "INR",
+      progressPct: 45,
+      ownerUserId: adminUserId,
+      updateFrequency: "MONTHLY",
+      confidenceScore: 70,
+      evidence: "Finance ARR export Q2",
+    },
+  });
+
+  await prisma.keyResultUpdate.deleteMany({
+    where: { keyResultId: "seed-kr-revenue" },
+  });
+  await prisma.keyResultUpdate.createMany({
+    data: [
+      {
+        id: "seed-kr-upd-1",
+        organizationId,
+        keyResultId: "seed-kr-revenue",
+        previousValue: 8000000,
+        newValue: 9000000,
+        previousProgressPct: 0,
+        progressPct: 25,
+        note: "Month 1 update",
+        createdById: adminUserId,
+      },
+      {
+        id: "seed-kr-upd-2",
+        organizationId,
+        keyResultId: "seed-kr-revenue",
+        previousValue: 9000000,
+        newValue: 9800000,
+        previousProgressPct: 25,
+        progressPct: 45,
+        note: "Month 2 update",
+        evidence: "Finance ARR export Q2",
+        createdById: adminUserId,
+      },
+    ],
+  });
+
+  await prisma.keyResult.upsert({
+    where: { id: "seed-kr-winrate" },
+    update: {
+      organizationId,
+      objectiveId: "seed-obj-sales",
+      title: "Win rate",
+      metricType: MetricType.PERCENT,
+      baseline: 22,
+      target: 35,
+      currentValue: 28,
+      unit: "%",
+      progressPct: 46,
+      ownerUserId: salesperson.user.id,
+      updateFrequency: "WEEKLY",
+      confidenceScore: 55,
+      deletedAt: null,
+    },
+    create: {
+      id: "seed-kr-winrate",
+      organizationId,
+      objectiveId: "seed-obj-sales",
+      title: "Win rate",
+      metricType: MetricType.PERCENT,
+      baseline: 22,
+      target: 35,
+      currentValue: 28,
+      unit: "%",
+      progressPct: 46,
+      ownerUserId: salesperson.user.id,
+      updateFrequency: "WEEKLY",
+      confidenceScore: 55,
+    },
+  });
+
+  const healthRules = [
+    {
+      id: "seed-health-green",
+      name: "On track",
+      health: HealthStatus.GREEN,
+      match: { minProgress: 70, maxDaysOverdue: 0, statuses: ["IN_PROGRESS"] },
+      sortOrder: 1,
+    },
+    {
+      id: "seed-health-amber",
+      name: "At risk",
+      health: HealthStatus.AMBER,
+      match: {
+        minProgress: 40,
+        maxProgress: 69,
+        maxDaysOverdue: 7,
+        statuses: ["IN_PROGRESS", "AT_RISK"],
+      },
+      sortOrder: 2,
+    },
+    {
+      id: "seed-health-red",
+      name: "Off track",
+      health: HealthStatus.RED,
+      match: {
+        maxProgress: 39,
+        statuses: ["IN_PROGRESS", "AT_RISK", "BLOCKED"],
+      },
+      sortOrder: 3,
+    },
+    {
+      id: "seed-health-grey",
+      name: "Not started",
+      health: HealthStatus.GREY,
+      match: { statuses: ["NOT_STARTED"], requireStarted: false },
+      sortOrder: 4,
+    },
+  ];
+  for (const rule of healthRules) {
+    await prisma.progressHealthRule.upsert({
+      where: { id: rule.id },
+      update: {
+        organizationId,
+        name: rule.name,
+        health: rule.health,
+        match: rule.match,
+        sortOrder: rule.sortOrder,
+        isActive: true,
+      },
+      create: {
+        id: rule.id,
+        organizationId,
+        name: rule.name,
+        health: rule.health,
+        match: rule.match,
+        sortOrder: rule.sortOrder,
+      },
+    });
+  }
+
+  // Configurable department scorecards (different KPI sets)
+  async function seedScorecard(
+    dept: { id: string; code?: string },
+    codePrefix: string,
+    name: string,
+    defs: Array<{ code: string; name: string; category: string; unit?: string; value?: number }>,
+  ) {
+    const kpiIds: string[] = [];
+    for (const def of defs) {
+      const kpi = await prisma.kPI.upsert({
+        where: {
+          organizationId_code: {
+            organizationId,
+            code: `${codePrefix}_${def.code}`,
+          },
+        },
+        update: {
+          name: def.name,
+          category: def.category,
+          unit: def.unit ?? null,
+          departmentId: dept.id,
+          isActive: true,
+          deletedAt: null,
+        },
+        create: {
+          organizationId,
+          departmentId: dept.id,
+          name: def.name,
+          code: `${codePrefix}_${def.code}`,
+          category: def.category,
+          unit: def.unit ?? null,
+        },
+      });
+      kpiIds.push(kpi.id);
+      if (def.value != null) {
+        const periodStart = new Date(Date.UTC(2026, 3, 1));
+        const periodEnd = new Date(Date.UTC(2026, 5, 30));
+        await prisma.kPIValue.upsert({
+          where: {
+            kpiId_periodStart_periodEnd: {
+              kpiId: kpi.id,
+              periodStart,
+              periodEnd,
+            },
+          },
+          update: { value: def.value },
+          create: {
+            organizationId,
+            kpiId: kpi.id,
+            periodStart,
+            periodEnd,
+            value: def.value,
+            createdById: adminUserId,
+          },
+        });
+      }
+    }
+
+    const scorecard = await prisma.departmentScorecard.upsert({
+      where: {
+        organizationId_departmentId_name: {
+          organizationId,
+          departmentId: dept.id,
+          name,
+        },
+      },
+      update: { isActive: true, deletedAt: null },
+      create: {
+        organizationId,
+        departmentId: dept.id,
+        name,
+        description: `${name} demo scorecard`,
+      },
+    });
+    await prisma.scorecardKpi.deleteMany({ where: { scorecardId: scorecard.id } });
+    for (const [index, kpiId] of kpiIds.entries()) {
+      await prisma.scorecardKpi.create({
+        data: { scorecardId: scorecard.id, kpiId, sortOrder: index },
+      });
+    }
+  }
+
+  await seedScorecard(departments.sales, "SAL", "FY scorecard", [
+    { code: "LEAD_GEN", name: "Lead generation", category: "pipeline", value: 42 },
+    { code: "PIPELINE_VALUE", name: "Pipeline", category: "pipeline", unit: "INR", value: 4500000 },
+    { code: "CLOSED_REVENUE", name: "Closed revenue", category: "revenue", unit: "INR", value: 1800000 },
+    { code: "CONVERSION_RATE", name: "Conversion rate", category: "funnel", unit: "%", value: 28 },
+  ]);
+  await seedScorecard(departments.creative, "CRV", "FY scorecard", [
+    { code: "DESIGN_DELIVERABLES", name: "Design deliverables", category: "delivery", value: 18 },
+    { code: "REVISION_RATE", name: "Revision rate", category: "quality", unit: "%", value: 12 },
+    { code: "UTILIZATION", name: "Utilization", category: "capacity", unit: "%", value: 78 },
+  ]);
+  await seedScorecard(departments.hr, "HR", "FY scorecard", [
+    { code: "OPEN_POSITIONS", name: "Open positions", category: "hiring", value: 3 },
+    { code: "TIME_TO_HIRE", name: "Time to hire", category: "hiring", unit: "days", value: 34 },
+    { code: "ATTRITION", name: "Attrition", category: "people", unit: "%", value: 6 },
+  ]);
+  await seedScorecard(departments.finance, "FIN", "FY scorecard", [
+    { code: "INVOICE_COLLECTION", name: "Invoice collection", category: "cash", unit: "%", value: 88 },
+    { code: "OVERDUE_INVOICES", name: "Overdue invoices", category: "cash", value: 4 },
+    { code: "PROJECT_PROFITABILITY", name: "Project profitability", category: "margin", unit: "%", value: 32 },
+  ]);
+
+  await prisma.progressUpdate.deleteMany({
+    where: { id: { startsWith: "seed-prog-upd-" } },
+  });
+  await prisma.progressUpdate.create({
+    data: {
+      id: "seed-prog-upd-1",
+      organizationId,
+      objectiveId: "seed-obj-sales",
+      cadence: "WEEKLY",
+      periodStart: new Date(Date.UTC(2026, 6, 7)),
+      periodEnd: new Date(Date.UTC(2026, 6, 13)),
+      body: "Pipeline coverage improved; two enterprise proposals out.",
+      progressPct: 48,
+      confidenceScore: 60,
+      riskFlag: false,
+      reviewStatus: "REVIEWED",
+      reviewedById: adminUserId,
+      reviewedAt: new Date(),
+      createdById: salesperson.user.id,
+    },
+  });
+
+  await prisma.decisionLog.upsert({
+    where: { id: "seed-decision-1" },
+    update: {
+      organizationId,
+      title: "Prioritize retainer expansion",
+      decision: "Focus Q2 sales capacity on expansion motions over net-new SMB.",
+      decidedById: adminUserId,
+      deletedAt: null,
+    },
+    create: {
+      id: "seed-decision-1",
+      organizationId,
+      title: "Prioritize retainer expansion",
+      decision: "Focus Q2 sales capacity on expansion motions over net-new SMB.",
+      decidedById: adminUserId,
+    },
+  });
+
+  await prisma.businessReview.upsert({
+    where: { id: "seed-review-q2" },
+    update: {
+      organizationId,
+      title: "Q2 monthly leadership review",
+      reviewType: "MONTHLY",
+      periodStart: new Date(Date.UTC(2026, 5, 1)),
+      periodEnd: new Date(Date.UTC(2026, 5, 30)),
+      summary: "Retainer growth on track; delivery health green; hiring still open.",
+      majorWins: "Closed Northstar expansion\nCollected overdue invoices",
+      missedTargets: "Win rate still below 35%",
+      snapshot: {
+        capturedAt: new Date().toISOString(),
+        objectives: [
+          {
+            id: "seed-obj-company",
+            title: "Grow retainer revenue",
+            progressPct: 62,
+            health: "AMBER",
+            status: "IN_PROGRESS",
+          },
+        ],
+        kpis: [],
+        risks: [],
+      },
+      createdById: adminUserId,
+      deletedAt: null,
+    },
+    create: {
+      id: "seed-review-q2",
+      organizationId,
+      title: "Q2 monthly leadership review",
+      reviewType: "MONTHLY",
+      periodStart: new Date(Date.UTC(2026, 5, 1)),
+      periodEnd: new Date(Date.UTC(2026, 5, 30)),
+      summary: "Retainer growth on track; delivery health green; hiring still open.",
+      majorWins: "Closed Northstar expansion\nCollected overdue invoices",
+      missedTargets: "Win rate still below 35%",
+      snapshot: {
+        capturedAt: new Date().toISOString(),
+        objectives: [
+          {
+            id: "seed-obj-company",
+            title: "Grow retainer revenue",
+            progressPct: 62,
+            health: "AMBER",
+            status: "IN_PROGRESS",
+          },
+        ],
+        kpis: [],
+        risks: [],
+      },
+      createdById: adminUserId,
+      items: {
+        create: [
+          {
+            organizationId,
+            itemType: "ACTION",
+            title: "Coach sales on enterprise discovery",
+            ownerUserId: salesperson.user.id,
+            dueDate: new Date(Date.UTC(2026, 6, 31)),
+            sortOrder: 0,
+          },
+          {
+            organizationId,
+            itemType: "RISK",
+            title: "Designer bandwidth",
+            sortOrder: 1,
+          },
+          {
+            organizationId,
+            itemType: "DECISION",
+            title: "Prioritize retainer expansion",
+            sortOrder: 2,
+          },
+        ],
+      },
     },
   });
 

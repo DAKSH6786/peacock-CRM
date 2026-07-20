@@ -64,12 +64,27 @@ export const navigationSections: NavSection[] = [
       {
         href: "/company-progress",
         label: "Company Progress",
-        permission: "reports:view",
+        permission: "progress:view",
+      },
+      {
+        href: "/company-progress/objectives",
+        label: "Objectives",
+        permission: "progress:view",
+      },
+      {
+        href: "/company-progress/scorecards",
+        label: "Scorecards",
+        permission: "progress:view",
+      },
+      {
+        href: "/company-progress/reviews",
+        label: "Business Reviews",
+        permission: "progress:view",
       },
       {
         href: "/departments",
         label: "Department Progress",
-        permission: "employees:view",
+        permission: "progress:view",
       },
       { href: "/xyme", label: "XYME", permission: "xyme:view" },
       { href: "/employees", label: "Employees", permission: "employees:view" },
