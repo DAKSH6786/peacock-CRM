@@ -1,0 +1,133 @@
+// Peacock One — Prisma schema (multi-file)
+// Money: integer minor units + currencyCode
+// Timestamps: UTC; soft-delete via deletedAt on important records
+
+generator client {
+  provider      = "prisma-client-js"
+  // native = local/CI; rhel-openssl-3.0.x = Vercel serverless runtime
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Stable enums only — configurable statuses live in tables
+
+enum UserStatus {
+  ACTIVE
+  INVITED
+  SUSPENDED
+  OFFBOARDED
+}
+
+/// Coarse membership role retained for Auth.js session claims & bootstrap access.
+enum MembershipRole {
+  SUPER_ADMIN
+  ADMIN
+  DEPARTMENT_HEAD
+  MANAGER
+  EMPLOYEE
+  FINANCE
+  HR
+  SALES
+  OPERATIONS
+  CREATIVE
+  VIEWER
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  APPROVE
+  REJECT
+  EXPORT
+  IMPORT
+  DOWNLOAD
+  PERMISSION_CHANGE
+  LOGIN
+  LOGOUT
+  LOGIN_FAILED
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERN
+  CONSULTANT
+}
+
+enum EmploymentStatus {
+  ACTIVE
+  PROBATION
+  NOTICE
+  EXITED
+  ON_LEAVE
+}
+
+enum WorkMode {
+  OFFICE
+  REMOTE
+  HYBRID
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+  DRAFT
+}
+
+enum XYMECategory {
+  X
+  Y
+  ME
+}
+
+enum MetricType {
+  NUMBER
+  PERCENT
+  CURRENCY
+  BOOLEAN
+  TEXT
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  AT_RISK
+  BLOCKED
+  COMPLETED
+  CANCELLED
+}
+
+enum OwnershipScope {
+  COMPANY
+  DEPARTMENT
+  TEAM
+  INDIVIDUAL
+}
+
+enum AttributionType {
+  SOURCED
+  CLOSED
+  COLLECTED
+  ASSISTED
+}
+
+enum HealthStatus {
+  GREEN
+  AMBER
+  RED
+}

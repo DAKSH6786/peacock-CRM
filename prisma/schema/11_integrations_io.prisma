@@ -1,0 +1,271 @@
+// ─── Import / export / documents / integrations ──────────────────────────────
+
+model ApiKey {
+  id             String    @id @default(cuid())
+  organizationId String
+  name           String
+  /// Public prefix for identification (e.g. pk_live_ab12)
+  keyPrefix      String
+  /// Hash of the full secret — never store plaintext
+  keyHash        String
+  scopes         String[]
+  expiresAt      DateTime?
+  revokedAt      DateTime?
+  revokedById    String?
+  lastUsedAt     DateTime?
+  createdById    String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  createdBy    User?        @relation("ApiKeyCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  revokedBy    User?        @relation("ApiKeyRevoker", fields: [revokedById], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, keyPrefix])
+  @@index([organizationId, revokedAt])
+  @@map("api_keys")
+}
+
+model WebhookDelivery {
+  id             String    @id @default(cuid())
+  organizationId String
+  endpointId     String
+  event          String
+  payload        Json
+  status         String    @default("PENDING")
+  attempts       Int       @default(0)
+  responseCode   Int?
+  responseBody   String?   @db.Text
+  errorMessage   String?
+  nextRetryAt    DateTime?
+  deliveredAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  endpoint WebhookEndpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, status])
+  @@index([endpointId, createdAt])
+  @@index([nextRetryAt])
+  @@map("webhook_deliveries")
+}
+
+model DocumentFolder {
+  id             String    @id @default(cuid())
+  organizationId String
+  parentId       String?
+  name           String
+  category       String?
+  createdById    String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  createdBy    User?             @relation("DocumentFolderOwner", fields: [createdById], references: [id], onDelete: SetNull)
+  parent       DocumentFolder?   @relation("DocumentFolderTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children     DocumentFolder[]  @relation("DocumentFolderTree")
+  documents    ManagedDocument[]
+
+  @@index([organizationId, parentId])
+  @@index([deletedAt])
+  @@map("document_folders")
+}
+
+model ManagedDocument {
+  id               String    @id @default(cuid())
+  organizationId   String
+  folderId         String?
+  title            String
+  category         String?
+  /// ORGANIZATION | RESTRICTED | PRIVATE
+  visibility       String    @default("ORGANIZATION")
+  expiresAt        DateTime?
+  currentVersionId String?   @unique
+  createdById      String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
+
+  organization   Organization          @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  folder         DocumentFolder?       @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  createdBy      User?                 @relation("DocumentUploader", fields: [createdById], references: [id], onDelete: SetNull)
+  currentVersion DocumentVersion?      @relation("DocumentCurrentVersion", fields: [currentVersionId], references: [id], onDelete: SetNull)
+  versions       DocumentVersion[]     @relation("DocumentVersions")
+  tags           DocumentTagLink[]
+  links          DocumentRecordLink[]
+  accessGrants   DocumentAccessGrant[]
+  downloads      DocumentDownloadLog[]
+
+  @@index([organizationId, category])
+  @@index([organizationId, folderId])
+  @@index([deletedAt])
+  @@map("managed_documents")
+}
+
+model DocumentVersion {
+  id               String   @id @default(cuid())
+  organizationId   String
+  documentId       String
+  version          Int
+  storageKey       String
+  fileName         String
+  contentType      String?
+  sizeBytes        Int?
+  changeNote       String?
+  createdById      String?
+  createdAt        DateTime @default(now())
+
+  document   ManagedDocument  @relation("DocumentVersions", fields: [documentId], references: [id], onDelete: Cascade)
+  createdBy  User?            @relation("DocumentVersionUploader", fields: [createdById], references: [id], onDelete: SetNull)
+  currentFor ManagedDocument? @relation("DocumentCurrentVersion")
+
+  @@unique([documentId, version])
+  @@index([organizationId, documentId])
+  @@map("document_versions")
+}
+
+model DocumentTag {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  createdAt      DateTime @default(now())
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  links        DocumentTagLink[]
+
+  @@unique([organizationId, name])
+  @@map("document_tags")
+}
+
+model DocumentTagLink {
+  id         String @id @default(cuid())
+  documentId String
+  tagId      String
+
+  document ManagedDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  tag      DocumentTag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, tagId])
+  @@map("document_tag_links")
+}
+
+model DocumentRecordLink {
+  id             String   @id @default(cuid())
+  organizationId String
+  documentId     String
+  /// employees | leads | clients | deals | projects | tasks | invoices | expenses | vendors | xyme_goals | policies
+  entityType     String
+  entityId       String
+  createdAt      DateTime @default(now())
+
+  document ManagedDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, entityType, entityId])
+  @@index([documentId])
+  @@map("document_record_links")
+}
+
+model DocumentAccessGrant {
+  id             String    @id @default(cuid())
+  organizationId String
+  documentId     String
+  /// USER | ROLE
+  granteeType    String
+  granteeId      String
+  canDownload    Boolean   @default(true)
+  grantedById    String?
+  createdAt      DateTime  @default(now())
+  expiresAt      DateTime?
+
+  document  ManagedDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  grantedBy User?           @relation("DocumentAccessGranter", fields: [grantedById], references: [id], onDelete: SetNull)
+
+  @@unique([documentId, granteeType, granteeId])
+  @@map("document_access_grants")
+}
+
+model DocumentDownloadLog {
+  id             String   @id @default(cuid())
+  organizationId String
+  documentId     String
+  userId         String?
+  createdAt      DateTime @default(now())
+  ipAddress      String?
+  userAgent      String?
+
+  document ManagedDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  user     User?           @relation("DocumentDownloader", fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, documentId, createdAt])
+  @@map("document_download_logs")
+}
+
+model EmailSendLog {
+  id                String    @id @default(cuid())
+  organizationId    String
+  provider          String
+  templateKey       String?
+  toAddress         String
+  subject           String
+  status            String    @default("QUEUED")
+  attempts          Int       @default(0)
+  providerMessageId String?
+  errorMessage      String?
+  previewMode       Boolean   @default(false)
+  payload           Json?
+  sentById          String?
+  sentAt            DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  sentBy       User?        @relation("EmailSender", fields: [sentById], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, status])
+  @@index([organizationId, createdAt])
+  @@map("email_send_logs")
+}
+
+model CalendarConnection {
+  id             String    @id @default(cuid())
+  organizationId String
+  /// google | microsoft
+  provider       String
+  status         String    @default("DISCONNECTED")
+  accountEmail   String?
+  /// vault reference only — never store OAuth secrets in plaintext
+  vaultRef       String?
+  ownedById      String?
+  lastSyncAt     DateTime?
+  lastError      String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  ownedBy      User?        @relation("CalendarConnectionOwner", fields: [ownedById], references: [id], onDelete: SetNull)
+
+  @@unique([organizationId, provider])
+  @@map("calendar_connections")
+}
+
+model CalendarSyncEvent {
+  id              String   @id @default(cuid())
+  organizationId  String
+  provider        String
+  /// crm_meeting | interview | leave | project_deadline | follow_up
+  entityType      String
+  entityId        String
+  externalEventId String?
+  syncStatus      String   @default("PENDING")
+  lastError       String?
+  updatedAt       DateTime @updatedAt
+  createdAt       DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  @@unique([organizationId, provider, entityType, entityId])
+  @@index([organizationId, syncStatus])
+  @@map("calendar_sync_events")
+}
