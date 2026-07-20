@@ -1,0 +1,183 @@
+// ─── Employee sales economics ────────────────────────────────────────────────
+
+model EmployeeMonthlyCost {
+  id             String   @id @default(cuid())
+  organizationId String
+  employeeId     String
+  /// Year-month as first day of month
+  month          DateTime @db.Date
+  costMinor      Int
+  currencyCode   String   @default("INR") @db.Char(3)
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([employeeId, month])
+  @@index([organizationId, month])
+  @@map("employee_monthly_costs")
+}
+
+model RevenueAttributionRule {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  code           String
+  attributionType AttributionType
+  defaultPercentage Int   @default(100)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  attributions EmployeeRevenueAttribution[]
+
+  @@unique([organizationId, code])
+  @@map("revenue_attribution_rules")
+}
+
+model EmployeeRevenueAttribution {
+  id             String         @id @default(cuid())
+  organizationId String
+  employeeId     String
+  ruleId         String?
+  attributionType AttributionType
+  dealId         String?
+  invoiceId      String?
+  paymentId      String?
+  amountMinor    Int
+  currencyCode   String         @default("INR") @db.Char(3)
+  percentage     Int            @default(100)
+  month          DateTime       @db.Date
+  notes          String?        @db.Text
+  approverId     String?
+  approvalStatus ApprovalStatus @default(PENDING)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  deletedAt      DateTime?
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  rule     RevenueAttributionRule? @relation(fields: [ruleId], references: [id], onDelete: SetNull)
+  deal     Deal?    @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  invoice  Invoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  payment  Payment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, employeeId, month])
+  @@index([approvalStatus])
+  @@map("employee_revenue_attributions")
+}
+
+model SalesTarget {
+  id             String   @id @default(cuid())
+  organizationId String
+  employeeId     String
+  financialYearId String?
+  month          DateTime? @db.Date
+  targetMinor    Int
+  currencyCode   String   @default("INR") @db.Char(3)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  organization  Organization   @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  employee      Employee       @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  financialYear FinancialYear? @relation(fields: [financialYearId], references: [id], onDelete: SetNull)
+  achievements  SalesAchievement[]
+
+  @@index([organizationId, employeeId])
+  @@map("sales_targets")
+}
+
+model SalesAchievement {
+  id             String   @id @default(cuid())
+  organizationId String
+  employeeId     String
+  targetId       String?
+  month          DateTime @db.Date
+  achievedMinor  Int
+  currencyCode   String   @default("INR") @db.Char(3)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  employee Employee     @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  target   SalesTarget? @relation(fields: [targetId], references: [id], onDelete: SetNull)
+
+  @@unique([employeeId, month])
+  @@index([organizationId, month])
+  @@map("sales_achievements")
+}
+
+model SalesCommissionPlan {
+  id             String    @id @default(cuid())
+  organizationId String
+  name           String
+  code           String
+  rules          Json?
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  records      SalesCommissionRecord[]
+
+  @@unique([organizationId, code])
+  @@map("sales_commission_plans")
+}
+
+model SalesCommissionRecord {
+  id             String         @id @default(cuid())
+  organizationId String
+  employeeId     String
+  planId         String?
+  month          DateTime       @db.Date
+  baseMinor      Int            @default(0)
+  commissionMinor Int           @default(0)
+  currencyCode   String         @default("INR") @db.Char(3)
+  approvalStatus ApprovalStatus @default(PENDING)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  employee Employee             @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  plan     SalesCommissionPlan? @relation(fields: [planId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, employeeId, month])
+  @@map("sales_commission_records")
+}
+
+model EmployeeProfitabilitySnapshot {
+  id             String   @id @default(cuid())
+  organizationId String
+  employeeId     String
+  month          DateTime @db.Date
+  costMinor      Int      @default(0)
+  revenueMinor   Int      @default(0)
+  profitMinor    Int      @default(0)
+  currencyCode   String   @default("INR") @db.Char(3)
+  createdAt      DateTime @default(now())
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([employeeId, month])
+  @@index([organizationId, month])
+  @@map("employee_profitability_snapshots")
+}
+
+model EmployeeHealthStatusHistory {
+  id             String       @id @default(cuid())
+  organizationId String
+  employeeId     String
+  status         HealthStatus
+  reason         String?
+  effectiveAt    DateTime     @default(now())
+  createdById    String?
+  createdAt      DateTime     @default(now())
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([employeeId, effectiveAt])
+  @@index([organizationId])
+  @@map("employee_health_status_history")
+}

@@ -1,0 +1,482 @@
+// ─── Identity, Auth.js, RBAC, Employee ───────────────────────────────────────
+
+model User {
+  id             String     @id @default(cuid())
+  organizationId String?
+  email          String     @unique
+  emailVerified  DateTime?
+  name           String?
+  image          String?
+  passwordHash   String?
+  status         UserStatus @default(INVITED)
+  jobTitle       String?
+  departmentId   String?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  department   Department?   @relation("UserDepartment", fields: [departmentId], references: [id], onDelete: SetNull)
+  memberships  Membership[]
+  accounts     Account[]
+  sessions     Session[]
+  userSessions UserSession[]
+  profile      UserProfile?
+  employee     Employee?
+  userRoles    UserRole[]
+  permissionOverrides UserPermissionOverride[]
+  notificationPrefs NotificationPreference[]
+  auditLogs    AuditLog[] @relation("AuditActor")
+
+  // authorship
+  createdLeads   Lead[]    @relation("LeadCreatedBy")
+  assignedLeads  Lead[]    @relation("LeadAssignee")
+  ownedObjectives ObjectiveOwner[]
+  xymePlans      XYMEPlan[] @relation("XYMEPlanEmployeeUser")
+  comments       Comment[]  @relation("CommentAuthor")
+  mentions       Mention[]  @relation("MentionedUser")
+  approvalActions ApprovalAction[]
+  notifications  Notification[] @relation("NotificationRecipient")
+  savedViews     SavedView[]
+  uploadedFiles  FileAttachment[] @relation("FileUploader")
+  savedReports   SavedReport[] @relation("SavedReportOwner")
+
+  @@index([organizationId, status])
+  @@index([departmentId])
+  @@index([deletedAt])
+  @@map("users")
+}
+
+/// Auth.js OAuth account linkage
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  organizationId    String?
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@index([organizationId])
+  @@map("accounts")
+}
+
+/// Auth.js session store (JWT strategy may not persist rows)
+model Session {
+  id             String   @id @default(cuid())
+  sessionToken   String   @unique
+  userId         String
+  organizationId String?
+  expires        DateTime
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([organizationId])
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+/// Application-level session telemetry (separate from Auth.js Session)
+model UserSession {
+  id             String    @id @default(cuid())
+  organizationId String?
+  userId         String
+  sessionToken   String?   @unique
+  ipAddress      String?
+  userAgent      String?
+  lastSeenAt     DateTime  @default(now())
+  expiresAt      DateTime?
+  revokedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+
+  @@index([userId, revokedAt])
+  @@index([organizationId])
+  @@map("user_sessions")
+}
+
+/// Coarse org membership for bootstrap auth claims (kept for working login)
+model Membership {
+  id             String         @id @default(cuid())
+  organizationId String
+  userId         String
+  role           MembershipRole @default(EMPLOYEE)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([organizationId, role])
+  @@index([deletedAt])
+  @@map("memberships")
+}
+
+model UserProfile {
+  id             String    @id @default(cuid())
+  organizationId String
+  userId         String    @unique
+  displayName    String?
+  personalEmail  String?
+  phone          String?
+  bio            String?   @db.Text
+  avatarFileId   String?
+  timezone       String?
+  locale         String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("user_profiles")
+}
+
+model Role {
+  id             String    @id @default(cuid())
+  organizationId String?
+  code           String
+  name           String
+  description    String?
+  isSystem       Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization    Organization?   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  rolePermissions RolePermission[]
+  userRoles       UserRole[]
+
+  @@unique([organizationId, code])
+  @@index([code])
+  @@map("roles")
+}
+
+model Permission {
+  id             String    @id @default(cuid())
+  organizationId String?
+  code           String
+  name           String
+  module         String
+  description    String?
+  isSensitive    Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization    Organization?   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  rolePermissions RolePermission[]
+  overrides       UserPermissionOverride[]
+
+  @@unique([organizationId, code])
+  @@index([module])
+  @@index([code])
+  @@map("permissions")
+}
+
+model RolePermission {
+  id           String   @id @default(cuid())
+  roleId       String
+  permissionId String
+  createdAt    DateTime @default(now())
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model UserRole {
+  id             String    @id @default(cuid())
+  organizationId String
+  userId         String
+  roleId         String
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+  @@index([organizationId, userId])
+  @@map("user_roles")
+}
+
+model UserPermissionOverride {
+  id             String    @id @default(cuid())
+  organizationId String
+  userId         String
+  permissionId   String
+  /// true = grant, false = revoke
+  allowed        Boolean
+  reason         String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, permissionId])
+  @@index([organizationId])
+  @@map("user_permission_overrides")
+}
+
+model NotificationPreference {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String
+  channel        String
+  eventType      String
+  enabled        Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, channel, eventType])
+  @@index([organizationId])
+  @@map("notification_preferences")
+}
+
+model AuditLog {
+  id             String      @id @default(cuid())
+  organizationId String
+  actorId        String?
+  action         AuditAction
+  entityType     String
+  entityId       String?
+  metadata       Json?
+  ipAddress      String?
+  userAgent      String?
+  createdAt      DateTime    @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  actor        User?        @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+  @@index([entityType, entityId])
+  @@index([actorId])
+  @@map("audit_logs")
+}
+
+model Employee {
+  id                     String           @id @default(cuid())
+  organizationId         String
+  userId                 String           @unique
+  employeeCode           String
+  officialEmail          String
+  personalEmail          String?
+  phone                  String?
+  joiningDate            DateTime         @db.Date
+  employmentType         EmploymentType   @default(FULL_TIME)
+  employmentStatus       EmploymentStatus @default(PROBATION)
+  probationEndDate       DateTime?        @db.Date
+  departmentId           String?
+  teamId                 String?
+  jobRoleId              String?
+  designationId          String?
+  reportingManagerId     String?
+  officeLocationId       String?
+  workMode               WorkMode         @default(HYBRID)
+  dateOfBirth            DateTime?        @db.Date
+  addressLine1           String?
+  addressLine2           String?
+  city                   String?
+  state                  String?
+  country                String?
+  postalCode             String?
+  profilePhotoFileId     String?
+  /// Protected — access via compensation services only
+  monthlyEmploymentCostMinor Int?
+  /// Protected — access via compensation services only
+  annualCtcMinor         Int?
+  currencyCode           String           @default("INR") @db.Char(3)
+  revenueTargetApplicable Boolean         @default(false)
+  isSalesRole            Boolean          @default(false)
+  exitDate               DateTime?        @db.Date
+  exitReason             String?
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+  deletedAt              DateTime?
+  createdById            String?
+  updatedById            String?
+
+  organization     Organization   @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  user             User           @relation(fields: [userId], references: [id], onDelete: Restrict)
+  department       Department?    @relation("EmployeeDepartment", fields: [departmentId], references: [id], onDelete: SetNull)
+  team             Team?          @relation("EmployeeTeam", fields: [teamId], references: [id], onDelete: SetNull)
+  jobRole          JobRole?       @relation(fields: [jobRoleId], references: [id], onDelete: SetNull)
+  designation      Designation?   @relation(fields: [designationId], references: [id], onDelete: SetNull)
+  reportingManager Employee?      @relation("EmployeeManager", fields: [reportingManagerId], references: [id], onDelete: SetNull)
+  directReports    Employee[]     @relation("EmployeeManager")
+  officeLocation   OfficeLocation? @relation(fields: [officeLocationId], references: [id], onDelete: SetNull)
+
+  emergencyContacts EmergencyContact[]
+  managerHistory    EmployeeManagerHistory[] @relation("ManagerHistoryEmployee")
+  managedHistory    EmployeeManagerHistory[] @relation("ManagerHistoryManager")
+  departmentHistory EmployeeDepartmentHistory[]
+  bankDetail        EmployeeBankDetail?
+  taxInformation    EmployeeTaxInformation?
+  compensation      EmployeeCompensation?
+  monthlyCosts      EmployeeMonthlyCost[]
+  revenueAttributions EmployeeRevenueAttribution[]
+  salesTargets      SalesTarget[]
+  salesAchievements SalesAchievement[]
+  commissionRecords SalesCommissionRecord[]
+  profitabilitySnapshots EmployeeProfitabilitySnapshot[]
+  healthHistory     EmployeeHealthStatusHistory[]
+  attendance        AttendanceRecord[]
+  leaveBalances     LeaveBalance[]
+  leaveRequests     LeaveRequest[]
+  documents         EmployeeDocument[]
+  assetAssignments  AssetAssignment[]
+  salaryComponents  EmployeeSalaryComponent[]
+  payslips          Payslip[]
+  reimbursements    ReimbursementRequest[]
+  xymePlans         XYMEPlan[]
+  projectMemberships ProjectMember[]
+  timeEntries       TimeEntry[]
+  resourceAllocations ResourceAllocation[]
+  shiftAssignments  ShiftAssignment[]
+  wfhRequests       WorkFromHomeRequest[]
+  regularizationRequests RegularizationRequest[]
+  attendanceCorrections AttendanceCorrectionRequest[]
+  objectiveOwners   ObjectiveOwner[]
+  onboardingChecklists OnboardingChecklist[]
+  offboardingChecklists OffboardingChecklist[]
+
+  @@unique([organizationId, employeeCode])
+  @@unique([organizationId, officialEmail])
+  @@index([organizationId, employmentStatus])
+  @@index([organizationId, departmentId])
+  @@index([reportingManagerId])
+  @@index([deletedAt])
+  @@map("employees")
+}
+
+model EmployeeManagerHistory {
+  id             String    @id @default(cuid())
+  organizationId String
+  employeeId     String
+  managerId      String
+  startDate      DateTime  @db.Date
+  endDate        DateTime? @db.Date
+  reason         String?
+  createdAt      DateTime  @default(now())
+
+  employee Employee @relation("ManagerHistoryEmployee", fields: [employeeId], references: [id], onDelete: Cascade)
+  manager  Employee @relation("ManagerHistoryManager", fields: [managerId], references: [id], onDelete: Restrict)
+
+  @@index([employeeId, startDate])
+  @@index([organizationId])
+  @@map("employee_manager_history")
+}
+
+model EmployeeDepartmentHistory {
+  id             String    @id @default(cuid())
+  organizationId String
+  employeeId     String
+  departmentId   String
+  startDate      DateTime  @db.Date
+  endDate        DateTime? @db.Date
+  reason         String?
+  createdAt      DateTime  @default(now())
+
+  employee   Employee   @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  department Department @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+
+  @@index([employeeId, startDate])
+  @@index([organizationId])
+  @@map("employee_department_history")
+}
+
+model EmergencyContact {
+  id             String   @id @default(cuid())
+  organizationId String
+  employeeId     String
+  name           String
+  relationship   String
+  phone          String
+  email          String?
+  isPrimary      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([employeeId])
+  @@index([organizationId])
+  @@map("emergency_contacts")
+}
+
+/// Restricted — never expose via ordinary employee list/detail endpoints
+model EmployeeBankDetail {
+  id                String    @id @default(cuid())
+  organizationId    String
+  employeeId        String    @unique
+  accountHolderName String?
+  bankName          String?
+  accountNumberEnc  String?
+  ifscOrSwift       String?
+  branchName        String?
+  metadata          Json?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  deletedAt         DateTime?
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("employee_bank_details")
+}
+
+/// Restricted — never expose via ordinary employee list/detail endpoints
+model EmployeeTaxInformation {
+  id             String    @id @default(cuid())
+  organizationId String
+  employeeId     String    @unique
+  taxIdEnc       String?
+  panOrNationalIdEnc String?
+  taxRegime      String?
+  metadata       Json?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("employee_tax_information")
+}
