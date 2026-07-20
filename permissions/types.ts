@@ -20,6 +20,7 @@ export type Permission =
   | "xyme:manage"
   | "reports:view"
   | "reports:export"
+  | "imports:run"
   | "documents:view"
   | "documents:manage"
   | "approvals:view"
@@ -58,6 +59,7 @@ const ALL_PERMISSIONS: Permission[] = [
   "xyme:manage",
   "reports:view",
   "reports:export",
+  "imports:run",
   "documents:view",
   "documents:manage",
   "approvals:view",
@@ -82,6 +84,7 @@ const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "xyme:view",
     "xyme:manage",
     "reports:view",
+    "imports:run",
     "documents:view",
     "approvals:view",
     "approvals:decide",
@@ -97,6 +100,7 @@ const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "xyme:view",
     "xyme:manage",
     "reports:view",
+    "imports:run",
     "documents:view",
     "approvals:view",
     "approvals:decide",
@@ -116,6 +120,7 @@ const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "finance:view_profitability",
     "reports:view",
     "reports:export",
+    "imports:run",
     "documents:view",
     "approvals:view",
     "approvals:decide",
@@ -129,6 +134,7 @@ const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "hr:view",
     "hr:manage",
     "reports:view",
+    "imports:run",
     "documents:view",
     "documents:manage",
     "approvals:view",
@@ -142,6 +148,7 @@ const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "sales:view",
     "sales:manage",
     "reports:view",
+    "imports:run",
     "documents:view",
     "notifications:view",
   ],
@@ -151,6 +158,7 @@ const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "projects:manage",
     "employees:view",
     "reports:view",
+    "imports:run",
     "documents:view",
     "notifications:view",
   ],

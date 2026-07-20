@@ -18,6 +18,19 @@ const serverSchema = z.object({
     .enum(["true", "false"])
     .default("true")
     .transform((v) => v === "true"),
+  EMAIL_PROVIDER: z
+    .enum([
+      "preview",
+      "smtp",
+      "google_workspace",
+      "microsoft_365",
+      "transactional",
+    ])
+    .optional(),
+  EMAIL_PREVIEW_MODE: z
+    .enum(["true", "false"])
+    .optional()
+    .transform((v) => v === "true"),
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.coerce.number().int().positive().optional(),
   SMTP_USER: z.string().optional(),

@@ -202,53 +202,92 @@ model CustomFieldValue {
 }
 
 model ImportJob {
-  id             String   @id @default(cuid())
-  organizationId String
-  module         String
-  status         String   @default("PENDING")
+  id               String    @id @default(cuid())
+  organizationId   String
+  /// Entity key: employees | leads | contacts | clients | deals | attendance | revenue_attribution | projects | invoices | payments | expenses | vendors
+  entityType       String
+  status           String    @default("QUEUED")
+  fileName         String?
+  storageKey       String?
   fileAttachmentId String?
-  rowCount       Int?
-  errorCount     Int?
-  result         Json?
-  createdById    String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  totalRows        Int       @default(0)
+  successRows      Int       @default(0)
+  failedRows       Int       @default(0)
+  skippedRows      Int       @default(0)
+  columnMapping    Json?
+  previewRows      Json?
+  validationErrors Json?
+  errorReport      Json?
+  errorFileKey     String?
+  /// SKIP | UPDATE | FAIL
+  duplicatePolicy  String    @default("SKIP")
+  /// COMMIT_VALID | ALL_OR_NOTHING
+  partialPolicy    String    @default("COMMIT_VALID")
+  createdById      String?
+  startedAt        DateTime?
+  completedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  createdBy    User?        @relation("ImportJobCreator", fields: [createdById], references: [id], onDelete: SetNull)
 
   @@index([organizationId, status])
+  @@index([organizationId, entityType, createdAt])
   @@map("import_jobs")
 }
 
 model ExportJob {
-  id             String   @id @default(cuid())
-  organizationId String
-  module         String
-  status         String   @default("PENDING")
+  id               String    @id @default(cuid())
+  organizationId   String
+  /// tables | reports | employees | crm | projects | invoices | finance | xyme
+  exportType       String
+  status           String    @default("QUEUED")
+  filters          Json?
+  columns          String[]  @default([])
+  dateFrom         DateTime?
+  dateTo           DateTime?
+  rowCount         Int?
+  fileUrl          String?
+  storageKey       String?
   fileAttachmentId String?
-  filters        Json?
-  createdById    String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  expiresAt        DateTime?
+  requiresApproval Boolean   @default(false)
+  approvedAt       DateTime?
+  approvedById     String?
+  rejectionReason  String?
+  createdById      String?
+  startedAt        DateTime?
+  completedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  createdBy    User?        @relation("ExportJobCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  approvedBy   User?        @relation("ExportJobApprover", fields: [approvedById], references: [id], onDelete: SetNull)
 
   @@index([organizationId, status])
+  @@index([organizationId, exportType, createdAt])
   @@map("export_jobs")
 }
 
 model WebhookEndpoint {
-  id             String    @id @default(cuid())
-  organizationId String
-  url            String
-  secretEnc      String?
-  events         Json
-  isActive       Boolean   @default(true)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  deletedAt      DateTime?
+  id              String            @id @default(cuid())
+  organizationId  String
+  name            String
+  url             String
+  /// SHA-256 hash of signing secret — plaintext shown once at creation
+  secretHash      String
+  events          String[]
+  isActive        Boolean           @default(true)
+  failureCount    Int               @default(0)
+  lastDeliveredAt DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  deletedAt       DateTime?
 
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  deliveries   WebhookDelivery[]
 
   @@index([organizationId, isActive])
   @@map("webhook_endpoints")

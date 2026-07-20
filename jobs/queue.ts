@@ -8,7 +8,11 @@ export type JobName =
   | "send-reminder"
   | "process-recurring-invoice"
   | "run-scheduled-calculation"
-  | "generate-report";
+  | "generate-report"
+  | "process-import"
+  | "process-export"
+  | "deliver-webhook"
+  | "retry-email";
 
 export type JobPayload = Record<string, unknown>;
 

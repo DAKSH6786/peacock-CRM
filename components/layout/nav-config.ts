@@ -128,7 +128,9 @@ export const navigationSections: NavSection[] = [
         label: "Saved Reports",
         permission: "reports:view",
       },
-      { href: "/exports", label: "Exports", permission: "reports:export" },
+      { href: "/exports", label: "Exports", permission: "reports:view" },
+      { href: "/imports", label: "Imports", permission: "imports:run" },
+      { href: "/documents", label: "Documents", permission: "documents:view" },
     ],
   },
   {

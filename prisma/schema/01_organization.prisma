@@ -105,6 +105,13 @@ model Organization {
   systemSettings        SystemSetting[]
   exchangeRates         ExchangeRate[]
   savedReports          SavedReport[]
+  apiKeys               ApiKey[]
+  documentFolders       DocumentFolder[]
+  managedDocuments      ManagedDocument[]
+  documentTags          DocumentTag[]
+  emailSendLogs         EmailSendLog[]
+  calendarConnections   CalendarConnection[]
+  calendarSyncEvents    CalendarSyncEvent[]
 
   @@index([deletedAt])
   @@map("organizations")

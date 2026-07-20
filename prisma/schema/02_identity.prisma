@@ -40,6 +40,18 @@ model User {
   savedViews     SavedView[]
   uploadedFiles  FileAttachment[] @relation("FileUploader")
   savedReports   SavedReport[] @relation("SavedReportOwner")
+  importJobsCreated        ImportJob[]             @relation("ImportJobCreator")
+  exportJobsCreated        ExportJob[]             @relation("ExportJobCreator")
+  exportJobsApproved       ExportJob[]             @relation("ExportJobApprover")
+  apiKeysCreated           ApiKey[]                @relation("ApiKeyCreator")
+  apiKeysRevoked           ApiKey[]                @relation("ApiKeyRevoker")
+  documentFoldersOwned     DocumentFolder[]        @relation("DocumentFolderOwner")
+  documentsUploaded        ManagedDocument[]       @relation("DocumentUploader")
+  documentVersionsUploaded DocumentVersion[]       @relation("DocumentVersionUploader")
+  documentAccessGranted    DocumentAccessGrant[]   @relation("DocumentAccessGranter")
+  documentDownloads        DocumentDownloadLog[]   @relation("DocumentDownloader")
+  emailSends               EmailSendLog[]          @relation("EmailSender")
+  calendarConnections      CalendarConnection[]    @relation("CalendarConnectionOwner")
 
   @@index([organizationId, status])
   @@index([departmentId])
