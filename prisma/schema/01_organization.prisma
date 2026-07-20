@@ -46,6 +46,7 @@ model Organization {
   contacts              Contact[]
   leads                 Lead[]
   deals                 Deal[]
+  leadScoringRules      LeadScoringRule[]
   objectives            Objective[]
   kpis                  KPI[]
   companyTargets        CompanyTarget[]

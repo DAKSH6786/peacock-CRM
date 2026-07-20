@@ -229,6 +229,41 @@ export async function seedDemoMetrics(
     },
   });
 
+  const statusDefs = [
+    { name: "New lead", code: "NEW", sortOrder: 1 },
+    { name: "Qualification", code: "QUALIFICATION", sortOrder: 2 },
+    { name: "Contacted", code: "CONTACTED", sortOrder: 3 },
+    { name: "Discovery", code: "DISCOVERY", sortOrder: 4 },
+    { name: "Proposal required", code: "PROPOSAL_REQUIRED", sortOrder: 5 },
+    { name: "Proposal sent", code: "PROPOSAL_SENT", sortOrder: 6 },
+    { name: "Negotiation", code: "NEGOTIATION", sortOrder: 7 },
+    { name: "Won", code: "WON", sortOrder: 8, isWon: true },
+    { name: "Lost", code: "LOST", sortOrder: 9, isLost: true },
+    { name: "Nurturing", code: "NURTURING", sortOrder: 10 },
+    { name: "Disqualified", code: "DISQUALIFIED", sortOrder: 11, isLost: true },
+  ] as const;
+
+  for (const def of statusDefs) {
+    await prisma.leadStatus.upsert({
+      where: { organizationId_code: { organizationId, code: def.code } },
+      update: {
+        name: def.name,
+        sortOrder: def.sortOrder,
+        isWon: "isWon" in def ? Boolean(def.isWon) : false,
+        isLost: "isLost" in def ? Boolean(def.isLost) : false,
+        deletedAt: null,
+      },
+      create: {
+        organizationId,
+        name: def.name,
+        code: def.code,
+        sortOrder: def.sortOrder,
+        isWon: "isWon" in def ? Boolean(def.isWon) : false,
+        isLost: "isLost" in def ? Boolean(def.isLost) : false,
+      },
+    });
+  }
+
   const lostReason = await prisma.lostReason.upsert({
     where: { organizationId_code: { organizationId, code: "BUDGET" } },
     update: { name: "Budget", deletedAt: null },
@@ -247,22 +282,87 @@ export async function seedDemoMetrics(
   });
 
   const stageDefs = [
-    { name: "Discovery", code: "DISC", sortOrder: 1, probability: 20 },
-    { name: "Proposal", code: "PROP", sortOrder: 2, probability: 45 },
-    { name: "Negotiation", code: "NEGO", sortOrder: 3, probability: 70 },
+    {
+      name: "New",
+      code: "NEW",
+      sortOrder: 1,
+      probability: 5,
+      color: "#64748B",
+      staleAfterDays: 7,
+    },
+    {
+      name: "Qualification",
+      code: "QUAL",
+      sortOrder: 2,
+      probability: 15,
+      color: "#0EA5E9",
+      requiredFields: ["email", "companyName"],
+      staleAfterDays: 10,
+    },
+    {
+      name: "Contacted",
+      code: "CONT",
+      sortOrder: 3,
+      probability: 20,
+      color: "#06B6D4",
+      staleAfterDays: 7,
+    },
+    {
+      name: "Discovery",
+      code: "DISC",
+      sortOrder: 4,
+      probability: 30,
+      color: "#14B8A6",
+      requiredFields: ["estimatedValueMinor"],
+      staleAfterDays: 14,
+    },
+    {
+      name: "Proposal required",
+      code: "PROP_REQ",
+      sortOrder: 5,
+      probability: 40,
+      color: "#F59E0B",
+      staleAfterDays: 7,
+    },
+    {
+      name: "Proposal sent",
+      code: "PROP",
+      sortOrder: 6,
+      probability: 55,
+      color: "#F97316",
+      staleAfterDays: 10,
+    },
+    {
+      name: "Negotiation",
+      code: "NEGO",
+      sortOrder: 7,
+      probability: 70,
+      color: "#8B5CF6",
+      staleAfterDays: 14,
+    },
     {
       name: "Won",
       code: "WON",
-      sortOrder: 4,
+      sortOrder: 8,
       probability: 100,
+      color: "#16A34A",
       isClosedWon: true,
     },
     {
       name: "Lost",
       code: "LOST",
-      sortOrder: 5,
+      sortOrder: 9,
       probability: 0,
+      color: "#DC2626",
       isClosedLost: true,
+    },
+    {
+      name: "Nurturing",
+      code: "NURT",
+      sortOrder: 10,
+      probability: 10,
+      color: "#A855F7",
+      staleAfterDays: 30,
     },
   ] as const;
 
@@ -276,6 +376,11 @@ export async function seedDemoMetrics(
         name: def.name,
         sortOrder: def.sortOrder,
         probability: def.probability,
+        color: "color" in def ? def.color : null,
+        requiredFields:
+          "requiredFields" in def ? [...(def.requiredFields as unknown as string[])] : [],
+        staleAfterDays:
+          "staleAfterDays" in def ? (def.staleAfterDays as number) : null,
         isClosedWon: "isClosedWon" in def ? def.isClosedWon : false,
         isClosedLost: "isClosedLost" in def ? def.isClosedLost : false,
         deletedAt: null,
@@ -288,8 +393,13 @@ export async function seedDemoMetrics(
         code: def.code,
         sortOrder: def.sortOrder,
         probability: def.probability,
-        isClosedWon: "isClosedWon" in def ? def.isClosedWon : false,
-        isClosedLost: "isClosedLost" in def ? def.isClosedLost : false,
+        color: "color" in def ? def.color : null,
+        requiredFields:
+          "requiredFields" in def ? [...(def.requiredFields as unknown as string[])] : [],
+        staleAfterDays:
+          "staleAfterDays" in def ? (def.staleAfterDays as number) : null,
+        isClosedWon: "isClosedWon" in def ? Boolean(def.isClosedWon) : false,
+        isClosedLost: "isClosedLost" in def ? Boolean(def.isClosedLost) : false,
       },
     });
     stages[def.code] = stage.id;

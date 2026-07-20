@@ -280,6 +280,30 @@ export const REPORT_CATALOG: ReportDefinition[] = [
     revenueDefinition: "closed",
     chartType: "table",
   }),
+  def({
+    key: "crm.pipeline-value",
+    title: "Pipeline value",
+    category: "crm",
+    description: "Open lead and deal pipeline value by stage.",
+    permission: "crm:view",
+    chartType: "bar",
+  }),
+  def({
+    key: "crm.weighted-forecast",
+    title: "Weighted forecast",
+    category: "crm",
+    description: "Open pipeline weighted by stage probability.",
+    permission: "crm:view",
+    chartType: "bar",
+  }),
+  def({
+    key: "crm.monthly-lead-trend",
+    title: "Monthly lead trend",
+    category: "crm",
+    description: "New leads created by month.",
+    permission: "crm:view",
+    chartType: "line",
+  }),
 
   // Sales
   def({

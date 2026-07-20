@@ -152,11 +152,11 @@ export async function processImportJob(importJobId: string) {
     partialPolicy: job.partialPolicy as PartialImportPolicy,
   });
 
-  const successRows =
-    job.partialPolicy === "ALL_OR_NOTHING" && prepared.validation.invalidCount > 0
-      ? 0
-      : prepared.validation.validCount;
+  const successCandidates = prepared.validation.rows.filter(
+    (r) => r.errors.length === 0,
+  );
 
+  let successRows = 0;
   const skippedRows = prepared.validation.rows.filter(
     (r) =>
       r.isDuplicate &&
@@ -165,6 +165,39 @@ export async function processImportJob(importJobId: string) {
         (e) => e.code === "DUPLICATE_EXISTING" || e.code === "DUPLICATE_IN_FILE",
       ),
   ).length;
+
+  if (
+    !(
+      job.partialPolicy === "ALL_OR_NOTHING" &&
+      prepared.validation.invalidCount > 0
+    )
+  ) {
+    if (job.entityType === "leads") {
+      const { createLeadFromImportRow } = await import(
+        "@/modules/crm/import-leads"
+      );
+      for (const row of successCandidates) {
+        if (
+          row.isDuplicate &&
+          job.duplicatePolicy === "SKIP"
+        ) {
+          continue;
+        }
+        try {
+          await createLeadFromImportRow({
+            organizationId: job.organizationId,
+            createdById: job.createdById,
+            row: row.data,
+          });
+          successRows += 1;
+        } catch {
+          // counted as failed below via remaining
+        }
+      }
+    } else {
+      successRows = prepared.validation.validCount;
+    }
+  }
 
   await prisma.importJob.update({
     where: { id: job.id },
@@ -178,6 +211,7 @@ export async function processImportJob(importJobId: string) {
         validCount: prepared.validation.validCount,
         invalidCount: prepared.validation.invalidCount,
         duplicateCount: prepared.validation.duplicateCount,
+        committed: successRows,
       },
       completedAt: new Date(),
     },

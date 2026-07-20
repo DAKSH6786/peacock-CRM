@@ -105,6 +105,12 @@ export async function runCrmReport(input: CrmReportInput): Promise<ReportPayload
       return followUpCompliance(input, currencyCode);
     case "crm.forecast-accuracy":
       return forecastAccuracy(input, currencyCode);
+    case "crm.pipeline-value":
+      return pipelineValue(input, currencyCode);
+    case "crm.weighted-forecast":
+      return weightedForecast(input, currencyCode);
+    case "crm.monthly-lead-trend":
+      return monthlyLeadTrend(input, currencyCode);
     default:
       return buildPayload({
         definition: input.definition,
@@ -774,3 +780,198 @@ async function forecastAccuracy(
   });
 }
 
+
+async function pipelineValue(
+  input: CrmReportInput,
+  currencyCode: string,
+): Promise<ReportPayload> {
+  const leads = await prisma.lead.findMany({
+    where: {
+      organizationId: input.user.organizationId,
+      deletedAt: null,
+      stage: { isClosedWon: false, isClosedLost: false },
+    },
+    select: {
+      id: true,
+      estimatedValueMinor: true,
+      currencyCode: true,
+      stage: { select: { id: true, name: true, sortOrder: true } },
+      createdAt: true,
+    },
+  });
+
+  const byStage = new Map<
+    string,
+    { label: string; value: number; sort: number; ids: string[] }
+  >();
+  for (const lead of leads) {
+    const key = lead.stage?.id ?? "none";
+    const label = lead.stage?.name ?? "Unstaged";
+    const amount = await convertMoney({
+      organizationId: input.user.organizationId,
+      amountMinor: lead.estimatedValueMinor ?? 0,
+      fromCurrency: lead.currencyCode,
+      toCurrency: currencyCode,
+      asOf: lead.createdAt,
+    });
+    const row = byStage.get(key) ?? {
+      label,
+      value: 0,
+      sort: lead.stage?.sortOrder ?? 999,
+      ids: [],
+    };
+    row.value += amount;
+    row.ids.push(lead.id);
+    byStage.set(key, row);
+  }
+
+  const ordered = [...byStage.values()].sort((a, b) => a.sort - b.sort);
+  const total = ordered.reduce((sum, row) => sum + row.value, 0);
+
+  return buildPayload({
+    definition: input.definition,
+    range: input.range,
+    currencyCode,
+    summary: `Open pipeline value ${Math.round(total / 100)} ${currencyCode} across ${ordered.length} stages.`,
+    metrics: [
+      metric("Pipeline value", total, "money"),
+      metric("Open leads", leads.length, "number"),
+    ],
+    series: ordered.map((row) => ({
+      label: row.label,
+      value: Math.round(row.value / 100),
+      href: "/crm/pipeline",
+    })),
+    columns: [
+      { key: "stage", label: "Stage" },
+      { key: "valueMinor", label: "Value", format: "money" },
+      { key: "leads", label: "Leads", format: "number" },
+    ],
+    rows: ordered.map((row) => ({
+      id: row.label,
+      href: "/crm/pipeline",
+      values: {
+        stage: row.label,
+        valueMinor: row.value,
+        leads: row.ids.length,
+      },
+    })),
+    drilldownHref: "/crm/pipeline",
+  });
+}
+
+async function weightedForecast(
+  input: CrmReportInput,
+  currencyCode: string,
+): Promise<ReportPayload> {
+  const leads = await prisma.lead.findMany({
+    where: {
+      organizationId: input.user.organizationId,
+      deletedAt: null,
+      stage: { isClosedWon: false, isClosedLost: false },
+    },
+    select: {
+      id: true,
+      estimatedValueMinor: true,
+      currencyCode: true,
+      probability: true,
+      stage: { select: { name: true, probability: true } },
+      createdAt: true,
+    },
+  });
+
+  let weighted = 0;
+  const rows: ReportTableRow[] = [];
+  for (const lead of leads) {
+    const probability = lead.probability ?? lead.stage?.probability ?? 0;
+    const amount = await convertMoney({
+      organizationId: input.user.organizationId,
+      amountMinor: lead.estimatedValueMinor ?? 0,
+      fromCurrency: lead.currencyCode,
+      toCurrency: currencyCode,
+      asOf: lead.createdAt,
+    });
+    const w = Math.round((amount * probability) / 100);
+    weighted += w;
+    rows.push({
+      id: lead.id,
+      href: `/crm/leads/${lead.id}`,
+      values: {
+        stage: lead.stage?.name ?? "—",
+        probability,
+        valueMinor: amount,
+        weightedMinor: w,
+      },
+    });
+  }
+
+  return buildPayload({
+    definition: input.definition,
+    range: input.range,
+    currencyCode,
+    summary: `Weighted forecast ${Math.round(weighted / 100)} ${currencyCode} from ${leads.length} open leads.`,
+    metrics: [
+      metric("Weighted forecast", weighted, "money"),
+      metric("Open leads", leads.length, "number"),
+    ],
+    series: [
+      {
+        label: "Weighted forecast",
+        value: Math.round(weighted / 100),
+        href: "/crm/pipeline",
+      },
+    ],
+    columns: [
+      { key: "stage", label: "Stage" },
+      { key: "probability", label: "Probability", format: "percent" },
+      { key: "valueMinor", label: "Value", format: "money" },
+      { key: "weightedMinor", label: "Weighted", format: "money" },
+    ],
+    rows,
+    drilldownHref: "/crm/pipeline",
+  });
+}
+
+async function monthlyLeadTrend(
+  input: CrmReportInput,
+  currencyCode: string,
+): Promise<ReportPayload> {
+  const leads = await prisma.lead.findMany({
+    where: {
+      organizationId: input.user.organizationId,
+      deletedAt: null,
+      createdAt: { gte: input.range.from, lte: input.range.to },
+    },
+    select: { id: true, createdAt: true },
+  });
+
+  const byMonth = new Map<string, number>();
+  for (const lead of leads) {
+    const key = lead.createdAt.toISOString().slice(0, 7);
+    byMonth.set(key, (byMonth.get(key) ?? 0) + 1);
+  }
+  const months = [...byMonth.entries()].sort(([a], [b]) => a.localeCompare(b));
+
+  return buildPayload({
+    definition: input.definition,
+    range: input.range,
+    currencyCode,
+    summary: `${leads.length} leads created across ${months.length} months.`,
+    metrics: [metric("Leads created", leads.length, "number")],
+    series: months.map(([label, value]) => ({
+      label,
+      value,
+      href: "/crm/leads",
+    })),
+    columns: [
+      { key: "month", label: "Month" },
+      { key: "leads", label: "Leads", format: "number" },
+    ],
+    rows: months.map(([month, count]) => ({
+      id: month,
+      href: "/crm/leads",
+      values: { month, leads: count },
+    })),
+    drilldownHref: "/crm/leads",
+  });
+}

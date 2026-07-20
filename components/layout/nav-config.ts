@@ -33,10 +33,12 @@ export const navigationSections: NavSection[] = [
     items: [
       { href: "/crm", label: "CRM", permission: "crm:view" },
       { href: "/crm/leads", label: "Leads", permission: "crm:view" },
+      { href: "/crm/pipeline", label: "Pipeline", permission: "crm:view" },
+      { href: "/crm/follow-ups", label: "Follow-ups", permission: "crm:view" },
+      { href: "/crm/workload", label: "Workload", permission: "crm:view" },
       { href: "/crm/companies", label: "Companies", permission: "crm:view" },
       { href: "/crm/contacts", label: "Contacts", permission: "crm:view" },
       { href: "/crm/deals", label: "Deals", permission: "crm:view" },
-      { href: "/crm/pipeline", label: "Pipeline", permission: "crm:view" },
       { href: "/sales", label: "Sales", permission: "sales:view" },
     ],
   },

@@ -64,6 +64,12 @@ model PipelineStage {
   code           String
   sortOrder      Int       @default(0)
   probability    Int       @default(0)
+  /// Hex colour for kanban headers, e.g. #0D9488
+  color          String?
+  /// Field keys that must be present before entering this stage
+  requiredFields String[]  @default([])
+  /// Days in stage before a deal/lead is considered stale
+  staleAfterDays Int?
   isClosedWon    Boolean   @default(false)
   isClosedLost   Boolean   @default(false)
   createdAt      DateTime  @default(now())
@@ -316,15 +322,25 @@ model Lead {
   assignedTeamId String?
   nextFollowUpAt DateTime?
   leadScore      Int       @default(0)
+  /// Transparent rule-based scoring breakdown [{factor, points, reason}]
+  scoreBreakdown Json?
   lastContactedAt DateTime?
   consentMarketing Boolean  @default(false)
   contactPreference String?
   lostReasonId   String?
   notes          String?   @db.Text
+  /// Qualification / scoring inputs
+  companySize    String?
+  budgetMinor    Int?
+  decisionTimeline String?
+  websiteQuality Int?
+  existingRelationship Boolean @default(false)
+  engagementScore Int      @default(0)
   /// Duplicate detection
   normalizedEmail String?
   normalizedPhone String?
   normalizedCompany String?
+  normalizedDomain String?
   interestedServices Json?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
@@ -357,10 +373,14 @@ model Lead {
   leadTags          LeadTag[]
   campaignLinks     CampaignLead[]
   deals             Deal[]
+  duplicateLeft     LeadDuplicateCandidate[] @relation("DuplicateLeadLeft")
+  duplicateRight    LeadDuplicateCandidate[] @relation("DuplicateLeadRight")
 
   @@index([organizationId, stageId])
   @@index([organizationId, assignedUserId])
   @@index([organizationId, normalizedEmail])
+  @@index([organizationId, normalizedPhone])
+  @@index([organizationId, normalizedCompany])
   @@index([organizationId, nextFollowUpAt])
   @@index([deletedAt])
   @@map("leads")
@@ -613,4 +633,50 @@ model DealProduct {
 
   @@index([dealId])
   @@map("deal_products")
+}
+
+/// Configurable rule-based lead scoring (transparent, not opaque AI)
+model LeadScoringRule {
+  id             String    @id @default(cuid())
+  organizationId String
+  /// company_size | country | source | budget | service_interest | engagement | activities | response_recency | decision_timeline | existing_relationship | website_quality | lead_age
+  factor         String
+  label          String
+  /// Optional match expression as JSON { op, value } or { op, min, max }
+  match          Json?
+  points         Int
+  isActive       Boolean   @default(true)
+  sortOrder      Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, isActive])
+  @@map("lead_scoring_rules")
+}
+
+/// Possible duplicates awaiting human review — never auto-merged
+model LeadDuplicateCandidate {
+  id             String    @id @default(cuid())
+  organizationId String
+  leadId         String
+  matchLeadId    String
+  /// EMAIL | PHONE | DOMAIN | COMPANY
+  matchType      String
+  matchValue     String
+  status         String    @default("PENDING")
+  /// PENDING | MERGED | DISMISSED
+  reviewedById   String?
+  reviewedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  lead      Lead @relation("DuplicateLeadLeft", fields: [leadId], references: [id], onDelete: Cascade)
+  matchLead Lead @relation("DuplicateLeadRight", fields: [matchLeadId], references: [id], onDelete: Cascade)
+
+  @@unique([leadId, matchLeadId, matchType])
+  @@index([organizationId, status])
+  @@map("lead_duplicate_candidates")
 }
