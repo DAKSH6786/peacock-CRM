@@ -104,6 +104,7 @@ model Organization {
   scheduledJobs         ScheduledJob[]
   systemSettings        SystemSetting[]
   exchangeRates         ExchangeRate[]
+  savedReports          SavedReport[]
 
   @@index([deletedAt])
   @@map("organizations")
@@ -120,6 +121,9 @@ model OrganizationSettings {
   quotePrefix             String   @default("QT")
   employeeCodePrefix      String   @default("DP")
   allowNegativeLeave      Boolean  @default(false)
+  /// Sales performance visibility controls (JSON):
+  /// { showPeerLeaderboard, showCostVersusRevenue, salesSelfOnly }
+  salesPerformanceVisibility Json?
   metadata                Json?
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt

@@ -39,6 +39,7 @@ model User {
   notifications  Notification[] @relation("NotificationRecipient")
   savedViews     SavedView[]
   uploadedFiles  FileAttachment[] @relation("FileUploader")
+  savedReports   SavedReport[] @relation("SavedReportOwner")
 
   @@index([organizationId, status])
   @@index([departmentId])

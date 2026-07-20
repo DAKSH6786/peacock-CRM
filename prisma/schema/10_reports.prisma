@@ -1,0 +1,67 @@
+// ─── Reporting & analytics persistence ───────────────────────────────────────
+
+model SavedReport {
+  id             String    @id @default(cuid())
+  organizationId String
+  ownerUserId    String
+  name           String
+  description    String?
+  /// catalog | builder
+  source         String    @default("builder")
+  /// Catalog report id when source=catalog
+  reportKey      String?
+  /// Constrained builder config JSON (never raw SQL)
+  definition     Json
+  chartType      String?
+  currencyCode   String?   @db.Char(3)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  owner        User         @relation("SavedReportOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  shares       ReportShare[]
+  schedules    ReportSchedule[]
+
+  @@index([organizationId, ownerUserId])
+  @@index([organizationId, reportKey])
+  @@index([deletedAt])
+  @@map("saved_reports")
+}
+
+model ReportShare {
+  id             String   @id @default(cuid())
+  organizationId String
+  savedReportId  String
+  /// MembershipRole code, e.g. SALES / MANAGER
+  roleCode       String
+  canExport      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  savedReport SavedReport @relation(fields: [savedReportId], references: [id], onDelete: Cascade)
+
+  @@unique([savedReportId, roleCode])
+  @@index([organizationId, roleCode])
+  @@map("report_shares")
+}
+
+model ReportSchedule {
+  id             String    @id @default(cuid())
+  organizationId String
+  savedReportId  String
+  /// daily | weekly | monthly
+  cadence        String
+  /// csv | spreadsheet | pdf
+  format         String    @default("csv")
+  nextRunAt      DateTime?
+  lastRunAt      DateTime?
+  isActive       Boolean   @default(true)
+  createdById    String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  savedReport SavedReport @relation(fields: [savedReportId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, nextRunAt, isActive])
+  @@map("report_schedules")
+}

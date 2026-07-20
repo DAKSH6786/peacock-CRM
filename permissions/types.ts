@@ -128,6 +128,7 @@ const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "employees:view_compensation",
     "hr:view",
     "hr:manage",
+    "reports:view",
     "documents:view",
     "documents:manage",
     "approvals:view",

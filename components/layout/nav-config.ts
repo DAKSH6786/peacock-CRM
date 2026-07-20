@@ -119,6 +119,11 @@ export const navigationSections: NavSection[] = [
     items: [
       { href: "/reports", label: "Reports", permission: "reports:view" },
       {
+        href: "/reports/builder",
+        label: "Report builder",
+        permission: "reports:view",
+      },
+      {
         href: "/reports/saved",
         label: "Saved Reports",
         permission: "reports:view",
