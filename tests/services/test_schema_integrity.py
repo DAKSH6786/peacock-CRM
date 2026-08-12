@@ -242,13 +242,28 @@ def test_jsonb_only_on_justified_columns() -> None:
     assert _jsonb_columns(WebsiteProperty) == set()
     assert _jsonb_columns(Recommendation) == set()
 
-    # Global metadata scan: only the four justified JSONB columns above (+ job pair)
+    # Variable-length page extraction snapshots use JSONB with stable item shapes.
+    from db_models import CrawlPage
+
+    assert _jsonb_columns(CrawlPage) == {
+        "internal_links",
+        "external_links",
+        "images",
+        "schema_blocks",
+        "redirect_chain",
+    }
+
     allowed = {
         ("background_jobs", "payload"),
         ("background_jobs", "result"),
         ("crawls", "config"),
         ("llm_requests", "messages"),
         ("websites", "extensions"),
+        ("crawl_pages", "internal_links"),
+        ("crawl_pages", "external_links"),
+        ("crawl_pages", "images"),
+        ("crawl_pages", "schema_blocks"),
+        ("crawl_pages", "redirect_chain"),
     }
     found: set[tuple[str, str]] = set()
     for table in models.Base.metadata.tables.values():

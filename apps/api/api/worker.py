@@ -38,6 +38,25 @@ def ping_task(
     }
 
 
+@celery_app.task(name="peacock.crawl")
+def crawl_task(
+    organisation_id: str,
+    payload: dict,
+    workspace_id: str | None = None,
+    metadata: dict | None = None,
+) -> dict:
+    from api.routes.crawler import run_crawl_job
+
+    crawl_id = (payload or {}).get("crawl_id")
+    if not crawl_id:
+        return {"ok": False, "error": "crawl_id required", "organisation_id": organisation_id}
+    result = run_crawl_job(crawl_id)
+    result["organisation_id"] = organisation_id
+    result["workspace_id"] = workspace_id
+    result["metadata"] = metadata or {}
+    return result
+
+
 _memory_runner: InMemoryJobRunner | None = None
 
 
@@ -51,6 +70,10 @@ def get_job_runner() -> JobRunner:
             _memory_runner.register(
                 "peacock.ping",
                 lambda payload: {"ok": True, "payload": payload},
+            )
+            _memory_runner.register(
+                "peacock.crawl",
+                lambda payload: crawl_task("memory", payload),
             )
         return _memory_runner
     if backend == "temporal":

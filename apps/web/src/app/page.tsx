@@ -1,4 +1,5 @@
 import { ArchitecturePanel } from "@/components/architecture-panel";
+import { CrawlConsole } from "@/components/crawl-console";
 import { HealthCard } from "@/components/health-card";
 import { LoginForm } from "@/components/login-form";
 
@@ -16,9 +17,9 @@ export default function HomePage() {
           Generative visibility intelligence architecture
         </h1>
         <p className="max-w-2xl text-lg text-[var(--muted)]">
-          OBSERVE → THINK → VERIFY → DECIDE → EXECUTE → MEASURE → LEARN. This
-          stage ships the monorepo, auth boundaries, job runtime, and LLM
-          adapter ports — not business features yet.
+          OBSERVE → THINK → VERIFY → DECIDE → EXECUTE → MEASURE → LEARN. Peacock
+          Crawler ingests websites with configurable crawl policies — not
+          hardcoded commercial plan logic in the engine core.
         </p>
       </header>
 
@@ -27,6 +28,7 @@ export default function HomePage() {
         <LoginForm />
       </div>
 
+      <CrawlConsole />
       <ArchitecturePanel />
     </main>
   );
