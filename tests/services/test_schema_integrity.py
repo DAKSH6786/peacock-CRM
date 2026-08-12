@@ -203,7 +203,7 @@ def test_core_domain_tables_registered() -> None:
     registered = set(models.Base.metadata.tables)
     missing = REQUIRED_CORE_TABLES - registered
     assert not missing, f"Missing tables: {sorted(missing)}"
-    assert len(registered) >= 100
+    assert len(registered) >= 110
 
 
 def test_intelligence_case_is_relational_not_json_blob() -> None:
