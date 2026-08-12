@@ -73,6 +73,7 @@ Everything else is relational columns, unique constraints, or EAV attribute tabl
 | Monitoring | `monitoring_projects`, `metric_snapshots`, `search_performance_snapshots` |
 | LLM intelligence | `llm_requests`, `llm_responses`, `agent_runs`, `agent_results`, `council_runs`, `decisions`, `evidences` |
 | PINE IntelligenceCase | `intelligence_cases`, `intelligence_case_context_items`, `intelligence_case_observations`, `intelligence_case_evidence`, `intelligence_case_evidence_urls`, `intelligence_case_hypotheses`, `intelligence_case_agent_findings`, `intelligence_case_agent_claims`, `intelligence_case_contradictions`, `intelligence_case_unknowns`, `intelligence_case_assumptions`, `intelligence_case_risks`, `intelligence_case_opportunities`, `intelligence_case_recommendations`, `intelligence_case_recommendation_evidence`, `intelligence_case_models_used`, `intelligence_case_tools_used` |
+| Evidence Ledger | `ledger_evidences`, `ledger_findings`, `ledger_recommendations`, `ledger_actions`, `ledger_outcomes`, `ledger_evidence_finding_links`, `ledger_finding_recommendation_links`, `ledger_recommendation_action_links`, `ledger_action_outcome_links`, `ledger_claim_evidence_links` |
 | Learning | `recommendations`, `recommendation_executions`, `recommendation_metrics`, `recommendation_outcomes`, `feature_weights`, `model_evaluations` |
 
 Aliases: `Organization` → `Organisation`; `LLMProvider` → `AiProvider`; `LLMModel` → `AiProviderModel`.

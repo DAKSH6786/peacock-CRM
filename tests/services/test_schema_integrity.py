@@ -144,6 +144,17 @@ REQUIRED_CORE_TABLES = {
     "intelligence_case_recommendation_evidence",
     "intelligence_case_models_used",
     "intelligence_case_tools_used",
+    # Evidence Ledger graph
+    "ledger_evidences",
+    "ledger_findings",
+    "ledger_recommendations",
+    "ledger_actions",
+    "ledger_outcomes",
+    "ledger_evidence_finding_links",
+    "ledger_finding_recommendation_links",
+    "ledger_recommendation_action_links",
+    "ledger_action_outcome_links",
+    "ledger_claim_evidence_links",
 }
 
 
@@ -223,6 +234,61 @@ def test_intelligence_case_is_relational_not_json_blob() -> None:
     assert "value" not in evidence_cols
     assert "payload" not in evidence_cols
 
+
+def test_evidence_ledger_is_relational_graph() -> None:
+    from db_models import (
+        EVIDENCE_TYPES,
+        LedgerAction,
+        LedgerEvidence,
+        LedgerEvidenceFindingLink,
+        LedgerFinding,
+        LedgerOutcome,
+        LedgerRecommendation,
+    )
+
+    assert issubclass(LedgerEvidence, WorkspaceTenantMixin)
+    assert issubclass(LedgerFinding, WorkspaceTenantMixin)
+    assert issubclass(LedgerRecommendation, WorkspaceTenantMixin)
+    assert issubclass(LedgerAction, WorkspaceTenantMixin)
+    assert issubclass(LedgerOutcome, WorkspaceTenantMixin)
+
+    for model in (LedgerEvidence, LedgerFinding, LedgerRecommendation, LedgerAction, LedgerOutcome):
+        assert _jsonb_columns(model) == set()
+
+    required_types = {
+        "CRAWL",
+        "SERP",
+        "ANALYTICS",
+        "SEARCH_CONSOLE",
+        "BACKLINK",
+        "AI_RESPONSE",
+        "COMPETITOR_PAGE",
+        "USER_DATA",
+        "MODEL_INFERENCE",
+        "EXTERNAL_SOURCE",
+        "HISTORICAL_OUTCOME",
+        "EXPERIMENT",
+    }
+    assert set(EVIDENCE_TYPES) == required_types
+
+    evidence_cols = {c.name for c in inspect(LedgerEvidence).columns}
+    assert {
+        "source",
+        "observed_at",
+        "freshness_hours",
+        "freshness_score",
+        "confidence",
+        "scope_kind",
+        "scope_ref",
+        "value_text",
+        "value_number",
+        "value_bool",
+        "evidence_type",
+    } <= evidence_cols
+
+    assert _fk_map(LedgerEvidence)["organisation_id"] == "CASCADE"
+    assert _fk_map(LedgerEvidenceFindingLink)["evidence_id"] == "CASCADE"
+    assert _fk_map(LedgerEvidenceFindingLink)["finding_id"] == "CASCADE"
 
 def test_workspace_tenant_mixin_fields() -> None:
     assert issubclass(Website, WorkspaceTenantMixin)
