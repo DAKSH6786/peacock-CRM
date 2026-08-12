@@ -82,6 +82,13 @@ def _keyword_intent(text: str) -> tuple[str, str, list[str]]:
 
 async def layer0_classify(state: PipelineState) -> LayerResult:
     start = time.perf_counter()
+    from intelligence.peacock_modes import (
+        LabExperimentPlan,
+        ModeBudgetTracker,
+        profile_for,
+        resolve_mode,
+    )
+
     text = state.request.request_text
     intent, default_output, required = _keyword_intent(text)
     requested_output = state.request.requested_output or default_output
@@ -97,12 +104,15 @@ async def layer0_classify(state: PipelineState) -> LayerResult:
         importance_val = "critical"
         risk_val = "high"
         depth = ThinkingDepth.COUNCIL
-    elif any(k in lower for k in ("quick", "summary", "status")):
+    elif any(k in lower for k in ("lab", "experiment", "hypothesis", "a/b", "prompt experiment")):
+        importance_val = "medium"
+        risk_val = "low"
+        depth = ThinkingDepth.LAB
+    elif any(k in lower for k in ("quick", "summary", "status", "fast")):
         importance_val = "low"
         risk_val = "low"
         depth = ThinkingDepth.SHALLOW
-        skip = [3, 8]  # skip research + simulation for shallow asks
-    elif any(k in lower for k in ("deep dive", "board", "quarterly", "strategy")):
+    elif any(k in lower for k in ("deep dive", "board", "quarterly", "strategy", "multi-agent")):
         importance_val = "high"
         risk_val = "medium"
         depth = ThinkingDepth.DEEP
@@ -111,6 +121,52 @@ async def layer0_classify(state: PipelineState) -> LayerResult:
         freshness = "realtime"
     elif any(k in lower for k in ("historical", "trend", "over time")):
         freshness = "stale_ok"
+
+    # Resolve Peacock mode (explicit request wins)
+    explicit_mode = state.request.peacock_mode or (state.request.metadata or {}).get("peacock_mode")
+    mode = resolve_mode(explicit=explicit_mode, thinking_depth=depth, request_text=text)
+    profile = profile_for(mode)
+    depth = profile.thinking_depth
+    skip = list(profile.skip_layers)
+
+    # Standard: verification when required — skip adversarial for low-risk simple asks
+    if (
+        mode.value == "peacock_standard"
+        and importance_val == "low"
+        and risk_val == "low"
+        and int(StrategicLayer.ADVERSARIAL_ANALYSIS) not in skip
+    ):
+        skip = [*skip, int(StrategicLayer.ADVERSARIAL_ANALYSIS)]
+
+    lab_plan = None
+    if mode.value == "peacock_lab":
+        plan = LabExperimentPlan(
+            repeated_measurements=any(k in lower for k in ("repeat", "measurement", "n=")),
+            prompt_experiments=any(k in lower for k in ("prompt", "wording")),
+            content_simulations=any(k in lower for k in ("simulation", "simulate")),
+            controlled_comparisons=any(k in lower for k in ("compare", "a/b", "control")),
+            hypothesis_tests=any(k in lower for k in ("hypothesis", "test whether")),
+            measurement_rounds=3 if "repeat" in lower else 1,
+        )
+        # Default Lab enables the full experimental toolkit when unspecified
+        if not any(
+            [
+                plan.repeated_measurements,
+                plan.prompt_experiments,
+                plan.content_simulations,
+                plan.controlled_comparisons,
+                plan.hypothesis_tests,
+            ]
+        ):
+            plan = LabExperimentPlan(
+                repeated_measurements=True,
+                prompt_experiments=True,
+                content_simulations=True,
+                controlled_comparisons=True,
+                hypothesis_tests=True,
+                measurement_rounds=3,
+            )
+        lab_plan = plan.to_dict()
 
     # Expand required_data to valid catalogue keys only
     required_data = [k for k in required if k in CONTEXT_CATALOG]
@@ -123,18 +179,35 @@ async def layer0_classify(state: PipelineState) -> LayerResult:
         freshness_requirement=freshness,  # type: ignore[arg-type]
         required_data=required_data,
         thinking_depth=depth,
+        peacock_mode=mode.value,
+        mode_budget=profile.budget.to_dict(),
+        mode_capabilities=profile.capabilities.to_dict(),
         intent_confidence=0.82,
         skip_layers=skip,
-        notes="Rule-based classification; escalate to LLM classifier when confidence is low.",
+        notes=(
+            f"{profile.display_name}: {profile.summary} "
+            f"(max_cost={profile.budget.max_cost}, max_calls={profile.budget.max_calls}, "
+            f"max_iterations={profile.budget.max_iterations}, max_runtime={profile.budget.max_runtime})."
+        ),
     )
     state.classification = classification
+    state.peacock_mode = mode.value
+    state.mode_tracker = ModeBudgetTracker(profile.budget)
+    # Layer 0 counts as one call toward the mode envelope
+    state.mode_tracker.record_call(cost_usd_micros=0)
+    state.lab_plan = lab_plan
+
     return LayerResult(
         layer=StrategicLayer.REQUEST_CLASSIFICATION,
         name=LAYER_NAMES[StrategicLayer.REQUEST_CLASSIFICATION],
         status="completed",
-        summary=f"Intent={intent}, depth={depth.value}, risk={risk_val}",
+        summary=f"Intent={intent}, mode={mode.value}, depth={depth.value}, risk={risk_val}",
         duration_ms=_ms_since(start),
-        output=classification.to_dict(),
+        output={
+            **classification.to_dict(),
+            "mode_profile": profile.to_dict(),
+            "lab_plan": lab_plan,
+        },
     )
 
 

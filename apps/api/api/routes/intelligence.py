@@ -32,6 +32,7 @@ from intelligence import (
     IntelligenceCaseRepository,
     IntelligenceOrchestrator,
     StrategicRequest,
+    list_mode_catalog,
 )
 from observability.audit import AuditEvent, AuditLogger
 
@@ -97,6 +98,7 @@ async def create_strategic_run(
             crawl_id=body.crawl_id,
             audit_id=body.audit_id,
             requested_output=body.requested_output,
+            peacock_mode=body.peacock_mode,
             metadata=body.metadata,
         )
     )
@@ -134,6 +136,16 @@ def get_strategic_run(
 @router.get("/layers")
 def list_layers(ctx: AuthContext = Depends(get_auth_context)) -> dict:
     return IntelligenceOrchestrator(ctx.organisation.id).status()
+
+
+@router.get("/modes")
+def list_peacock_modes(ctx: AuthContext = Depends(get_auth_context)) -> dict:
+    """Catalogue of Peacock Fast / Standard / Deep / Council / Lab modes."""
+    modes = list_mode_catalog()
+    return {
+        "modes": modes,
+        "required_budget_fields": ["max_cost", "max_calls", "max_iterations", "max_runtime"],
+    }
 
 
 @router.post("/cases", response_model=IntelligenceCaseResponse, status_code=201)

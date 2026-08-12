@@ -29,10 +29,11 @@ Every sufficiently complex strategic request is decomposed into conceptual layer
 - `POST /intelligence/runs`
 - `GET /intelligence/runs/{id}`
 - `GET /intelligence/layers`
+- `GET /intelligence/modes` — Peacock Fast / Standard / Deep / Council / Lab
 - `POST /intelligence/cases` — PINE `IntelligenceCase` (relational)
 - `GET /intelligence/cases/{case_id}`
 
-See also [`intelligence-case.md`](./intelligence-case.md).
+See also [`intelligence-case.md`](./intelligence-case.md) and [`peacock-modes.md`](./peacock-modes.md).
 
 ## Code
 
@@ -42,3 +43,4 @@ See also [`intelligence-case.md`](./intelligence-case.md).
 - `services/intelligence/evidence.py`
 - `services/intelligence/case.py`
 - `services/intelligence/case_repository.py`
+- `services/intelligence/peacock_modes.py`

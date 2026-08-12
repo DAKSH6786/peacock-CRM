@@ -18,6 +18,8 @@ class IntelligenceOrchestrator:
     _runs: dict[str, PipelineResult] = field(default_factory=dict)
 
     def status(self) -> dict[str, Any]:
+        from intelligence.peacock_modes import list_mode_catalog
+
         return {
             "service": "intelligence",
             "name": "Peacock Strategic Intelligence",
@@ -37,10 +39,12 @@ class IntelligenceOrchestrator:
                 "9_execution_plan",
                 "10_learning",
             ],
+            "peacock_modes": list_mode_catalog(),
             "guarantees": [
                 "intelligent_context_selection",
                 "no_full_database_dump",
                 "deterministic_evidence_separated_from_llm_inference",
+                "mode_budget_envelopes",
             ],
         }
 

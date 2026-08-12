@@ -38,6 +38,7 @@ DEFAULT_TOKEN_BUDGETS: dict[ThinkingDepth, int] = {
     ThinkingDepth.STANDARD: 4_000,
     ThinkingDepth.DEEP: 8_000,
     ThinkingDepth.COUNCIL: 12_000,
+    ThinkingDepth.LAB: 10_000,
 }
 
 # Intent → preferred context kinds (selection prior, not a full dump)

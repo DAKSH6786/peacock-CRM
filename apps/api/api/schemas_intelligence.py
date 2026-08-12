@@ -12,6 +12,10 @@ class StrategicRunRequest(BaseModel):
     crawl_id: str | None = None
     audit_id: str | None = None
     requested_output: str | None = None
+    peacock_mode: str | None = Field(
+        default=None,
+        description="peacock_fast | peacock_standard | peacock_deep | peacock_council | peacock_lab",
+    )
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -20,6 +24,8 @@ class StrategicRunResponse(BaseModel):
     organisation_id: str
     workspace_id: str
     status: str
+    peacock_mode: str | None = None
+    mode: dict[str, Any] = Field(default_factory=dict)
     classification: dict[str, Any]
     layers: list[dict[str, Any]]
     recommendations: list[dict[str, Any]]

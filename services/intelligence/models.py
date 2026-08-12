@@ -26,6 +26,7 @@ class ThinkingDepth(StrEnum):
     STANDARD = "standard"
     DEEP = "deep"
     COUNCIL = "council"
+    LAB = "lab"
 
 
 class EvidenceKind(StrEnum):
@@ -60,6 +61,8 @@ class StrategicRequest:
     crawl_id: str | None = None
     audit_id: str | None = None
     requested_output: str | None = None
+    # Explicit Peacock mode override (fast|standard|deep|council|lab or peacock_*)
+    peacock_mode: str | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
@@ -74,6 +77,9 @@ class RequestClassification:
     freshness_requirement: Literal["stale_ok", "recent", "realtime"]
     required_data: list[str]
     thinking_depth: ThinkingDepth
+    peacock_mode: str = "peacock_standard"
+    mode_budget: dict[str, Any] = field(default_factory=dict)
+    mode_capabilities: dict[str, Any] = field(default_factory=dict)
     intent_confidence: float = 0.0
     skip_layers: list[int] = field(default_factory=list)
     notes: str = ""
@@ -288,6 +294,10 @@ class PipelineState:
     tasks: list[ExecutionTask] = field(default_factory=list)
     learning: list[LearningRecord] = field(default_factory=list)
     layer_results: list[LayerResult] = field(default_factory=list)
+    # Peacock mode runtime
+    peacock_mode: str | None = None
+    mode_tracker: Any = None  # ModeBudgetTracker — typed loosely to avoid cycles
+    lab_plan: dict[str, Any] | None = None
 
 
 @dataclass(slots=True)
@@ -305,6 +315,8 @@ class PipelineResult:
     verification: VerificationResult | None
     learning: list[LearningRecord]
     interpretation: str | None = None
+    peacock_mode: str | None = None
+    mode: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -312,6 +324,8 @@ class PipelineResult:
             "organisation_id": self.organisation_id,
             "workspace_id": self.workspace_id,
             "status": self.status,
+            "peacock_mode": self.peacock_mode,
+            "mode": self.mode,
             "classification": self.classification.to_dict(),
             "layers": [layer.to_dict() for layer in self.layers],
             "recommendations": [r.to_dict() for r in self.recommendations],

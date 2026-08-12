@@ -60,9 +60,15 @@ async def test_shallow_request_skips_research_and_simulation() -> None:
             request_text="Quick summary of current SEO status",
         )
     )
+    assert result.peacock_mode == "peacock_fast"
     skipped = {layer.layer for layer in result.layers if layer.status == "skipped"}
-    assert 3 in skipped
-    assert 8 in skipped
+    assert 3 in skipped  # research
+    assert 5 in skipped  # adversarial / critic
+    assert 8 in skipped  # simulation
+    assert result.mode["budget"]["max_cost"] == 5_000
+    assert result.mode["budget"]["max_calls"] == 12
+    assert result.mode["budget"]["max_iterations"] == 1
+    assert result.mode["budget"]["max_runtime"] == 30.0
 
 
 def test_context_selector_never_dumps_full_catalogue() -> None:
