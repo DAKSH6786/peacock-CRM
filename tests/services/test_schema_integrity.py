@@ -212,6 +212,13 @@ REQUIRED_CORE_TABLES = {
     "cdt_evaluations",
     "cdt_requirement_scores",
     "cdt_findings",
+    # Peacock GEO Lab
+    "geo_lab_experiments",
+    "gl_variants",
+    "gl_pages",
+    "gl_metric_observations",
+    "gl_metric_deltas",
+    "gl_causality_assessments",
 }
 
 
