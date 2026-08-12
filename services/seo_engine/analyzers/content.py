@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import re
-from collections import defaultdict
 
 from crawler.store import StoredCrawl, StoredPage
 from scoring import ScoreResult, penalty_score
