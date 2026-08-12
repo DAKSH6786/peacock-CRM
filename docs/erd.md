@@ -79,6 +79,7 @@ Everything else is relational columns, unique constraints, or EAV attribute tabl
 | Prompt Universe Intelligence | `prompt_universes`, `synthetic_personas`, `prompt_source_signals`, `prompt_families`, `universe_prompts`, `prompt_generation_runs` |
 | Share of Answer | `share_of_answer_analyses`, `soa_answer_observations`, `soa_entity_indicators`, `soa_brand_scores` |
 | Citation Graph | `citation_graph_analyses`, `cg_observations`, `cg_citations`, `cg_entity_mentions`, `cg_pathways`, `cg_domain_scores`, `cg_source_opportunities` |
+| Retrieval Pathway Intelligence | `retrieval_pathway_analyses`, `rpi_evidence`, `rpi_cause_classifications`, `rpi_bottleneck_diagnoses` |
 | Learning | `recommendations`, `recommendation_executions`, `recommendation_metrics`, `recommendation_outcomes`, `feature_weights`, `model_evaluations` |
 
 Aliases: `Organization` → `Organisation`; `LLMProvider` → `AiProvider`; `LLMModel` → `AiProviderModel`.
@@ -226,3 +227,4 @@ Also seeded generative engines (`chatgpt`, `gemini`, `claude`, `perplexity`, `de
 | `0004_core_domain_schema` (`9b7d51fd6b52`) | Full websites/crawls/audits/SEO/GEO/competitors/content/writers/roadmaps/monitoring/LLM/learning schema |
 | `0011_share_of_answer` | Share of Answer multi-indicator generative influence |
 | `0012_citation_graph` | Peacock Citation Graph, CIS, Source Opportunity Engine |
+| `0013_retrieval_pathway` | Retrieval Pathway Intelligence forensics |
