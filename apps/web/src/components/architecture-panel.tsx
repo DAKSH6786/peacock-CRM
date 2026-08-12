@@ -8,6 +8,20 @@ const LOOP = [
   "LEARN",
 ] as const;
 
+const LAYERS = [
+  "L0 Classification",
+  "L1 Context",
+  "L2 Evidence",
+  "L3 Research",
+  "L4 Specialists",
+  "L5 Adversarial",
+  "L6 Verification",
+  "L7 Decision",
+  "L8 Simulation",
+  "L9 Execution",
+  "L10 Learning",
+] as const;
+
 const SERVICES = [
   "crawler",
   "intelligence",
@@ -31,7 +45,7 @@ export function ArchitecturePanel() {
       </h2>
       <p className="mt-1 text-sm text-[var(--muted)]">
         Provider-specific LLM logic stays in <code>llm_gateway</code> adapters.
-        Jobs run through a Celery backend behind a Temporal-ready port.
+        Strategic requests decompose into Layers 0–10 with intelligent context selection.
       </p>
 
       <ol className="mt-6 flex flex-wrap gap-2">
@@ -42,6 +56,17 @@ export function ArchitecturePanel() {
           >
             <span className="text-[var(--muted)]">{index + 1}. </span>
             {stage}
+          </li>
+        ))}
+      </ol>
+
+      <ol className="mt-4 flex flex-wrap gap-2">
+        {LAYERS.map((layer) => (
+          <li
+            key={layer}
+            className="rounded-lg border border-[var(--primary)]/30 px-3 py-2 text-xs font-semibold tracking-wide"
+          >
+            {layer}
           </li>
         ))}
       </ol>

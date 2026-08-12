@@ -7,6 +7,7 @@ import { CrawlConsole } from "@/components/crawl-console";
 import { HealthCard } from "@/components/health-card";
 import { LoginForm } from "@/components/login-form";
 import { SeoAuditPanel } from "@/components/seo-audit-panel";
+import { StrategicIntelligencePanel } from "@/components/strategic-intelligence-panel";
 
 export default function HomePage() {
   const [crawlId, setCrawlId] = useState<string | null>(null);
@@ -24,9 +25,9 @@ export default function HomePage() {
           Generative visibility intelligence architecture
         </h1>
         <p className="max-w-2xl text-lg text-[var(--muted)]">
-          OBSERVE → THINK → VERIFY → DECIDE → EXECUTE → MEASURE → LEARN. Peacock
-          Crawler ingests sites; Peacock SEO Engine turns crawl data into
-          deterministic, explainable audits.
+          Complex strategy decomposes into Layers 0–10: classify, assemble
+          relevant context, gather deterministic evidence, research, reason,
+          challenge, verify, decide, simulate, plan, and learn.
         </p>
       </header>
 
@@ -37,6 +38,7 @@ export default function HomePage() {
 
       <CrawlConsole onCrawlIdChange={setCrawlId} />
       <SeoAuditPanel crawlId={crawlId} />
+      <StrategicIntelligencePanel />
       <ArchitecturePanel />
     </main>
   );
