@@ -249,6 +249,11 @@ REQUIRED_CORE_TABLES = {
     "j2_signal_scores",
     "j2_evidence",
     "j2_reversal_conditions",
+    # Peacock Scenario Engine
+    "scenario_analyses",
+    "se_scenarios",
+    "se_metric_ranges",
+    "se_assumptions",
 }
 
 
