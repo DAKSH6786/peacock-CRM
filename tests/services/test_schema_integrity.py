@@ -270,6 +270,11 @@ REQUIRED_CORE_TABLES = {
     "agentic_readiness_analyses",
     "awr_check_results",
     "awr_gaps",
+    # Peacock Revenue Attribution
+    "revenue_attribution_analyses",
+    "ra_funnel_stages",
+    "ra_chain_links",
+    "ra_source_snapshots",
 }
 
 
