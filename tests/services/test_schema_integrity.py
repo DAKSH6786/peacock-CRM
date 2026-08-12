@@ -177,6 +177,14 @@ REQUIRED_CORE_TABLES = {
     "soa_answer_observations",
     "soa_entity_indicators",
     "soa_brand_scores",
+    # Citation Graph
+    "citation_graph_analyses",
+    "cg_observations",
+    "cg_citations",
+    "cg_entity_mentions",
+    "cg_pathways",
+    "cg_domain_scores",
+    "cg_source_opportunities",
 }
 
 
