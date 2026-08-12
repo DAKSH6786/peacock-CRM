@@ -78,6 +78,7 @@ Everything else is relational columns, unique constraints, or EAV attribute tabl
 | Probabilistic AI Visibility | `visibility_campaigns`, `visibility_probe_cells`, `visibility_probe_observations`, `visibility_distributions`, `visibility_score_cards` |
 | Prompt Universe Intelligence | `prompt_universes`, `synthetic_personas`, `prompt_source_signals`, `prompt_families`, `universe_prompts`, `prompt_generation_runs` |
 | Share of Answer | `share_of_answer_analyses`, `soa_answer_observations`, `soa_entity_indicators`, `soa_brand_scores` |
+| Citation Graph | `citation_graph_analyses`, `cg_observations`, `cg_citations`, `cg_entity_mentions`, `cg_pathways`, `cg_domain_scores`, `cg_source_opportunities` |
 | Learning | `recommendations`, `recommendation_executions`, `recommendation_metrics`, `recommendation_outcomes`, `feature_weights`, `model_evaluations` |
 
 Aliases: `Organization` → `Organisation`; `LLMProvider` → `AiProvider`; `LLMModel` → `AiProviderModel`.
@@ -189,6 +190,20 @@ erDiagram
     recommendations ||--o{ evidences : explains
 ```
 
+
+## Mermaid — Citation Graph
+
+```mermaid
+erDiagram
+    citation_graph_analyses ||--o{ cg_observations : observes
+    citation_graph_analyses ||--o{ cg_pathways : materialises
+    citation_graph_analyses ||--o{ cg_domain_scores : scores
+    citation_graph_analyses ||--o{ cg_source_opportunities : recommends
+    cg_observations ||--o{ cg_citations : cites
+    cg_observations ||--o{ cg_entity_mentions : mentions
+    cg_citations ||--o{ cg_pathways : pathway
+```
+
 ## Seeded AI providers
 
 | Code | Display name | Vendor |
@@ -209,3 +224,5 @@ Also seeded generative engines (`chatgpt`, `gemini`, `claude`, `perplexity`, `de
 | `0002_org_fks` | Organisation FK hardening |
 | `0003_relational_hardening` | Cascades, role_permissions, AI providers, attribute tables |
 | `0004_core_domain_schema` (`9b7d51fd6b52`) | Full websites/crawls/audits/SEO/GEO/competitors/content/writers/roadmaps/monitoring/LLM/learning schema |
+| `0011_share_of_answer` | Share of Answer multi-indicator generative influence |
+| `0012_citation_graph` | Peacock Citation Graph, CIS, Source Opportunity Engine |
