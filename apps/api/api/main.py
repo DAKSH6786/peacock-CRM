@@ -11,6 +11,7 @@ from api.routes import (
     capabilities,
     citation_graph,
     crawler,
+    deep_competitor,
     entity_intelligence,
     evidence_ledger,
     health,
@@ -69,6 +70,7 @@ def create_app() -> FastAPI:
     application.include_router(citation_graph.router)
     application.include_router(retrieval_pathway.router)
     application.include_router(entity_intelligence.router)
+    application.include_router(deep_competitor.router)
 
     # Soft static role fallbacks only — PINE should prefer CapabilityRouter
     # dynamic selection (request.provider / request.model). Never treat these

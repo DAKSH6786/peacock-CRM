@@ -196,6 +196,12 @@ REQUIRED_CORE_TABLES = {
     "ei_associations",
     "ei_entity_gaps",
     "ei_strategies",
+    # Deep Competitor Intelligence
+    "deep_competitor_analyses",
+    "dc_competitor_profiles",
+    "dc_competitive_deltas",
+    "dc_content_diffs",
+    "dc_differentiated_strategies",
 }
 
 
