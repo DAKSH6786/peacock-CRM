@@ -84,6 +84,7 @@ Everything else is relational columns, unique constraints, or EAV attribute tabl
 | Deep Competitor Intelligence | `deep_competitor_analyses`, `dc_competitor_profiles`, `dc_competitive_deltas`, `dc_content_diffs`, `dc_differentiated_strategies` |
 | Content Lab | `content_lab_analyses`, `cl_content_proposals`, `cl_info_gain_signals`, `cl_citability_components` |
 | Content Digital Twin | `content_digital_twins`, `cdt_evaluations`, `cdt_requirement_scores`, `cdt_findings` |
+| Peacock GEO Lab | `geo_lab_experiments`, `gl_variants`, `gl_pages`, `gl_metric_observations`, `gl_metric_deltas`, `gl_causality_assessments` |
 | Learning | `recommendations`, `recommendation_executions`, `recommendation_metrics`, `recommendation_outcomes`, `feature_weights`, `model_evaluations` |
 
 Aliases: `Organization` → `Organisation`; `LLMProvider` → `AiProvider`; `LLMModel` → `AiProviderModel`.
@@ -236,3 +237,4 @@ Also seeded generative engines (`chatgpt`, `gemini`, `claude`, `perplexity`, `de
 | `0015_deep_competitor` | Deep Competitor Intelligence multi-category discovery |
 | `0016_content_lab` | Peacock Content Lab multi-opportunity evaluation |
 | `0017_content_digital_twin` | Content Digital Twin pre-publish simulation |
+| `0018_geo_lab` | Peacock GEO Lab controlled experimentation |
