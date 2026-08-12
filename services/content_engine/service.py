@@ -6,7 +6,7 @@ from typing import Any
 
 @dataclass(slots=True)
 class ContentEngine:
-    """Architecture scaffold — business features intentionally not implemented."""
+    """Legacy scaffold — prefer ContentLabService for multi-opportunity evaluation."""
 
     organisation_id: str
 
@@ -16,4 +16,9 @@ class ContentEngine:
             "organisation_id": self.organisation_id,
             "ready": True,
             "features_implemented": False,
+            "superseded_by": "content_lab",
+            "note": (
+                "Use services.content_lab for Information Gain, Content Moat, "
+                "and Generative Citability (proprietary estimate)."
+            ),
         }
