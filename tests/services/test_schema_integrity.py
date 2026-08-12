@@ -260,6 +260,12 @@ REQUIRED_CORE_TABLES = {
     "p90_tasks",
     "p90_dependencies",
     "p90_capacity_refusals",
+    # Peacock Action Engine
+    "peacock_actions",
+    "pae_connector_permissions",
+    "pae_approvals",
+    "pae_executions",
+    "pae_status_events",
 }
 
 
