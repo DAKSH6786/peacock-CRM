@@ -82,6 +82,7 @@ Everything else is relational columns, unique constraints, or EAV attribute tabl
 | Retrieval Pathway Intelligence | `retrieval_pathway_analyses`, `rpi_evidence`, `rpi_cause_classifications`, `rpi_bottleneck_diagnoses` |
 | Entity Intelligence | `entity_intelligence_analyses`, `ei_entities`, `ei_associations`, `ei_entity_gaps`, `ei_strategies` |
 | Deep Competitor Intelligence | `deep_competitor_analyses`, `dc_competitor_profiles`, `dc_competitive_deltas`, `dc_content_diffs`, `dc_differentiated_strategies` |
+| Content Lab | `content_lab_analyses`, `cl_content_proposals`, `cl_info_gain_signals`, `cl_citability_components` |
 | Learning | `recommendations`, `recommendation_executions`, `recommendation_metrics`, `recommendation_outcomes`, `feature_weights`, `model_evaluations` |
 
 Aliases: `Organization` → `Organisation`; `LLMProvider` → `AiProvider`; `LLMModel` → `AiProviderModel`.
@@ -232,3 +233,4 @@ Also seeded generative engines (`chatgpt`, `gemini`, `claude`, `perplexity`, `de
 | `0013_retrieval_pathway` | Retrieval Pathway Intelligence forensics |
 | `0014_entity_intelligence` | Peacock Entity Intelligence graph, association strength, gaps |
 | `0015_deep_competitor` | Deep Competitor Intelligence multi-category discovery |
+| `0016_content_lab` | Peacock Content Lab multi-opportunity evaluation |

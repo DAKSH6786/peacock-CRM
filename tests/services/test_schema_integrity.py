@@ -202,6 +202,11 @@ REQUIRED_CORE_TABLES = {
     "dc_competitive_deltas",
     "dc_content_diffs",
     "dc_differentiated_strategies",
+    # Content Lab
+    "content_lab_analyses",
+    "cl_content_proposals",
+    "cl_info_gain_signals",
+    "cl_citability_components",
 }
 
 
