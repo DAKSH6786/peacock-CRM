@@ -56,6 +56,16 @@ prior + observed metrics. Soft priors are discounted; sample-size trust
 bonuses apply once enough observations exist. `permanent_role_locks` is
 always `false`.
 
+### ModelRouter
+
+Higher-level selector used by PINE for constrained multi-model plans.
+
+**Inputs:** `task_type`, `complexity`, `freshness_requirement`,
+`required_capabilities`, `expected_context_size`, `accuracy_requirement`,
+`latency_target`, `budget`, `organisation_policy`
+
+**Output:** `primary_model`, `secondary_model`, `fallback_model`, `reason`
+
 Bridge into the LLM gateway via `route_completion_request()` which sets
 `request.provider` / `request.model`. Static `role_routing` on
 `LLMGateway` is a **fallback only**.
@@ -67,9 +77,11 @@ Bridge into the LLM gateway via `route_completion_request()` which sets
 - `GET /capabilities/profiles`
 - `POST /capabilities/observations`
 - `POST /capabilities/route`
+- `POST /capabilities/model-router`
 
 ## Code
 
 - ORM: `packages/db_models/capability_profiles.py`
 - Service: `services/capability_router/`
+- ModelRouter: `services/capability_router/model_router.py`
 - Migration: `infra/migrations/versions/0008_capability_profiles.py`

@@ -1,6 +1,15 @@
 """PINE dynamic capability routing — profiles over permanent role locks."""
 
 from capability_router.gateway_bridge import apply_routing_decision, route_completion_request
+from capability_router.model_router import (
+    FreshnessRequirement,
+    ModelChoice,
+    ModelRouter,
+    ModelRouterRequest,
+    ModelRouterResult,
+    OrganisationPolicy,
+    TaskComplexity,
+)
 from capability_router.models import (
     CapabilityMetrics,
     CapabilityObservation,
@@ -21,11 +30,18 @@ __all__ = [
     "CapabilityProfileRepository",
     "CapabilityRouter",
     "CapabilityTaskType",
+    "FreshnessRequirement",
     "GATEWAY_ROLE_TASK_DEFAULTS",
+    "ModelChoice",
+    "ModelRouter",
+    "ModelRouterRequest",
+    "ModelRouterResult",
+    "OrganisationPolicy",
     "RoutingCandidate",
     "RoutingDecision",
     "RoutingWeights",
     "SOFT_CAPABILITY_PRIORS",
+    "TaskComplexity",
     "apply_routing_decision",
     "route_completion_request",
 ]

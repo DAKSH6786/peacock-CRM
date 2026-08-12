@@ -13,6 +13,8 @@ from api.schemas_capability import (
     CapabilityProfileResponse,
     CapabilityRouteRequest,
     CapabilityRouteResponse,
+    ModelRouterRequestSchema,
+    ModelRouterResponse,
 )
 from capability_router import (
     GATEWAY_ROLE_TASK_DEFAULTS,
@@ -21,6 +23,9 @@ from capability_router import (
     CapabilityProfileRepository,
     CapabilityRouter,
     CapabilityTaskType,
+    ModelRouter,
+    ModelRouterRequest,
+    OrganisationPolicy,
 )
 from observability.audit import AuditEvent, AuditLogger
 
@@ -166,3 +171,64 @@ def route_task(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     return CapabilityRouteResponse(decision=decision.to_dict())
+
+
+@router.post("/model-router", response_model=ModelRouterResponse)
+def model_router_select(
+    body: ModelRouterRequestSchema,
+    ctx: AuthContext = Depends(get_auth_context),
+    db: Session = Depends(get_db),
+) -> ModelRouterResponse:
+    """Select primary / secondary / fallback models under full routing constraints."""
+    ws = _workspace_id(ctx, body.workspace_id)
+    repo = CapabilityProfileRepository(db)
+    if not repo.list_priors(task_type=body.task_type):
+        repo.seed_soft_priors()
+
+    policy = OrganisationPolicy(
+        allowed_providers=body.organisation_policy.allowed_providers,
+        denied_providers=body.organisation_policy.denied_providers,
+        allowed_models=body.organisation_policy.allowed_models,
+        denied_models=body.organisation_policy.denied_models,
+        max_cost_usd_micros=body.organisation_policy.max_cost_usd_micros,
+        prefer_observed=body.organisation_policy.prefer_observed,
+        require_json_capable=body.organisation_policy.require_json_capable,
+        prefer_eu_compatible=body.organisation_policy.prefer_eu_compatible,
+        notes=body.organisation_policy.notes,
+    )
+    try:
+        result = ModelRouter(CapabilityRouter(repo), session=db).route(
+            ModelRouterRequest(
+                task_type=body.task_type,
+                complexity=body.complexity,
+                freshness_requirement=body.freshness_requirement,
+                required_capabilities=body.required_capabilities,
+                expected_context_size=body.expected_context_size,
+                accuracy_requirement=body.accuracy_requirement,
+                latency_target=body.latency_target,
+                budget=body.budget,
+                organisation_policy=policy,
+                organisation_id=ctx.organisation.id,
+                workspace_id=ws,
+            )
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    audit_logger.log(
+        AuditEvent(
+            organisation_id=ctx.organisation.id,
+            actor_user_id=ctx.user.id,
+            action="capability.model_router",
+            resource_type="model_router_decision",
+            resource_id=result.primary_model.key,
+            workspace_id=ws,
+            metadata={
+                "task_type": result.task_type,
+                "primary": result.primary_model.key,
+                "secondary": result.secondary_model.key if result.secondary_model else None,
+                "fallback": result.fallback_model.key if result.fallback_model else None,
+            },
+        )
+    )
+    return ModelRouterResponse(**result.to_dict())

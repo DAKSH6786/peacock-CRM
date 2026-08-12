@@ -43,3 +43,39 @@ class CapabilityCatalogResponse(BaseModel):
     soft_priors: list[dict[str, Any]]
     gateway_role_task_defaults: dict[str, str]
     permanent_role_locks: bool = False
+
+
+class OrganisationPolicySchema(BaseModel):
+    allowed_providers: list[str] = Field(default_factory=list)
+    denied_providers: list[str] = Field(default_factory=list)
+    allowed_models: list[str] = Field(default_factory=list)
+    denied_models: list[str] = Field(default_factory=list)
+    max_cost_usd_micros: int | None = None
+    prefer_observed: bool = True
+    require_json_capable: bool = False
+    prefer_eu_compatible: bool = False
+    notes: str | None = None
+
+
+class ModelRouterRequestSchema(BaseModel):
+    task_type: str
+    complexity: str = "medium"
+    freshness_requirement: str = "none"
+    required_capabilities: list[str] = Field(default_factory=list)
+    expected_context_size: int = Field(default=8000, ge=1)
+    accuracy_requirement: float = Field(default=0.7, ge=0.0, le=1.0)
+    latency_target: float = Field(default=5000.0, ge=1.0)
+    budget: int = Field(default=50000, ge=0)
+    organisation_policy: OrganisationPolicySchema = Field(default_factory=OrganisationPolicySchema)
+    workspace_id: str | None = None
+
+
+class ModelRouterResponse(BaseModel):
+    primary_model: dict[str, Any]
+    secondary_model: dict[str, Any] | None = None
+    fallback_model: dict[str, Any] | None = None
+    reason: str
+    task_type: str
+    candidates_considered: int = 0
+    constraints_applied: list[str] = Field(default_factory=list)
+    permanent_role_locks: bool = False
