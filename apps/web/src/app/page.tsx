@@ -1,9 +1,16 @@
+"use client";
+
+import { useState } from "react";
+
 import { ArchitecturePanel } from "@/components/architecture-panel";
 import { CrawlConsole } from "@/components/crawl-console";
 import { HealthCard } from "@/components/health-card";
 import { LoginForm } from "@/components/login-form";
+import { SeoAuditPanel } from "@/components/seo-audit-panel";
 
 export default function HomePage() {
+  const [crawlId, setCrawlId] = useState<string | null>(null);
+
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-10 px-6 py-12">
       <header className="space-y-4">
@@ -18,8 +25,8 @@ export default function HomePage() {
         </h1>
         <p className="max-w-2xl text-lg text-[var(--muted)]">
           OBSERVE → THINK → VERIFY → DECIDE → EXECUTE → MEASURE → LEARN. Peacock
-          Crawler ingests websites with configurable crawl policies — not
-          hardcoded commercial plan logic in the engine core.
+          Crawler ingests sites; Peacock SEO Engine turns crawl data into
+          deterministic, explainable audits.
         </p>
       </header>
 
@@ -28,7 +35,8 @@ export default function HomePage() {
         <LoginForm />
       </div>
 
-      <CrawlConsole />
+      <CrawlConsole onCrawlIdChange={setCrawlId} />
+      <SeoAuditPanel crawlId={crawlId} />
       <ArchitecturePanel />
     </main>
   );

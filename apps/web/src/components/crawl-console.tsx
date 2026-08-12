@@ -43,13 +43,22 @@ function Stat({ label, value }: { label: string; value: string | number }) {
   );
 }
 
-export function CrawlConsole() {
+export function CrawlConsole({
+  onCrawlIdChange,
+}: {
+  onCrawlIdChange?: (crawlId: string | null) => void;
+}) {
   const { accessToken, workspaceId } = useAuthStore();
   const queryClient = useQueryClient();
   const [url, setUrl] = useState("https://example.com");
   const [preset, setPreset] = useState<(typeof PRESETS)[number]["id"]>("free_trial");
   const [enterprisePages, setEnterprisePages] = useState(25000);
   const [crawlId, setCrawlId] = useState<string | null>(null);
+
+  const updateCrawlId = (id: string | null) => {
+    setCrawlId(id);
+    onCrawlIdChange?.(id);
+  };
   const [error, setError] = useState<string | null>(null);
 
   const crawl = useQuery({
@@ -80,7 +89,7 @@ export function CrawlConsole() {
       }),
     onSuccess: (data) => {
       setError(null);
-      setCrawlId(data.id);
+      updateCrawlId(data.id);
       queryClient.setQueryData(["crawl", data.id, accessToken], data);
     },
     onError: (err: Error) => setError(err.message),
@@ -93,7 +102,7 @@ export function CrawlConsole() {
         token: accessToken ?? undefined,
       }),
     onSuccess: (data) => {
-      setCrawlId(data.id);
+      updateCrawlId(data.id);
       queryClient.setQueryData(["crawl", data.id, accessToken], data);
     },
     onError: (err: Error) => setError(err.message),

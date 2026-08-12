@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.config import get_settings
-from api.routes import auth, crawler, health, jobs, services
+from api.routes import auth, crawler, health, jobs, seo, services
 from llm_gateway import LLMGateway, NullLLMProvider
 from llm_gateway.ports import LLMProviderName
 from observability.logging import configure_logging, get_logger
@@ -43,6 +43,7 @@ def create_app() -> FastAPI:
     application.include_router(services.router)
     application.include_router(jobs.router)
     application.include_router(crawler.router)
+    application.include_router(seo.router)
 
     # Composition root — gateway uses null provider until keys + live adapters enabled
     application.state.llm_gateway = LLMGateway(
