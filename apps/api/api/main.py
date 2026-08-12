@@ -14,6 +14,7 @@ from api.routes import (
     health,
     intelligence,
     jobs,
+    prompt_universe,
     seo,
     services,
     visibility,
@@ -59,6 +60,7 @@ def create_app() -> FastAPI:
     application.include_router(evidence_ledger.router)
     application.include_router(capabilities.router)
     application.include_router(visibility.router)
+    application.include_router(prompt_universe.router)
 
     # Soft static role fallbacks only — PINE should prefer CapabilityRouter
     # dynamic selection (request.provider / request.model). Never treat these

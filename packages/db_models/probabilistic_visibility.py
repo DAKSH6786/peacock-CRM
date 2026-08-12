@@ -95,6 +95,9 @@ class VisibilityProbeCell(Base, WorkspaceTenantMixin):
     ai_query_id: Mapped[str | None] = mapped_column(
         ForeignKey("ai_queries.id", ondelete="SET NULL"), nullable=True, index=True
     )
+    universe_prompt_id: Mapped[str | None] = mapped_column(
+        ForeignKey("universe_prompts.id", ondelete="SET NULL"), nullable=True, index=True
+    )
 
     campaign: Mapped[VisibilityCampaign] = relationship(back_populates="cells")
     observations: Mapped[list[VisibilityProbeObservation]] = relationship(

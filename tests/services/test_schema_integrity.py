@@ -165,6 +165,13 @@ REQUIRED_CORE_TABLES = {
     "visibility_probe_observations",
     "visibility_distributions",
     "visibility_score_cards",
+    # Prompt Universe Intelligence
+    "prompt_universes",
+    "synthetic_personas",
+    "prompt_source_signals",
+    "prompt_families",
+    "universe_prompts",
+    "prompt_generation_runs",
 }
 
 

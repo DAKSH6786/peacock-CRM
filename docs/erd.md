@@ -76,6 +76,7 @@ Everything else is relational columns, unique constraints, or EAV attribute tabl
 | Evidence Ledger | `ledger_evidences`, `ledger_findings`, `ledger_recommendations`, `ledger_actions`, `ledger_outcomes`, `ledger_evidence_finding_links`, `ledger_finding_recommendation_links`, `ledger_recommendation_action_links`, `ledger_action_outcome_links`, `ledger_claim_evidence_links` |
 | Capability profiles | `model_capability_priors`, `model_capability_profiles`, `model_capability_observations` |
 | Probabilistic AI Visibility | `visibility_campaigns`, `visibility_probe_cells`, `visibility_probe_observations`, `visibility_distributions`, `visibility_score_cards` |
+| Prompt Universe Intelligence | `prompt_universes`, `synthetic_personas`, `prompt_source_signals`, `prompt_families`, `universe_prompts`, `prompt_generation_runs` |
 | Learning | `recommendations`, `recommendation_executions`, `recommendation_metrics`, `recommendation_outcomes`, `feature_weights`, `model_evaluations` |
 
 Aliases: `Organization` → `Organisation`; `LLMProvider` → `AiProvider`; `LLMModel` → `AiProviderModel`.
