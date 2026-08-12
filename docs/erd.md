@@ -77,6 +77,7 @@ Everything else is relational columns, unique constraints, or EAV attribute tabl
 | Capability profiles | `model_capability_priors`, `model_capability_profiles`, `model_capability_observations` |
 | Probabilistic AI Visibility | `visibility_campaigns`, `visibility_probe_cells`, `visibility_probe_observations`, `visibility_distributions`, `visibility_score_cards` |
 | Prompt Universe Intelligence | `prompt_universes`, `synthetic_personas`, `prompt_source_signals`, `prompt_families`, `universe_prompts`, `prompt_generation_runs` |
+| Share of Answer | `share_of_answer_analyses`, `soa_answer_observations`, `soa_entity_indicators`, `soa_brand_scores` |
 | Learning | `recommendations`, `recommendation_executions`, `recommendation_metrics`, `recommendation_outcomes`, `feature_weights`, `model_evaluations` |
 
 Aliases: `Organization` → `Organisation`; `LLMProvider` → `AiProvider`; `LLMModel` → `AiProviderModel`.

@@ -172,6 +172,11 @@ REQUIRED_CORE_TABLES = {
     "prompt_families",
     "universe_prompts",
     "prompt_generation_runs",
+    # Share of Answer
+    "share_of_answer_analyses",
+    "soa_answer_observations",
+    "soa_entity_indicators",
+    "soa_brand_scores",
 }
 
 

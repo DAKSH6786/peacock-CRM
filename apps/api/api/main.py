@@ -17,6 +17,7 @@ from api.routes import (
     prompt_universe,
     seo,
     services,
+    share_of_answer,
     visibility,
 )
 from llm_gateway import LLMGateway, NullLLMProvider
@@ -61,6 +62,7 @@ def create_app() -> FastAPI:
     application.include_router(capabilities.router)
     application.include_router(visibility.router)
     application.include_router(prompt_universe.router)
+    application.include_router(share_of_answer.router)
 
     # Soft static role fallbacks only — PINE should prefer CapabilityRouter
     # dynamic selection (request.provider / request.model). Never treat these

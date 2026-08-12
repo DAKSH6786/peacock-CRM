@@ -138,6 +138,14 @@ from db_models.prompt_universe import (
     SyntheticPersona,
     UniversePrompt,
 )
+from db_models.share_of_answer import (
+    COMPARISON_OUTCOMES,
+    SOA_INDICATORS,
+    ShareOfAnswerAnalysis,
+    SoaAnswerObservation,
+    SoaBrandScore,
+    SoaEntityIndicator,
+)
 from db_models.roadmaps import (
     Roadmap,
     RoadmapMonth,
@@ -292,6 +300,12 @@ __all__ = [
     "SEOScore",
     "SchemaResult",
     "SearchPerformanceSnapshot",
+    "COMPARISON_OUTCOMES",
+    "SOA_INDICATORS",
+    "ShareOfAnswerAnalysis",
+    "SoaAnswerObservation",
+    "SoaBrandScore",
+    "SoaEntityIndicator",
     "TechnicalSEOResult",
     "TimestampMixin",
     "Topic",
