@@ -141,6 +141,7 @@ cd apps/web && npm test
 ## Documentation
 
 - [`docs/architecture.md`](docs/architecture.md) — system design
+- [`docs/erd.md`](docs/erd.md) — ERD, cascade rules, JSONB policy
 - [`docs/multi-tenancy.md`](docs/multi-tenancy.md) — org/workspace isolation
 - [`docs/jobs.md`](docs/jobs.md) — Celery → Temporal migration path
 - [`docs/llm-gateway.md`](docs/llm-gateway.md) — adapter rules

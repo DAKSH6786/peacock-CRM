@@ -19,6 +19,7 @@ apps/web  ──HTTP──►  apps/api (FastAPI)
 4. **Long-running = jobs** — enqueue via `JobRunner`, persist `background_jobs` status.
 5. **Explainability** — recommendations later must store evidence + scores + decision traces; never private CoT.
 6. **Embeddings in Postgres** — `pgvector` on `embedding_chunks`.
+7. **Relational modelling first** — see [`docs/erd.md`](./erd.md) for FKs, cascades, and JSONB policy.
 
 ## Cognitive loop (future features)
 
