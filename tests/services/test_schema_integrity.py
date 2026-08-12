@@ -244,6 +244,11 @@ REQUIRED_CORE_TABLES = {
     "c2_disagreements",
     "c2_evidence_requests",
     "c2_decisions",
+    # Peacock Judge 2.0
+    "judge2_judgments",
+    "j2_signal_scores",
+    "j2_evidence",
+    "j2_reversal_conditions",
 }
 
 
