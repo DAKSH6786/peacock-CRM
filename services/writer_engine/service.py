@@ -6,7 +6,7 @@ from typing import Any
 
 @dataclass(slots=True)
 class WriterEngine:
-    """Architecture scaffold — business features intentionally not implemented."""
+    """Legacy scaffold — prefer WriterIntelligenceService for outcome decisions."""
 
     organisation_id: str
 
@@ -16,4 +16,10 @@ class WriterEngine:
             "organisation_id": self.organisation_id,
             "ready": True,
             "features_implemented": False,
+            "superseded_by": "writer_intelligence",
+            "note": (
+                "Use services.writer_intelligence for Writer DNA, "
+                "Writer×Topic×Client outcome prediction, and the Writer Outcome Graph. "
+                "Do not use sample-embedding similarity as the primary recommender."
+            ),
         }

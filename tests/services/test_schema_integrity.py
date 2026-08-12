@@ -219,6 +219,14 @@ REQUIRED_CORE_TABLES = {
     "gl_metric_observations",
     "gl_metric_deltas",
     "gl_causality_assessments",
+    # Writer Intelligence 2.0
+    "writer_intelligence_analyses",
+    "wi_writer_dna",
+    "wi_dna_traits",
+    "wi_outcome_nodes",
+    "wi_outcome_edges",
+    "wi_performance_records",
+    "wi_recommendations",
 }
 
 
