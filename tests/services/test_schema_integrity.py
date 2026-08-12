@@ -227,6 +227,13 @@ REQUIRED_CORE_TABLES = {
     "wi_outcome_edges",
     "wi_performance_records",
     "wi_recommendations",
+    # Peacock Opportunity Engine
+    "opportunity_scans",
+    "peacock_opportunities",
+    "po_evidence",
+    "po_ranking_factors",
+    "po_ranking_weights",
+    "po_outcome_feedback",
 }
 
 
