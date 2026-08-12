@@ -275,6 +275,12 @@ REQUIRED_CORE_TABLES = {
     "ra_funnel_stages",
     "ra_chain_links",
     "ra_source_snapshots",
+    # Peacock Learning Engine 2.0
+    "learning2_records",
+    "le2_context_factors",
+    "le2_industry_policies",
+    "le2_dimension_insights",
+    "le2_learning_runs",
 }
 
 
