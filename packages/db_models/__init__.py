@@ -1,8 +1,52 @@
-"""SQLAlchemy models — multi-tenant by organisation_id."""
+"""SQLAlchemy models — multi-tenant Peacock One core database."""
 
 from db_models.audit import AuditLog, AuditLogAttribute
-from db_models.base import Base, OrganisationScopedMixin, TimestampMixin
+from db_models.audits import (
+    Audit,
+    AuditIssue,
+    AuditMetric,
+    AuditRecommendation,
+    AuditSection,
+)
+from db_models.base import (
+    Base,
+    OrganisationScopedMixin,
+    TimestampMixin,
+    WorkspaceTenantMixin,
+    new_uuid,
+)
+from db_models.competitors import (
+    Competitor,
+    CompetitorContent,
+    CompetitorGap,
+    CompetitorMetric,
+    CompetitorWebsite,
+)
+from db_models.content import (
+    BacklinkOpportunity,
+    CitationSource,
+    ContentBrief,
+    ContentRecommendation,
+    Keyword,
+    KeywordCluster,
+    Topic,
+    TopicCluster,
+    TopicRecommendation,
+)
+from db_models.crawls import Crawl, CrawlIssue, CrawlLink, CrawlPage
 from db_models.embeddings import EmbeddingChunk, EmbeddingChunkAttribute
+from db_models.geo_aeo import (
+    AEOObservation,
+    AIQuery,
+    AIQueryRun,
+    AIResponseObservation,
+    AIVisibilitySnapshot,
+    BrandMention,
+    CitationObservation,
+    EntityObservation,
+    GEOMetric,
+    GenerativeEngine,
+)
 from db_models.identity import (
     Membership,
     Organisation,
@@ -14,25 +58,154 @@ from db_models.identity import (
     WorkspaceMembership,
 )
 from db_models.jobs import BackgroundJob
+from db_models.learning import (
+    FeatureWeight,
+    ModelEvaluation,
+    Recommendation,
+    RecommendationExecution,
+    RecommendationMetric,
+    RecommendationOutcome,
+)
+from db_models.llm_intelligence import (
+    AgentResult,
+    AgentRun,
+    CouncilRun,
+    Decision,
+    Evidence,
+    LLMRequest,
+    LLMResponse,
+)
+from db_models.monitoring import (
+    MetricSnapshot,
+    MonitoringProject,
+    SearchPerformanceSnapshot,
+)
 from db_models.providers import AiProvider, AiProviderModel
+from db_models.roadmaps import (
+    Roadmap,
+    RoadmapMonth,
+    RoadmapRecommendation,
+    RoadmapTask,
+    RoadmapWeek,
+)
+from db_models.seo import (
+    InternalLinkResult,
+    OnPageSEOResult,
+    PerformanceResult,
+    SchemaResult,
+    SEOScore,
+    TechnicalSEOResult,
+)
+from db_models.websites import Domain, Website, WebsiteProperty
+from db_models.writers import (
+    Writer,
+    WriterAssignment,
+    WriterIndustryExpertise,
+    WriterPerformance,
+    WriterProfile,
+    WriterRecommendation,
+    WriterSample,
+    WriterSkill,
+)
+
+# Naming aliases requested by product vocabulary
+Organization = Organisation
+LLMProvider = AiProvider
+LLMModel = AiProviderModel
 
 __all__ = [
+    "AEOObservation",
+    "AIQuery",
+    "AIQueryRun",
+    "AIResponseObservation",
+    "AIVisibilitySnapshot",
+    "AgentResult",
+    "AgentRun",
     "AiProvider",
     "AiProviderModel",
+    "Audit",
+    "AuditIssue",
     "AuditLog",
     "AuditLogAttribute",
+    "AuditMetric",
+    "AuditRecommendation",
+    "AuditSection",
+    "BacklinkOpportunity",
     "BackgroundJob",
     "Base",
+    "BrandMention",
+    "CitationObservation",
+    "CitationSource",
+    "Competitor",
+    "CompetitorContent",
+    "CompetitorGap",
+    "CompetitorMetric",
+    "CompetitorWebsite",
+    "ContentBrief",
+    "ContentRecommendation",
+    "CouncilRun",
+    "Crawl",
+    "CrawlIssue",
+    "CrawlLink",
+    "CrawlPage",
+    "Decision",
+    "Domain",
     "EmbeddingChunk",
     "EmbeddingChunkAttribute",
+    "EntityObservation",
+    "Evidence",
+    "FeatureWeight",
+    "GEOMetric",
+    "GenerativeEngine",
+    "InternalLinkResult",
+    "Keyword",
+    "KeywordCluster",
+    "LLMModel",
+    "LLMProvider",
+    "LLMRequest",
+    "LLMResponse",
     "Membership",
+    "MetricSnapshot",
+    "ModelEvaluation",
+    "MonitoringProject",
+    "OnPageSEOResult",
     "Organisation",
     "OrganisationScopedMixin",
+    "Organization",
+    "PerformanceResult",
     "Permission",
+    "Recommendation",
+    "RecommendationExecution",
+    "RecommendationMetric",
+    "RecommendationOutcome",
+    "Roadmap",
+    "RoadmapMonth",
+    "RoadmapRecommendation",
+    "RoadmapTask",
+    "RoadmapWeek",
     "Role",
     "RolePermission",
+    "SEOScore",
+    "SchemaResult",
+    "SearchPerformanceSnapshot",
+    "TechnicalSEOResult",
     "TimestampMixin",
+    "Topic",
+    "TopicCluster",
+    "TopicRecommendation",
     "User",
+    "Website",
+    "WebsiteProperty",
     "Workspace",
     "WorkspaceMembership",
+    "WorkspaceTenantMixin",
+    "Writer",
+    "WriterAssignment",
+    "WriterIndustryExpertise",
+    "WriterPerformance",
+    "WriterProfile",
+    "WriterRecommendation",
+    "WriterSample",
+    "WriterSkill",
+    "new_uuid",
 ]

@@ -19,6 +19,7 @@ from api.security import hash_password
 from db_models import (
     AiProvider,
     AiProviderModel,
+    GenerativeEngine,
     Membership,
     Organisation,
     Permission,
@@ -27,6 +28,7 @@ from db_models import (
     User,
     Workspace,
 )
+from db_models.generative_engine_seed import GENERATIVE_ENGINE_SEEDS
 from db_models.provider_seed import SUPPORTED_AI_PROVIDERS
 
 
@@ -94,6 +96,41 @@ def seed_ai_providers(db) -> int:
                 existing.context_window_tokens = model_spec.context_window_tokens
                 existing.sort_order = model_spec.sort_order
                 existing.updated_at = now
+    return created
+
+
+def seed_generative_engines(db) -> int:
+    """Idempotently upsert generative / answer engines linked to AI providers."""
+    created = 0
+    now = datetime.now(UTC)
+    providers = {
+        p.code: p for p in db.scalars(select(AiProvider)).all()
+    }
+    for spec in GENERATIVE_ENGINE_SEEDS:
+        existing = db.scalar(select(GenerativeEngine).where(GenerativeEngine.code == spec.code))
+        provider = providers.get(spec.provider_code) if spec.provider_code else None
+        if existing is None:
+            db.add(
+                GenerativeEngine(
+                    id=str(uuid.uuid4()),
+                    code=spec.code,
+                    name=spec.name,
+                    vendor=spec.vendor,
+                    llm_provider_id=provider.id if provider else None,
+                    is_active=True,
+                    status="active",
+                    created_at=now,
+                    updated_at=now,
+                )
+            )
+            created += 1
+        else:
+            existing.name = spec.name
+            existing.vendor = spec.vendor
+            existing.llm_provider_id = provider.id if provider else None
+            existing.is_active = True
+            existing.status = "active"
+            existing.updated_at = now
     return created
 
 
@@ -195,9 +232,11 @@ def main() -> None:
     try:
         seed_permissions(db)
         created = seed_ai_providers(db)
+        engines_created = seed_generative_engines(db)
         seed_admin(db, settings)
         db.commit()
         print(f"AI providers upserted (new rows created this run: {created})")
+        print(f"Generative engines upserted (new rows: {engines_created})")
         print(f"Supported provider codes: {[p.code for p in SUPPORTED_AI_PROVIDERS]}")
     finally:
         db.close()

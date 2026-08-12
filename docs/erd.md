@@ -1,6 +1,26 @@
 # Entity-relationship diagram (Peacock One)
 
-Relational schema for the architecture stage. Embeddings use **pgvector** inside PostgreSQL.
+Enterprise multi-tenant core schema for SEO + AEO + GEO visibility intelligence.
+Embeddings use **pgvector** inside PostgreSQL. IDs are UUID strings (`String(36)`).
+
+## Tenancy conventions
+
+Important tenant-scoped records use `WorkspaceTenantMixin`:
+
+| Field | Notes |
+| --- | --- |
+| `id` | UUID PK |
+| `organisation_id` | FK → `organisations.id` **ON DELETE CASCADE** |
+| `workspace_id` | FK → `workspaces.id` **ON DELETE CASCADE** |
+| `created_by` | FK → `users.id` **ON DELETE SET NULL** (optional) |
+| `status` | Indexed lifecycle string |
+| `created_at` / `updated_at` | Timezone-aware timestamps |
+
+Child rows often denormalize `organisation_id` / `workspace_id` for isolation queries without deep joins.
+British spelling **organisation** is canonical; `Organization` is an import alias.
+
+`AIVisibilitySnapshot` is a single table (`ai_visibility_snapshots`) shared by GEO/AEO and monitoring.
+`RecommendationOutcome` lives in the learning domain; monitoring links via recommendations.
 
 ## Cascade policy (careful defaults)
 
@@ -8,39 +28,55 @@ Relational schema for the architecture stage. Embeddings use **pgvector** inside
 | --- | --- | --- | --- |
 | `workspaces` | `organisations` | **CASCADE** | Workspace cannot outlive its tenant |
 | `roles` | `organisations` | **CASCADE** | Org-scoped roles |
-| `memberships` | `organisations` | **CASCADE** | Tenant membership |
-| `memberships` | `users` | **CASCADE** | Remove membership when user is deleted |
-| `memberships` | `roles` | **RESTRICT** | Do not delete a role still assigned to users |
-| `workspace_memberships` | `organisations` / `workspaces` / `users` | **CASCADE** | Pure join ownership |
-| `workspace_memberships` | `roles` | **RESTRICT** | Protect in-use roles |
-| `role_permissions` | `roles` / `permissions` | **CASCADE** | Join rows are disposable |
-| `background_jobs` | `organisations` | **CASCADE** | Tenant wipe |
-| `background_jobs` | `workspaces` | **SET NULL** | Preserve job history if workspace removed |
-| `background_jobs` | `users` (creator) | **SET NULL** | Preserve job history if user removed |
-| `audit_logs` | `organisations` | **CASCADE** | Tenant wipe |
-| `audit_logs` | `users` (actor) | **SET NULL** | Keep audit row; anonymise actor |
-| `audit_logs` | `workspaces` | **SET NULL** | Keep audit row |
-| `audit_log_attributes` | `audit_logs` | **CASCADE** | Attributes owned by the log |
-| `embedding_chunks` | `organisations` | **CASCADE** | Tenant wipe |
-| `embedding_chunks` | `workspaces` | **SET NULL** | Keep chunk if workspace removed |
-| `embedding_chunk_attributes` | `embedding_chunks` | **CASCADE** | Attributes owned by the chunk |
-| `ai_provider_models` | `ai_providers` | **CASCADE** | Catalog hierarchy |
+| `memberships` | `organisations` / `users` | **CASCADE** | Tenant membership |
+| `memberships` / `workspace_memberships` | `roles` | **RESTRICT** | Do not delete an in-use role |
+| `websites` and most domain entities | org / workspace | **CASCADE** | Tenant wipe |
+| Crawl/audit/roadmap children | parent aggregate | **CASCADE** | Owned hierarchy |
+| `crawl_links.to_page_id` | `crawl_pages` | **SET NULL** | Preserve link if target page removed |
+| `ai_query_runs` | `generative_engines` | **RESTRICT** | Protect catalog engines in use |
+| `llm_requests` | `ai_providers` | **RESTRICT** | Protect provider catalog in use |
+| `llm_requests.agent_run_id` | `agent_runs` | **SET NULL** | Keep ledger if run pruned |
+| `background_jobs` | org | **CASCADE**; workspace/user **SET NULL** | Preserve history when possible |
+| `audit_logs` | org **CASCADE**; actor/workspace **SET NULL** | Keep audit trail |
+| `generative_engines.llm_provider_id` | `ai_providers` | **SET NULL** | Engines may outlive provider link |
+| Domain recommendation bridges | central `recommendations` | **SET NULL** | Keep local copy if central row removed |
 
 ## JSONB policy
 
-JSONB is used **only** where the shape is genuinely job-specific and heterogeneous:
+JSONB is used **only** where shape is genuinely heterogeneous:
 
-- `background_jobs.payload`
-- `background_jobs.result`
+| Table.column | Why JSONB |
+| --- | --- |
+| `background_jobs.payload` / `result` | Per-job contracts differ by job name |
+| `crawls.config` | Crawl engine knobs vary by version |
+| `llm_requests.messages` | Role-bound message arrays differ by adapter |
+| `websites.extensions` | Sparse product flags only — typed settings use `website_properties` |
 
-Everything else that looks like “metadata” is modelled relationally:
+Everything else is relational columns, unique constraints, or EAV attribute tables
+(`audit_log_attributes`, `embedding_chunk_attributes`, `website_properties`).
 
-- `audit_log_attributes (audit_log_id, key, value)`
-- `embedding_chunk_attributes (chunk_id, key, value)`
-- Structured columns on `embedding_chunks`: `content_hash`, `embedding_model`, `token_count`
-- `ai_provider_models` instead of a JSON array of models on the provider
+## Domain inventory
 
-## Mermaid ERD
+| Domain | Tables |
+| --- | --- |
+| Identity | `organisations`, `users`, `workspaces`, `roles`, `permissions`, `role_permissions`, `memberships`, `workspace_memberships` |
+| Platform | `ai_providers`, `ai_provider_models`, `background_jobs`, `audit_logs`, `audit_log_attributes`, `embedding_chunks`, `embedding_chunk_attributes` |
+| Websites | `websites`, `domains`, `website_properties` |
+| Crawls | `crawls`, `crawl_pages`, `crawl_links`, `crawl_issues` |
+| Audits | `audits`, `audit_sections`, `audit_metrics`, `audit_issues`, `audit_recommendations` |
+| SEO | `seo_scores`, `technical_seo_results`, `onpage_seo_results`, `internal_link_results`, `schema_results`, `performance_results` |
+| GEO/AEO | `generative_engines`, `ai_queries`, `ai_query_runs`, `ai_response_observations`, `brand_mentions`, `citation_observations`, `entity_observations`, `aeo_observations`, `geo_metrics`, `ai_visibility_snapshots` |
+| Competitors | `competitors`, `competitor_websites`, `competitor_metrics`, `competitor_contents`, `competitor_gaps` |
+| Content | `topics`, `topic_clusters`, `topic_recommendations`, `keywords`, `keyword_clusters`, `content_briefs`, `content_recommendations`, `backlink_opportunities`, `citation_sources` |
+| Writers | `writers`, `writer_samples`, `writer_profiles`, `writer_skills`, `writer_industry_expertise`, `writer_performances`, `writer_recommendations`, `writer_assignments` |
+| Roadmaps | `roadmaps`, `roadmap_months`, `roadmap_weeks`, `roadmap_tasks`, `roadmap_recommendations` |
+| Monitoring | `monitoring_projects`, `metric_snapshots`, `search_performance_snapshots` |
+| LLM intelligence | `llm_requests`, `llm_responses`, `agent_runs`, `agent_results`, `council_runs`, `decisions`, `evidences` |
+| Learning | `recommendations`, `recommendation_executions`, `recommendation_metrics`, `recommendation_outcomes`, `feature_weights`, `model_evaluations` |
+
+Aliases: `Organization` → `Organisation`; `LLMProvider` → `AiProvider`; `LLMModel` → `AiProviderModel`.
+
+## Mermaid — identity & platform
 
 ```mermaid
 erDiagram
@@ -48,145 +84,103 @@ erDiagram
     organisations ||--o{ roles : has
     organisations ||--o{ memberships : has
     organisations ||--o{ workspace_memberships : has
-    organisations ||--o{ background_jobs : owns
-    organisations ||--o{ audit_logs : owns
-    organisations ||--o{ embedding_chunks : owns
-
     users ||--o{ memberships : has
     users ||--o{ workspace_memberships : has
-    users ||--o{ background_jobs : created_by
-    users ||--o{ audit_logs : actor
-
     roles ||--o{ memberships : assigned
     roles ||--o{ workspace_memberships : assigned
     roles ||--o{ role_permissions : grants
     permissions ||--o{ role_permissions : granted_by
-
     workspaces ||--o{ workspace_memberships : has
-    workspaces ||--o{ background_jobs : scopes
-    workspaces ||--o{ audit_logs : scopes
-    workspaces ||--o{ embedding_chunks : scopes
-
-    audit_logs ||--o{ audit_log_attributes : has
-    embedding_chunks ||--o{ embedding_chunk_attributes : has
-
+    organisations ||--o{ websites : owns
+    workspaces ||--o{ websites : scopes
     ai_providers ||--o{ ai_provider_models : offers
+    ai_providers ||--o{ generative_engines : powers
+```
 
-    organisations {
-        string id PK
-        string name
-        string slug UK
-        bool is_active
-    }
+## Mermaid — website → crawl → audit → SEO
 
-    users {
-        string id PK
-        string email UK
-        string hashed_password
-        string google_sub UK
-        string microsoft_sub UK
-    }
+```mermaid
+erDiagram
+    websites ||--o{ domains : has
+    websites ||--o{ website_properties : has
+    websites ||--o{ crawls : crawls
+    crawls ||--o{ crawl_pages : contains
+    crawl_pages ||--o{ crawl_links : outbound
+    crawls ||--o{ crawl_issues : finds
+    websites ||--o{ audits : audited_by
+    crawls ||--o{ audits : informs
+    audits ||--o{ audit_sections : sections
+    audit_sections ||--o{ audit_metrics : metrics
+    audits ||--o{ audit_issues : issues
+    audits ||--o{ audit_recommendations : recommends
+    websites ||--o{ seo_scores : scores
+    websites ||--o{ technical_seo_results : technical
+    websites ||--o{ onpage_seo_results : onpage
+    websites ||--o{ internal_link_results : links
+    websites ||--o{ schema_results : schema
+    websites ||--o{ performance_results : performance
+```
 
-    workspaces {
-        string id PK
-        string organisation_id FK
-        string slug
-    }
+## Mermaid — GEO / AEO visibility
 
-    roles {
-        string id PK
-        string organisation_id FK
-        string code
-    }
+```mermaid
+erDiagram
+    generative_engines ||--o{ ai_query_runs : executes
+    websites ||--o{ ai_queries : probes
+    ai_queries ||--o{ ai_query_runs : runs
+    ai_query_runs ||--o{ ai_response_observations : observes
+    ai_response_observations ||--o{ brand_mentions : mentions
+    ai_response_observations ||--o{ citation_observations : cites
+    ai_response_observations ||--o{ entity_observations : entities
+    websites ||--o{ aeo_observations : aeo
+    websites ||--o{ geo_metrics : geo
+    websites ||--o{ ai_visibility_snapshots : snapshots
+    generative_engines ||--o{ ai_visibility_snapshots : engine
+```
 
-    permissions {
-        string id PK
-        string code UK
-    }
+## Mermaid — content, writers, competitors, roadmaps
 
-    role_permissions {
-        string id PK
-        string role_id FK
-        string permission_id FK
-    }
+```mermaid
+erDiagram
+    websites ||--o{ topics : topics
+    topics ||--o{ topic_clusters : hub
+    topics ||--o{ topic_recommendations : recommends
+    websites ||--o{ keywords : keywords
+    keywords ||--o{ keyword_clusters : seeds
+    websites ||--o{ content_briefs : briefs
+    content_briefs ||--o{ content_recommendations : recommends
+    websites ||--o{ writers : writers
+    writers ||--o{ writer_samples : samples
+    writers ||--o{ writer_profiles : profile
+    writers ||--o{ writer_skills : skills
+    writers ||--o{ writer_assignments : assigned
+    content_briefs ||--o{ writer_assignments : assigned_to
+    websites ||--o{ competitors : tracks
+    competitors ||--o{ competitor_websites : sites
+    competitors ||--o{ competitor_metrics : metrics
+    competitors ||--o{ competitor_gaps : gaps
+    websites ||--o{ roadmaps : plans
+    roadmaps ||--o{ roadmap_months : months
+    roadmap_months ||--o{ roadmap_weeks : weeks
+    roadmap_weeks ||--o{ roadmap_tasks : tasks
+```
 
-    memberships {
-        string id PK
-        string organisation_id FK
-        string user_id FK
-        string role_id FK
-    }
+## Mermaid — LLM intelligence & learning loop
 
-    workspace_memberships {
-        string id PK
-        string organisation_id FK
-        string workspace_id FK
-        string user_id FK
-        string role_id FK
-    }
-
-    background_jobs {
-        string id PK
-        string organisation_id FK
-        string workspace_id FK
-        string created_by_user_id FK
-        string name
-        string status
-        jsonb payload
-        jsonb result
-    }
-
-    audit_logs {
-        string id PK
-        string organisation_id FK
-        string actor_user_id FK
-        string workspace_id FK
-        string action
-        string resource_type
-        string resource_id
-    }
-
-    audit_log_attributes {
-        string id PK
-        string audit_log_id FK
-        string key
-        string value
-    }
-
-    embedding_chunks {
-        string id PK
-        string organisation_id FK
-        string workspace_id FK
-        string source_type
-        string source_id
-        string content_hash
-        string embedding_model
-        int token_count
-        vector embedding
-    }
-
-    embedding_chunk_attributes {
-        string id PK
-        string chunk_id FK
-        string key
-        string value
-    }
-
-    ai_providers {
-        string id PK
-        string code UK
-        string name
-        string vendor
-        bool is_active
-    }
-
-    ai_provider_models {
-        string id PK
-        string provider_id FK
-        string model_code
-        string display_name
-        bool is_default
-    }
+```mermaid
+erDiagram
+    agent_runs ||--o{ llm_requests : emits
+    ai_providers ||--o{ llm_requests : via
+    llm_requests ||--|| llm_responses : yields
+    agent_runs ||--o{ agent_results : results
+    agent_runs ||--o{ council_runs : verifies
+    council_runs ||--o{ decisions : decides
+    decisions ||--o{ evidences : cites
+    decisions ||--o{ recommendations : produces
+    recommendations ||--o{ recommendation_executions : executes
+    recommendations ||--o{ recommendation_metrics : tracks
+    recommendations ||--o{ recommendation_outcomes : measures
+    recommendations ||--o{ evidences : explains
 ```
 
 ## Seeded AI providers
@@ -199,4 +193,13 @@ erDiagram
 | `perplexity` | Perplexity | Perplexity |
 | `deepseek` | DeepSeek | DeepSeek |
 
-Seeded via `infra/scripts/seed_dev.py` using `db_models.provider_seed.SUPPORTED_AI_PROVIDERS`.
+Also seeded generative engines (`chatgpt`, `gemini`, `claude`, `perplexity`, `deepseek`, `google_ai_overview`) via `infra/scripts/seed_dev.py`.
+
+## Migrations
+
+| Revision | Purpose |
+| --- | --- |
+| `0001_initial` | Identity, jobs, audit logs, embeddings |
+| `0002_org_fks` | Organisation FK hardening |
+| `0003_relational_hardening` | Cascades, role_permissions, AI providers, attribute tables |
+| `0004_core_domain_schema` (`9b7d51fd6b52`) | Full websites/crawls/audits/SEO/GEO/competitors/content/writers/roadmaps/monitoring/LLM/learning schema |
