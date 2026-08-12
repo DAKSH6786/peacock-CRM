@@ -154,6 +154,17 @@ from db_models.council2 import (
     C2RoundRecord,
     Council2Session,
 )
+from db_models.judge2 import (
+    DEFAULT_JUDGE_WEIGHTS,
+    JUDGE_SIGNAL_FAMILIES,
+    METHODOLOGY as JUDGE2_METHODOLOGY,
+    METHODOLOGY_NOTE as JUDGE2_METHODOLOGY_NOTE,
+    SCORING_OUTSIDE_LLM,
+    J2Evidence,
+    J2ReversalCondition,
+    J2SignalScore,
+    Judge2Judgment,
+)
 from db_models.competitors import (
     Competitor,
     CompetitorContent,
@@ -403,6 +414,15 @@ __all__ = [
     "C2Evidence",
     "C2EvidenceRequest",
     "C2RoundRecord",
+    "DEFAULT_JUDGE_WEIGHTS",
+    "JUDGE_SIGNAL_FAMILIES",
+    "JUDGE2_METHODOLOGY",
+    "JUDGE2_METHODOLOGY_NOTE",
+    "SCORING_OUTSIDE_LLM",
+    "Judge2Judgment",
+    "J2Evidence",
+    "J2ReversalCondition",
+    "J2SignalScore",
     "INFO_GAIN_PENALTIES",
     "INFO_GAIN_REWARDS",
     "MOAT_FORMAT_PRIORS",
