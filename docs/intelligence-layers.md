@@ -29,6 +29,10 @@ Every sufficiently complex strategic request is decomposed into conceptual layer
 - `POST /intelligence/runs`
 - `GET /intelligence/runs/{id}`
 - `GET /intelligence/layers`
+- `POST /intelligence/cases` — PINE `IntelligenceCase` (relational)
+- `GET /intelligence/cases/{case_id}`
+
+See also [`intelligence-case.md`](./intelligence-case.md).
 
 ## Code
 
@@ -36,3 +40,5 @@ Every sufficiently complex strategic request is decomposed into conceptual layer
 - `services/intelligence/layers.py`
 - `services/intelligence/context_selector.py`
 - `services/intelligence/evidence.py`
+- `services/intelligence/case.py`
+- `services/intelligence/case_repository.py`

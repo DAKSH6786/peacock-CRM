@@ -126,6 +126,24 @@ REQUIRED_CORE_TABLES = {
     "recommendation_outcomes",
     "feature_weights",
     "model_evaluations",
+    # PINE IntelligenceCase (relational aggregate — no monolithic JSON)
+    "intelligence_cases",
+    "intelligence_case_context_items",
+    "intelligence_case_observations",
+    "intelligence_case_evidence",
+    "intelligence_case_evidence_urls",
+    "intelligence_case_hypotheses",
+    "intelligence_case_agent_findings",
+    "intelligence_case_agent_claims",
+    "intelligence_case_contradictions",
+    "intelligence_case_unknowns",
+    "intelligence_case_assumptions",
+    "intelligence_case_risks",
+    "intelligence_case_opportunities",
+    "intelligence_case_recommendations",
+    "intelligence_case_recommendation_evidence",
+    "intelligence_case_models_used",
+    "intelligence_case_tools_used",
 }
 
 
@@ -174,7 +192,36 @@ def test_core_domain_tables_registered() -> None:
     registered = set(models.Base.metadata.tables)
     missing = REQUIRED_CORE_TABLES - registered
     assert not missing, f"Missing tables: {sorted(missing)}"
-    assert len(registered) >= 86
+    assert len(registered) >= 100
+
+
+def test_intelligence_case_is_relational_not_json_blob() -> None:
+    from db_models import (
+        IntelligenceCaseAgentFinding,
+        IntelligenceCaseEvidence,
+        IntelligenceCaseRecord,
+        IntelligenceCaseRecommendation,
+    )
+
+    assert issubclass(IntelligenceCaseRecord, WorkspaceTenantMixin)
+    assert _jsonb_columns(IntelligenceCaseRecord) == set()
+    assert _jsonb_columns(IntelligenceCaseEvidence) == set()
+    assert _jsonb_columns(IntelligenceCaseAgentFinding) == set()
+    assert _jsonb_columns(IntelligenceCaseRecommendation) == set()
+
+    case_fks = _fk_map(IntelligenceCaseRecord)
+    assert case_fks["organisation_id"] == "CASCADE"
+    assert case_fks["workspace_id"] == "CASCADE"
+    assert case_fks["website_id"] == "SET NULL"
+
+    evidence_fks = _fk_map(IntelligenceCaseEvidence)
+    assert evidence_fks["case_id"] == "CASCADE"
+
+    # Evidence stores typed scalars, not a value JSON bag
+    evidence_cols = {c.name for c in inspect(IntelligenceCaseEvidence).columns}
+    assert {"value_text", "value_number", "value_bool", "kind"} <= evidence_cols
+    assert "value" not in evidence_cols
+    assert "payload" not in evidence_cols
 
 
 def test_workspace_tenant_mixin_fields() -> None:
