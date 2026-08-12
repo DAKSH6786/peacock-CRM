@@ -6,7 +6,7 @@ from typing import Any
 
 @dataclass(slots=True)
 class CompetitorEngine:
-    """Architecture scaffold — business features intentionally not implemented."""
+    """Legacy scaffold — prefer DeepCompetitorService for multi-category intelligence."""
 
     organisation_id: str
 
@@ -16,4 +16,9 @@ class CompetitorEngine:
             "organisation_id": self.organisation_id,
             "ready": True,
             "features_implemented": False,
+            "superseded_by": "deep_competitor",
+            "note": (
+                "Use services.deep_competitor for automatic multi-category discovery, "
+                "Competitive Delta Engine, and differentiated (no-copy) strategies."
+            ),
         }
