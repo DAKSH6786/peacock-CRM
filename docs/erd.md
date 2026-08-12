@@ -80,6 +80,7 @@ Everything else is relational columns, unique constraints, or EAV attribute tabl
 | Share of Answer | `share_of_answer_analyses`, `soa_answer_observations`, `soa_entity_indicators`, `soa_brand_scores` |
 | Citation Graph | `citation_graph_analyses`, `cg_observations`, `cg_citations`, `cg_entity_mentions`, `cg_pathways`, `cg_domain_scores`, `cg_source_opportunities` |
 | Retrieval Pathway Intelligence | `retrieval_pathway_analyses`, `rpi_evidence`, `rpi_cause_classifications`, `rpi_bottleneck_diagnoses` |
+| Entity Intelligence | `entity_intelligence_analyses`, `ei_entities`, `ei_associations`, `ei_entity_gaps`, `ei_strategies` |
 | Learning | `recommendations`, `recommendation_executions`, `recommendation_metrics`, `recommendation_outcomes`, `feature_weights`, `model_evaluations` |
 
 Aliases: `Organization` → `Organisation`; `LLMProvider` → `AiProvider`; `LLMModel` → `AiProviderModel`.
@@ -228,3 +229,4 @@ Also seeded generative engines (`chatgpt`, `gemini`, `claude`, `perplexity`, `de
 | `0011_share_of_answer` | Share of Answer multi-indicator generative influence |
 | `0012_citation_graph` | Peacock Citation Graph, CIS, Source Opportunity Engine |
 | `0013_retrieval_pathway` | Retrieval Pathway Intelligence forensics |
+| `0014_entity_intelligence` | Peacock Entity Intelligence graph, association strength, gaps |
