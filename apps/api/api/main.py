@@ -6,7 +6,18 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.config import get_settings
-from api.routes import auth, capabilities, crawler, evidence_ledger, health, intelligence, jobs, seo, services
+from api.routes import (
+    auth,
+    capabilities,
+    crawler,
+    evidence_ledger,
+    health,
+    intelligence,
+    jobs,
+    seo,
+    services,
+    visibility,
+)
 from llm_gateway import LLMGateway, NullLLMProvider
 from llm_gateway.ports import LLMProviderName
 from observability.logging import configure_logging, get_logger
@@ -47,6 +58,7 @@ def create_app() -> FastAPI:
     application.include_router(intelligence.router)
     application.include_router(evidence_ledger.router)
     application.include_router(capabilities.router)
+    application.include_router(visibility.router)
 
     # Soft static role fallbacks only — PINE should prefer CapabilityRouter
     # dynamic selection (request.provider / request.model). Never treat these

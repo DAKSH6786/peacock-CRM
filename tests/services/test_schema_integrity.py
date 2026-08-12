@@ -159,6 +159,12 @@ REQUIRED_CORE_TABLES = {
     "model_capability_priors",
     "model_capability_profiles",
     "model_capability_observations",
+    # Probabilistic AI Visibility
+    "visibility_campaigns",
+    "visibility_probe_cells",
+    "visibility_probe_observations",
+    "visibility_distributions",
+    "visibility_score_cards",
 }
 
 
@@ -207,7 +213,7 @@ def test_core_domain_tables_registered() -> None:
     registered = set(models.Base.metadata.tables)
     missing = REQUIRED_CORE_TABLES - registered
     assert not missing, f"Missing tables: {sorted(missing)}"
-    assert len(registered) >= 113
+    assert len(registered) >= 118
 
 
 def test_intelligence_case_is_relational_not_json_blob() -> None:
@@ -341,6 +347,55 @@ def test_capability_profiles_track_required_metrics() -> None:
     } <= profile_cols
 
     assert _fk_map(ModelCapabilityObservation)["profile_id"] == "CASCADE"
+
+
+def test_probabilistic_visibility_tables_are_relational() -> None:
+    from db_models import (
+        VisibilityCampaign,
+        VisibilityDistribution,
+        VisibilityProbeObservation,
+        VisibilityScoreCard,
+    )
+
+    assert issubclass(VisibilityCampaign, WorkspaceTenantMixin)
+    assert _jsonb_columns(VisibilityCampaign) == set()
+    assert _jsonb_columns(VisibilityDistribution) == set()
+    assert _jsonb_columns(VisibilityScoreCard) == set()
+
+    campaign_cols = {c.name for c in inspect(VisibilityCampaign).columns}
+    assert {
+        "target_repetitions",
+        "max_repetitions",
+        "max_calls_per_minute",
+        "max_concurrent",
+        "max_total_calls",
+        "min_interval_ms",
+    } <= campaign_cols
+
+    dist_cols = {c.name for c in inspect(VisibilityDistribution).columns}
+    assert {
+        "probability",
+        "variance",
+        "ci_low",
+        "ci_high",
+        "sample_size",
+        "engine_disagreement",
+        "temporal_volatility",
+    } <= dist_cols
+
+    score_cols = {c.name for c in inspect(VisibilityScoreCard).columns}
+    assert {
+        "ai_visibility_score",
+        "measurement_confidence",
+        "peacock_visibility_confidence",
+        "observation_count",
+        "engine_count",
+        "prompt_count",
+        "period_count",
+    } <= score_cols
+
+    assert _fk_map(VisibilityProbeObservation)["campaign_id"] == "CASCADE"
+    assert _fk_map(VisibilityDistribution)["campaign_id"] == "CASCADE"
 
 def test_workspace_tenant_mixin_fields() -> None:
     assert issubclass(Website, WorkspaceTenantMixin)

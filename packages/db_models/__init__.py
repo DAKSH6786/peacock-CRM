@@ -119,6 +119,13 @@ from db_models.monitoring import (
     SearchPerformanceSnapshot,
 )
 from db_models.providers import AiProvider, AiProviderModel
+from db_models.probabilistic_visibility import (
+    VisibilityCampaign,
+    VisibilityDistribution,
+    VisibilityProbeCell,
+    VisibilityProbeObservation,
+    VisibilityScoreCard,
+)
 from db_models.roadmaps import (
     Roadmap,
     RoadmapMonth,
@@ -244,6 +251,11 @@ __all__ = [
     "Organization",
     "PerformanceResult",
     "Permission",
+    "VisibilityCampaign",
+    "VisibilityDistribution",
+    "VisibilityProbeCell",
+    "VisibilityProbeObservation",
+    "VisibilityScoreCard",
     "Recommendation",
     "RecommendationExecution",
     "RecommendationMetric",
