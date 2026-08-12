@@ -89,6 +89,7 @@ Everything else is relational columns, unique constraints, or EAV attribute tabl
 | Peacock Opportunity Engine | `opportunity_scans`, `peacock_opportunities`, `po_evidence`, `po_ranking_factors`, `po_ranking_weights`, `po_outcome_feedback` |
 | Peacock Council 2.0 | `council2_sessions`, `c2_agents`, `c2_round_records`, `c2_claims`, `c2_evidence`, `c2_counterarguments`, `c2_disagreements`, `c2_evidence_requests`, `c2_decisions` |
 | Peacock Judge 2.0 | `judge2_judgments`, `j2_signal_scores`, `j2_evidence`, `j2_reversal_conditions` |
+| Peacock Scenario Engine | `scenario_analyses`, `se_scenarios`, `se_metric_ranges`, `se_assumptions` |
 | Learning | `recommendations`, `recommendation_executions`, `recommendation_metrics`, `recommendation_outcomes`, `feature_weights`, `model_evaluations` |
 
 Aliases: `Organization` → `Organisation`; `LLMProvider` → `AiProvider`; `LLMModel` → `AiProviderModel`.
@@ -246,3 +247,4 @@ Also seeded generative engines (`chatgpt`, `gemini`, `claude`, `perplexity`, `de
 | `0020_opportunity_engine` | Peacock Opportunity Engine always-on layer |
 | `0021_council2` | Peacock Council 2.0 opposing-role debate |
 | `0022_judge2` | Peacock Judge 2.0 deterministic multi-signal judgment |
+| `0023_scenario_engine` | Peacock Scenario Engine counterfactual strategy ranges |
