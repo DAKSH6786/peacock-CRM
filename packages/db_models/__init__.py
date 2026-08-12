@@ -79,6 +79,16 @@ from db_models.content_lab import (
     ClInfoGainSignal,
     ContentLabAnalysis,
 )
+from db_models.content_digital_twin import (
+    FINDING_CATEGORIES,
+    METHODOLOGY as CONTENT_DIGITAL_TWIN_METHODOLOGY,
+    METHODOLOGY_NOTE as CONTENT_DIGITAL_TWIN_METHODOLOGY_NOTE,
+    SIMULATION_SURFACES,
+    CdtEvaluation,
+    CdtFinding,
+    CdtRequirementScore,
+    ContentDigitalTwin,
+)
 from db_models.competitors import (
     Competitor,
     CompetitorContent,
@@ -263,6 +273,14 @@ __all__ = [
     "ClContentProposal",
     "ClInfoGainSignal",
     "ContentLabAnalysis",
+    "CONTENT_DIGITAL_TWIN_METHODOLOGY",
+    "CONTENT_DIGITAL_TWIN_METHODOLOGY_NOTE",
+    "ContentDigitalTwin",
+    "CdtEvaluation",
+    "CdtFinding",
+    "CdtRequirementScore",
+    "FINDING_CATEGORIES",
+    "SIMULATION_SURFACES",
     "INFO_GAIN_PENALTIES",
     "INFO_GAIN_REWARDS",
     "MOAT_FORMAT_PRIORS",

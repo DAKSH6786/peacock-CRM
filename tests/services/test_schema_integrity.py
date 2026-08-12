@@ -207,6 +207,11 @@ REQUIRED_CORE_TABLES = {
     "cl_content_proposals",
     "cl_info_gain_signals",
     "cl_citability_components",
+    # Content Digital Twin
+    "content_digital_twins",
+    "cdt_evaluations",
+    "cdt_requirement_scores",
+    "cdt_findings",
 }
 
 
