@@ -281,6 +281,11 @@ REQUIRED_CORE_TABLES = {
     "le2_industry_policies",
     "le2_dimension_insights",
     "le2_learning_runs",
+    # Peacock Temporal Intelligence
+    "temporal_timelines",
+    "ti_timeline_events",
+    "ti_change_points",
+    "ti_query_answers",
 }
 
 
