@@ -234,6 +234,16 @@ REQUIRED_CORE_TABLES = {
     "po_ranking_factors",
     "po_ranking_weights",
     "po_outcome_feedback",
+    # Peacock Council 2.0
+    "council2_sessions",
+    "c2_agents",
+    "c2_round_records",
+    "c2_claims",
+    "c2_evidence",
+    "c2_counterarguments",
+    "c2_disagreements",
+    "c2_evidence_requests",
+    "c2_decisions",
 }
 
 
