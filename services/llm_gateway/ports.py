@@ -21,6 +21,8 @@ class LLMCompletionRequest:
     """Provider-agnostic completion request.
 
     Business services pass role + template id; gateway maps to a provider adapter.
+    Prefer dynamic capability routing (set ``provider`` / ``model`` from
+    ``CapabilityRouter``) over static role→provider assumptions.
     Never embed provider SDKs in business modules.
     """
 
@@ -29,6 +31,10 @@ class LLMCompletionRequest:
     template_id: str
     messages: list[dict[str, str]]
     model: str | None = None
+    # Optional dynamic routing inputs / overrides (never permanent locks)
+    workspace_id: str | None = None
+    task_type: str | None = None
+    provider: str | None = None
     temperature: float = 0.2
     max_tokens: int = 2048
     timeout_seconds: float | None = None

@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.config import get_settings
-from api.routes import auth, crawler, evidence_ledger, health, intelligence, jobs, seo, services
+from api.routes import auth, capabilities, crawler, evidence_ledger, health, intelligence, jobs, seo, services
 from llm_gateway import LLMGateway, NullLLMProvider
 from llm_gateway.ports import LLMProviderName
 from observability.logging import configure_logging, get_logger
@@ -46,8 +46,11 @@ def create_app() -> FastAPI:
     application.include_router(seo.router)
     application.include_router(intelligence.router)
     application.include_router(evidence_ledger.router)
+    application.include_router(capabilities.router)
 
-    # Composition root — gateway uses null provider until keys + live adapters enabled
+    # Soft static role fallbacks only — PINE should prefer CapabilityRouter
+    # dynamic selection (request.provider / request.model). Never treat these
+    # as permanent Claude=critic / Perplexity=research / GPT=strategy locks.
     application.state.llm_gateway = LLMGateway(
         providers={LLMProviderName.NULL: NullLLMProvider()},
         role_routing={

@@ -27,7 +27,12 @@ class ProviderTimeoutError(Exception):
 
 
 class LLMGateway:
-    """Routes role-bound requests to provider adapters with retry/timeout/cost tracking."""
+    """Routes role-bound requests to provider adapters with retry/timeout/cost tracking.
+
+    Static ``role_routing`` is a soft fallback only. Prefer setting
+    ``request.provider`` / ``request.model`` from ``CapabilityRouter`` so PINE
+    routes dynamically from observed capability profiles.
+    """
 
     def __init__(
         self,
@@ -45,13 +50,26 @@ class LLMGateway:
         self._log = get_logger("llm_gateway")
 
     def provider_for_role(self, role: str) -> LLMProvider:
+        """Soft static fallback — not a permanent capability lock."""
         name = self._role_routing.get(role, LLMProviderName.NULL)
         if name not in self._providers:
             raise KeyError(f"No provider registered for {name}")
         return self._providers[name]
 
+    def provider_for_request(self, request: LLMCompletionRequest) -> LLMProvider:
+        """Resolve provider: dynamic override first, then soft role fallback."""
+        if request.provider:
+            try:
+                name = LLMProviderName(request.provider)
+            except ValueError as exc:
+                raise KeyError(f"Unknown provider override: {request.provider}") from exc
+            if name not in self._providers:
+                raise KeyError(f"No provider registered for {name}")
+            return self._providers[name]
+        return self.provider_for_role(request.role)
+
     async def complete(self, request: LLMCompletionRequest) -> LLMCompletionResponse:
-        provider = self.provider_for_role(request.role)
+        provider = self.provider_for_request(request)
         timeout = request.timeout_seconds or self._default_timeout
 
         async for attempt in AsyncRetrying(
@@ -68,6 +86,7 @@ class LLMGateway:
                         "llm_timeout",
                         provider=provider.name,
                         role=request.role,
+                        task_type=request.task_type,
                         attempt=attempt.retry_state.attempt_number,
                     )
                     raise ProviderTimeoutError(str(exc)) from exc
@@ -77,11 +96,15 @@ class LLMGateway:
                         provider=str(response.provider),
                         model=response.model,
                         organisation_id=request.organisation_id,
-                        operation=request.role,
+                        operation=request.task_type or request.role,
                         usage=response.usage,
                         cost_usd_micros=response.cost_usd_micros,
                         metadata={
                             "template_id": request.template_id,
+                            "role": request.role,
+                            "task_type": request.task_type,
+                            "workspace_id": request.workspace_id,
+                            "routing": "dynamic_override" if request.provider else "role_fallback",
                             # Never persist private CoT — structured summary only
                             "structured_summary_keys": list(response.structured_summary.keys()),
                         },
@@ -91,9 +114,11 @@ class LLMGateway:
                     "llm_completion",
                     provider=str(response.provider),
                     role=request.role,
+                    task_type=request.task_type,
                     tokens=response.usage.total_tokens,
                     cost_usd_micros=response.cost_usd_micros,
                     organisation_id=request.organisation_id,
+                    routing="dynamic_override" if request.provider else "role_fallback",
                 )
                 return response
 

@@ -134,6 +134,13 @@ def seed_generative_engines(db) -> int:
     return created
 
 
+def seed_capability_priors(db) -> int:
+    """Upsert soft model capability priors — defaults only, not permanent locks."""
+    from capability_router import CapabilityProfileRepository
+
+    return CapabilityProfileRepository(db).seed_soft_priors()
+
+
 def seed_permissions(db) -> None:
     now = datetime.now(UTC)
     catalog = [
@@ -233,10 +240,12 @@ def main() -> None:
         seed_permissions(db)
         created = seed_ai_providers(db)
         engines_created = seed_generative_engines(db)
+        priors_touched = seed_capability_priors(db)
         seed_admin(db, settings)
         db.commit()
         print(f"AI providers upserted (new rows created this run: {created})")
         print(f"Generative engines upserted (new rows: {engines_created})")
+        print(f"Capability soft priors created this run: {priors_touched}")
         print(f"Supported provider codes: {[p.code for p in SUPPORTED_AI_PROVIDERS]}")
     finally:
         db.close()

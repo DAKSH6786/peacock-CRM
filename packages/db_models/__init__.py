@@ -15,6 +15,12 @@ from db_models.base import (
     WorkspaceTenantMixin,
     new_uuid,
 )
+from db_models.capability_profiles import (
+    CAPABILITY_TASK_TYPES,
+    ModelCapabilityObservation,
+    ModelCapabilityPrior,
+    ModelCapabilityProfile,
+)
 from db_models.competitors import (
     Competitor,
     CompetitorContent,
@@ -166,6 +172,7 @@ __all__ = [
     "BackgroundJob",
     "Base",
     "BrandMention",
+    "CAPABILITY_TASK_TYPES",
     "CitationObservation",
     "CitationSource",
     "Competitor",
@@ -188,6 +195,9 @@ __all__ = [
     "EntityObservation",
     "Evidence",
     "FeatureWeight",
+    "ModelCapabilityObservation",
+    "ModelCapabilityPrior",
+    "ModelCapabilityProfile",
     "LedgerAction",
     "LedgerActionOutcomeLink",
     "LedgerClaimEvidenceLink",

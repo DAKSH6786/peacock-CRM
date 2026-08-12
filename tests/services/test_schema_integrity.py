@@ -155,6 +155,10 @@ REQUIRED_CORE_TABLES = {
     "ledger_recommendation_action_links",
     "ledger_action_outcome_links",
     "ledger_claim_evidence_links",
+    # Dynamic model capability profiles
+    "model_capability_priors",
+    "model_capability_profiles",
+    "model_capability_observations",
 }
 
 
@@ -203,7 +207,7 @@ def test_core_domain_tables_registered() -> None:
     registered = set(models.Base.metadata.tables)
     missing = REQUIRED_CORE_TABLES - registered
     assert not missing, f"Missing tables: {sorted(missing)}"
-    assert len(registered) >= 110
+    assert len(registered) >= 113
 
 
 def test_intelligence_case_is_relational_not_json_blob() -> None:
@@ -289,6 +293,54 @@ def test_evidence_ledger_is_relational_graph() -> None:
     assert _fk_map(LedgerEvidence)["organisation_id"] == "CASCADE"
     assert _fk_map(LedgerEvidenceFindingLink)["evidence_id"] == "CASCADE"
     assert _fk_map(LedgerEvidenceFindingLink)["finding_id"] == "CASCADE"
+
+
+def test_capability_profiles_track_required_metrics() -> None:
+    from db_models import (
+        CAPABILITY_TASK_TYPES,
+        ModelCapabilityObservation,
+        ModelCapabilityPrior,
+        ModelCapabilityProfile,
+    )
+
+    required_tasks = {
+        "RESEARCH",
+        "SEO_REASONING",
+        "GEO_REASONING",
+        "ENTITY_EXTRACTION",
+        "CITATION_EXTRACTION",
+        "STRUCTURED_OUTPUT",
+        "CRITICAL_ANALYSIS",
+        "SUMMARISATION",
+        "STRATEGY",
+        "CONTENT_ANALYSIS",
+        "COMPETITOR_ANALYSIS",
+        "FACT_VERIFICATION",
+        "LONG_CONTEXT_ANALYSIS",
+    }
+    assert set(CAPABILITY_TASK_TYPES) == required_tasks
+
+    assert issubclass(ModelCapabilityProfile, WorkspaceTenantMixin)
+    assert _jsonb_columns(ModelCapabilityPrior) == set()
+    assert _jsonb_columns(ModelCapabilityProfile) == set()
+    assert _jsonb_columns(ModelCapabilityObservation) == set()
+
+    profile_cols = {c.name for c in inspect(ModelCapabilityProfile).columns}
+    assert {
+        "provider_code",
+        "model_code",
+        "task_type",
+        "quality_score",
+        "latency_ms_avg",
+        "cost_usd_micros_avg",
+        "failure_rate",
+        "json_compliance_rate",
+        "citation_accuracy",
+        "historical_agreement",
+        "sample_size",
+    } <= profile_cols
+
+    assert _fk_map(ModelCapabilityObservation)["profile_id"] == "CASCADE"
 
 def test_workspace_tenant_mixin_fields() -> None:
     assert issubclass(Website, WorkspaceTenantMixin)
