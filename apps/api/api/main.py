@@ -34,6 +34,7 @@ from api.routes import (
     seo,
     services,
     share_of_answer,
+    temporal_intelligence,
     visibility,
     writer_intelligence,
 )
@@ -97,6 +98,7 @@ def create_app() -> FastAPI:
     application.include_router(agentic_readiness.router)
     application.include_router(revenue_attribution.router)
     application.include_router(learning_engine2.router)
+    application.include_router(temporal_intelligence.router)
 
     # Soft static role fallbacks only — PINE should prefer CapabilityRouter
     # dynamic selection (request.provider / request.model). Never treat these
