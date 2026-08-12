@@ -94,6 +94,7 @@ Everything else is relational columns, unique constraints, or EAV attribute tabl
 | Peacock Action Engine | `peacock_actions`, `pae_connector_permissions`, `pae_approvals`, `pae_executions`, `pae_status_events` |
 | Peacock Agentic Web Readiness | `agentic_readiness_analyses`, `awr_check_results`, `awr_gaps` |
 | Peacock Revenue Attribution | `revenue_attribution_analyses`, `ra_funnel_stages`, `ra_chain_links`, `ra_source_snapshots` |
+| Peacock Learning Engine 2.0 | `learning2_records`, `le2_context_factors`, `le2_industry_policies`, `le2_dimension_insights`, `le2_learning_runs` |
 | Learning | `recommendations`, `recommendation_executions`, `recommendation_metrics`, `recommendation_outcomes`, `feature_weights`, `model_evaluations` |
 
 Aliases: `Organization` → `Organisation`; `LLMProvider` → `AiProvider`; `LLMModel` → `AiProviderModel`.
@@ -256,3 +257,4 @@ Also seeded generative engines (`chatgpt`, `gemini`, `claude`, `perplexity`, `de
 | `0025_action_engine` | Peacock Action Engine approval-based execution |
 | `0026_agentic_readiness` | Peacock Agentic Web Readiness / Agent Discoverability |
 | `0027_revenue_attribution` | Peacock Revenue Attribution uncertain funnel chain |
+| `0028_learning_engine2` | Peacock Learning Engine 2.0 closed-loop industry learning |
