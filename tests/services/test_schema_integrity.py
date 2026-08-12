@@ -185,6 +185,11 @@ REQUIRED_CORE_TABLES = {
     "cg_pathways",
     "cg_domain_scores",
     "cg_source_opportunities",
+    # Retrieval Pathway Intelligence
+    "retrieval_pathway_analyses",
+    "rpi_evidence",
+    "rpi_cause_classifications",
+    "rpi_bottleneck_diagnoses",
 }
 
 
