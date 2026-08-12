@@ -115,6 +115,11 @@ model Organization {
   emailSendLogs         EmailSendLog[]
   calendarConnections   CalendarConnection[]
   calendarSyncEvents    CalendarSyncEvent[]
+  visibilityProperties  VisibilityProperty[]
+  intelligenceRuns      IntelligenceRun[]
+  recommendations       Recommendation[]
+  strategyPlans         StrategyPlan[]
+  recommendationWeights RecommendationWeight[]
 
   @@index([deletedAt])
   @@map("organizations")

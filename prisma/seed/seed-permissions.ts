@@ -45,6 +45,21 @@ const PERMISSIONS = [
     name: "View notifications",
     module: "notifications",
   },
+  {
+    code: "intelligence:view",
+    name: "View generative visibility intelligence",
+    module: "intelligence",
+  },
+  {
+    code: "intelligence:manage",
+    name: "Manage visibility properties and strategies",
+    module: "intelligence",
+  },
+  {
+    code: "intelligence:run",
+    name: "Run cognitive intelligence pipelines",
+    module: "intelligence",
+  },
 ] as const;
 
 const ROLE_CODES = [

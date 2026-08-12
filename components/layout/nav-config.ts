@@ -131,8 +131,39 @@ export const navigationSections: NavSection[] = [
     ],
   },
   {
+    id: "visibility",
+    label: "Visibility Intelligence",
+    items: [
+      {
+        href: "/intelligence",
+        label: "Cockpit",
+        permission: "intelligence:view",
+      },
+      {
+        href: "/intelligence/properties",
+        label: "Properties",
+        permission: "intelligence:view",
+      },
+      {
+        href: "/intelligence/visibility",
+        label: "AI Visibility",
+        permission: "intelligence:view",
+      },
+      {
+        href: "/intelligence/strategy",
+        label: "90-Day Strategy",
+        permission: "intelligence:view",
+      },
+      {
+        href: "/intelligence/recommendations",
+        label: "Recommendations",
+        permission: "intelligence:view",
+      },
+    ],
+  },
+  {
     id: "intelligence",
-    label: "Intelligence",
+    label: "Business Intelligence",
     items: [
       { href: "/reports", label: "Reports", permission: "reports:view" },
       {

@@ -31,7 +31,10 @@ export type Permission =
   | "settings:view"
   | "settings:manage"
   | "audit:view"
-  | "notifications:view";
+  | "notifications:view"
+  | "intelligence:view"
+  | "intelligence:manage"
+  | "intelligence:run";
 
 export type SessionUser = {
   id: string;
@@ -74,6 +77,9 @@ const ALL_PERMISSIONS: Permission[] = [
   "settings:manage",
   "audit:view",
   "notifications:view",
+  "intelligence:view",
+  "intelligence:manage",
+  "intelligence:run",
 ];
 
 const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
@@ -98,6 +104,9 @@ const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "approvals:view",
     "approvals:decide",
     "notifications:view",
+    "intelligence:view",
+    "intelligence:manage",
+    "intelligence:run",
   ],
   MANAGER: [
     "dashboard:view",
@@ -116,6 +125,8 @@ const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "approvals:view",
     "approvals:decide",
     "notifications:view",
+    "intelligence:view",
+    "intelligence:run",
   ],
   EMPLOYEE: [
     "dashboard:view",
@@ -124,6 +135,7 @@ const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "progress:view",
     "documents:view",
     "notifications:view",
+    "intelligence:view",
   ],
   FINANCE: [
     "dashboard:view",
@@ -166,6 +178,7 @@ const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "imports:run",
     "documents:view",
     "notifications:view",
+    "intelligence:view",
   ],
   OPERATIONS: [
     "dashboard:view",
@@ -177,6 +190,8 @@ const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "imports:run",
     "documents:view",
     "notifications:view",
+    "intelligence:view",
+    "intelligence:run",
   ],
   CREATIVE: [
     "dashboard:view",
@@ -184,8 +199,9 @@ const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "progress:view",
     "documents:view",
     "notifications:view",
+    "intelligence:view",
   ],
-  VIEWER: ["dashboard:view", "notifications:view"],
+  VIEWER: ["dashboard:view", "notifications:view", "intelligence:view"],
 };
 
 export function permissionsForRole(
