@@ -190,6 +190,12 @@ REQUIRED_CORE_TABLES = {
     "rpi_evidence",
     "rpi_cause_classifications",
     "rpi_bottleneck_diagnoses",
+    # Entity Intelligence
+    "entity_intelligence_analyses",
+    "ei_entities",
+    "ei_associations",
+    "ei_entity_gaps",
+    "ei_strategies",
 }
 
 
