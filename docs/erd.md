@@ -91,6 +91,7 @@ Everything else is relational columns, unique constraints, or EAV attribute tabl
 | Peacock Judge 2.0 | `judge2_judgments`, `j2_signal_scores`, `j2_evidence`, `j2_reversal_conditions` |
 | Peacock Scenario Engine | `scenario_analyses`, `se_scenarios`, `se_metric_ranges`, `se_assumptions` |
 | Peacock 90 2.0 | `peacock90_plans`, `p90_initiatives`, `p90_tasks`, `p90_dependencies`, `p90_capacity_refusals` |
+| Peacock Action Engine | `peacock_actions`, `pae_connector_permissions`, `pae_approvals`, `pae_executions`, `pae_status_events` |
 | Learning | `recommendations`, `recommendation_executions`, `recommendation_metrics`, `recommendation_outcomes`, `feature_weights`, `model_evaluations` |
 
 Aliases: `Organization` → `Organisation`; `LLMProvider` → `AiProvider`; `LLMModel` → `AiProviderModel`.
@@ -250,3 +251,4 @@ Also seeded generative engines (`chatgpt`, `gemini`, `claude`, `perplexity`, `de
 | `0022_judge2` | Peacock Judge 2.0 deterministic multi-signal judgment |
 | `0023_scenario_engine` | Peacock Scenario Engine counterfactual strategy ranges |
 | `0024_peacock90` | Peacock 90 2.0 adaptive roadmap optimisation |
+| `0025_action_engine` | Peacock Action Engine approval-based execution |
