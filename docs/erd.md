@@ -92,6 +92,7 @@ Everything else is relational columns, unique constraints, or EAV attribute tabl
 | Peacock Scenario Engine | `scenario_analyses`, `se_scenarios`, `se_metric_ranges`, `se_assumptions` |
 | Peacock 90 2.0 | `peacock90_plans`, `p90_initiatives`, `p90_tasks`, `p90_dependencies`, `p90_capacity_refusals` |
 | Peacock Action Engine | `peacock_actions`, `pae_connector_permissions`, `pae_approvals`, `pae_executions`, `pae_status_events` |
+| Peacock Agentic Web Readiness | `agentic_readiness_analyses`, `awr_check_results`, `awr_gaps` |
 | Learning | `recommendations`, `recommendation_executions`, `recommendation_metrics`, `recommendation_outcomes`, `feature_weights`, `model_evaluations` |
 
 Aliases: `Organization` → `Organisation`; `LLMProvider` → `AiProvider`; `LLMModel` → `AiProviderModel`.
@@ -252,3 +253,4 @@ Also seeded generative engines (`chatgpt`, `gemini`, `claude`, `perplexity`, `de
 | `0023_scenario_engine` | Peacock Scenario Engine counterfactual strategy ranges |
 | `0024_peacock90` | Peacock 90 2.0 adaptive roadmap optimisation |
 | `0025_action_engine` | Peacock Action Engine approval-based execution |
+| `0026_agentic_readiness` | Peacock Agentic Web Readiness / Agent Discoverability |

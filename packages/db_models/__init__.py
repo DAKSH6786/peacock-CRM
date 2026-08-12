@@ -207,6 +207,17 @@ from db_models.action_engine import (
     PaeStatusEvent,
     PeacockAction,
 )
+from db_models.agentic_readiness import (
+    CHECK_LABELS as AWR_CHECK_LABELS,
+    DISCOVERABILITY_CHECKS as AWR_DISCOVERABILITY_CHECKS,
+    METHODOLOGY as AWR_METHODOLOGY,
+    METHODOLOGY_NOTE as AWR_METHODOLOGY_NOTE,
+    NOT_INDUSTRY_STANDARD as AWR_NOT_INDUSTRY_STANDARD,
+    SURFACE_SEPARATION as AWR_SURFACE_SEPARATION,
+    AgenticReadinessAnalysis,
+    AwrCheckResult,
+    AwrGap,
+)
 from db_models.competitors import (
     Competitor,
     CompetitorContent,
@@ -501,6 +512,15 @@ __all__ = [
     "PaeConnectorPermission",
     "PaeExecution",
     "PaeStatusEvent",
+    "AWR_CHECK_LABELS",
+    "AWR_DISCOVERABILITY_CHECKS",
+    "AWR_METHODOLOGY",
+    "AWR_METHODOLOGY_NOTE",
+    "AWR_NOT_INDUSTRY_STANDARD",
+    "AWR_SURFACE_SEPARATION",
+    "AgenticReadinessAnalysis",
+    "AwrCheckResult",
+    "AwrGap",
     "INFO_GAIN_PENALTIES",
     "INFO_GAIN_REWARDS",
     "MOAT_FORMAT_PRIORS",

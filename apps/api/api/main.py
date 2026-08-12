@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from api.config import get_settings
 from api.routes import (
     action_engine,
+    agentic_readiness,
     auth,
     capabilities,
     citation_graph,
@@ -91,6 +92,7 @@ def create_app() -> FastAPI:
     application.include_router(scenario_engine.router)
     application.include_router(peacock90.router)
     application.include_router(action_engine.router)
+    application.include_router(agentic_readiness.router)
 
     # Soft static role fallbacks only — PINE should prefer CapabilityRouter
     # dynamic selection (request.provider / request.model). Never treat these

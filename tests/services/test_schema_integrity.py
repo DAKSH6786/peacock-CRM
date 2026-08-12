@@ -266,6 +266,10 @@ REQUIRED_CORE_TABLES = {
     "pae_approvals",
     "pae_executions",
     "pae_status_events",
+    # Peacock Agentic Web Readiness
+    "agentic_readiness_analyses",
+    "awr_check_results",
+    "awr_gaps",
 }
 
 
