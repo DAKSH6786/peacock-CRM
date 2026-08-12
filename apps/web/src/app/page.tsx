@@ -7,6 +7,7 @@ import { CrawlConsole } from "@/components/crawl-console";
 import { HealthCard } from "@/components/health-card";
 import { LoginForm } from "@/components/login-form";
 import { SeoAuditPanel } from "@/components/seo-audit-panel";
+import { ShareOfAnswerPanel } from "@/components/share-of-answer-panel";
 import { StrategicIntelligencePanel } from "@/components/strategic-intelligence-panel";
 
 export default function HomePage() {
@@ -38,6 +39,7 @@ export default function HomePage() {
 
       <CrawlConsole onCrawlIdChange={setCrawlId} />
       <SeoAuditPanel crawlId={crawlId} />
+      <ShareOfAnswerPanel />
       <StrategicIntelligencePanel />
       <ArchitecturePanel />
     </main>
