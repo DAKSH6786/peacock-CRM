@@ -85,6 +85,7 @@ Everything else is relational columns, unique constraints, or EAV attribute tabl
 | Content Lab | `content_lab_analyses`, `cl_content_proposals`, `cl_info_gain_signals`, `cl_citability_components` |
 | Content Digital Twin | `content_digital_twins`, `cdt_evaluations`, `cdt_requirement_scores`, `cdt_findings` |
 | Peacock GEO Lab | `geo_lab_experiments`, `gl_variants`, `gl_pages`, `gl_metric_observations`, `gl_metric_deltas`, `gl_causality_assessments` |
+| Writer Intelligence 2.0 | `writer_intelligence_analyses`, `wi_writer_dna`, `wi_dna_traits`, `wi_outcome_nodes`, `wi_outcome_edges`, `wi_performance_records`, `wi_recommendations` |
 | Learning | `recommendations`, `recommendation_executions`, `recommendation_metrics`, `recommendation_outcomes`, `feature_weights`, `model_evaluations` |
 
 Aliases: `Organization` → `Organisation`; `LLMProvider` → `AiProvider`; `LLMModel` → `AiProviderModel`.
@@ -238,3 +239,4 @@ Also seeded generative engines (`chatgpt`, `gemini`, `claude`, `perplexity`, `de
 | `0016_content_lab` | Peacock Content Lab multi-opportunity evaluation |
 | `0017_content_digital_twin` | Content Digital Twin pre-publish simulation |
 | `0018_geo_lab` | Peacock GEO Lab controlled experimentation |
+| `0019_writer_intelligence` | Writer Intelligence 2.0 DNA + outcome decision |

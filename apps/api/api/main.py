@@ -26,6 +26,7 @@ from api.routes import (
     services,
     share_of_answer,
     visibility,
+    writer_intelligence,
 )
 from llm_gateway import LLMGateway, NullLLMProvider
 from llm_gateway.ports import LLMProviderName
@@ -77,6 +78,7 @@ def create_app() -> FastAPI:
     application.include_router(content_lab.router)
     application.include_router(content_digital_twin.router)
     application.include_router(geo_lab.router)
+    application.include_router(writer_intelligence.router)
 
     # Soft static role fallbacks only — PINE should prefer CapabilityRouter
     # dynamic selection (request.provider / request.model). Never treat these
