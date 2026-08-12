@@ -99,7 +99,7 @@ class ShareOfAnswerService:
                 structured_summary=self._summary(readings),
                 answer_token_count=obs_spec.answer_token_count
                 or len(obs_spec.raw_excerpt.split()),
-                probe_source="mock",
+                probe_source="heuristic",
             )
             self.db.add(obs)
             self.db.flush()

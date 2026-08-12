@@ -29,6 +29,7 @@ const SERVICES = [
   "seo_engine",
   "geo_engine",
   "aeo_engine",
+  "share_of_answer",
   "content_engine",
   "writer_engine",
   "competitor_engine",

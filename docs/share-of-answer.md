@@ -19,6 +19,10 @@ Query Cluster: **Enterprise CRM**
 
 **Do not pretend token count alone equals influence.**
 
+Extraction uses heuristic answer-text analysis (mention spans, list/first-appearance
+rank, recommendation language, sentence/slot share, citation cues, claim polarity,
+comparison language). Token span ratio is diagnostic only.
+
 Share of Answer combines multiple indicators:
 
 | Indicator | Role |

@@ -12,6 +12,7 @@ from db_models import Organisation, Website, Workspace
 from db_models.base import new_uuid
 from db_models.share_of_answer import SOA_INDICATORS, SoaBrandScore
 from share_of_answer import ShareOfAnswerService
+from share_of_answer.extractor import AnswerDocument, extract_entity_indicators
 from share_of_answer.models import AnswerObservationSpec, ShareOfAnswerSpec
 from share_of_answer.scoring import (
     EntityIndicatorReading,
@@ -155,6 +156,63 @@ def test_normalise_share_of_answer() -> None:
     assert shares["A"] > shares["B"] > shares["Client"]
 
 
+def test_heuristic_extractor_tracks_all_indicators() -> None:
+    doc = AnswerDocument(
+        prompt_text="best enterprise CRM platforms",
+        engine_code="chatgpt",
+        raw_excerpt=(
+            "1. Brand A is the strongest overall recommendation and leads on scale "
+            "with documentation at https://branda.example/docs.\n"
+            "2. Brand B is a solid alternative for analytics.\n"
+            "3. Client appears as a niche option with limited coverage and drawbacks."
+        ),
+    )
+    readings = extract_entity_indicators(
+        doc,
+        client_brand="Client",
+        competitor_brands=["Brand A", "Brand B"],
+    )
+    by_name = {r.entity_name: r for r in readings}
+
+    assert by_name["Brand A"].mention is True
+    assert by_name["Brand B"].mention is True
+    assert by_name["Client"].mention is True
+    assert by_name["Client"].is_client is True
+
+    assert by_name["Brand A"].position == 1
+    assert by_name["Brand B"].position == 2
+    assert by_name["Client"].position == 3
+
+    assert by_name["Brand A"].recommendation_strength > by_name["Client"].recommendation_strength
+    assert by_name["Brand A"].citation_ownership > 0
+    assert by_name["Brand A"].semantic_prominence > by_name["Client"].semantic_prominence
+    assert by_name["Brand A"].positive_claims >= 1
+    assert by_name["Client"].negative_claims >= 1
+    assert by_name["Brand A"].comparison_outcome == "win"
+    assert by_name["Client"].answer_space > 0
+
+    brands = aggregate_brand_scores(entity_readings_per_observation=[readings])
+    assert brands[0].entity_name == "Brand A"
+    assert abs(sum(b.share_of_answer for b in brands) - 100.0) < 0.1
+
+
+def test_unmentioned_brand_is_absent() -> None:
+    doc = AnswerDocument(
+        prompt_text="crm",
+        engine_code="chatgpt",
+        raw_excerpt="Brand A is recommended. Brand B is comparable.",
+    )
+    readings = extract_entity_indicators(
+        doc,
+        client_brand="Client",
+        competitor_brands=["Brand A", "Brand B"],
+    )
+    client = next(r for r in readings if r.entity_name == "Client")
+    assert client.mention is False
+    assert client.comparison_outcome == "absent"
+    assert compute_influence(client).influence == 0.0
+
+
 @pytest.mark.skipif(not _can_connect(), reason="PostgreSQL not available")
 def test_share_of_answer_persists_multi_indicator_report() -> None:
     engine = create_engine(_database_url())
@@ -225,7 +283,6 @@ def test_share_of_answer_persists_multi_indicator_report() -> None:
         client = next(b for b in report.brands if b.is_client or b.entity_name == "Client")
         assert 0.0 <= client.share_of_answer <= 100.0
 
-        # Persisted scores include indicator breakdowns + token gap diagnostic
         rows = list(
             db.scalars(
                 select(SoaBrandScore).where(SoaBrandScore.analysis_id == report.analysis_id)
@@ -236,7 +293,6 @@ def test_share_of_answer_persists_multi_indicator_report() -> None:
             assert 0.0 <= row.mention_rate <= 1.0
             assert row.observation_sample_size == 2
 
-        # Token-only methodology must be rejected
         with pytest.raises(ValueError, match="Token count alone"):
             ShareOfAnswerService(db).analyse(
                 organisation_id=org.id,
