@@ -254,6 +254,12 @@ REQUIRED_CORE_TABLES = {
     "se_scenarios",
     "se_metric_ranges",
     "se_assumptions",
+    # Peacock 90 2.0
+    "peacock90_plans",
+    "p90_initiatives",
+    "p90_tasks",
+    "p90_dependencies",
+    "p90_capacity_refusals",
 }
 
 
