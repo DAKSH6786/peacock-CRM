@@ -41,6 +41,9 @@ export function CommandCentre() {
             <a href="#intelligence-feed" className="cc-btn cc-btn--primary">
               Open intelligence feed
             </a>
+            <Link href="/executive" className="cc-btn cc-btn--ghost">
+              Executive Brain
+            </Link>
             <Link href="/ops" className="cc-btn cc-btn--ghost">
               Platform ops
             </Link>

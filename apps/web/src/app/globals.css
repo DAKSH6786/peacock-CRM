@@ -403,3 +403,182 @@ a {
   }
 
 }
+
+/* —— Executive Brain —— */
+
+.eb-shell {
+  width: min(920px, calc(100% - 2.5rem));
+  margin: 0 auto;
+  padding: 2.75rem 0 5rem;
+}
+
+.eb-hero {
+  min-height: 42vh;
+  display: grid;
+  align-content: end;
+  gap: 0.85rem;
+  padding-bottom: 2rem;
+  animation: cc-rise 0.8s ease-out both;
+}
+
+.eb-kicker {
+  margin: 0;
+  font-size: 0.78rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.eb-kicker a:hover {
+  color: var(--primary);
+}
+
+.eb-brand {
+  margin: 0;
+  font-size: clamp(2.6rem, 6vw, 4.4rem);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+  max-width: 14ch;
+}
+
+.eb-lede {
+  margin: 0;
+  max-width: 38rem;
+  font-size: 1.15rem;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.eb-meta {
+  margin: 0.4rem 0 0;
+  font-size: 0.92rem;
+  color: #c7d4e8;
+}
+
+.eb-summaries {
+  display: grid;
+  gap: 1.75rem;
+  padding: 2rem 0 2.5rem;
+  border-top: 1px solid rgba(232, 238, 247, 0.1);
+  animation: cc-rise 0.9s ease-out 0.1s both;
+}
+
+.eb-summary__role {
+  margin: 0 0 0.75rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.eb-summary[data-role="cmo"] .eb-summary__role {
+  color: var(--accent);
+}
+
+.eb-summary__body {
+  margin: 0;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.28rem;
+  line-height: 1.55;
+}
+
+.eb-summary__cta {
+  margin: 1.1rem 0 0;
+  font-size: 1rem;
+  line-height: 1.45;
+  color: #d7e2f2;
+}
+
+.eb-summary__cta span {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.eb-questions {
+  padding-top: 2.25rem;
+  border-top: 1px solid rgba(232, 238, 247, 0.1);
+}
+
+.eb-section-head {
+  margin-bottom: 1.5rem;
+}
+
+.eb-section-head h2 {
+  margin: 0;
+  font-size: clamp(1.7rem, 3vw, 2.3rem);
+  letter-spacing: -0.02em;
+}
+
+.eb-section-head p {
+  margin: 0.4rem 0 0;
+  color: var(--muted);
+}
+
+.eb-qa {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.eb-qa li {
+  padding: 1.35rem 0 1.5rem;
+  border-bottom: 1px solid rgba(232, 238, 247, 0.08);
+  animation: cc-rise 0.65s ease-out both;
+}
+
+.eb-qa h3 {
+  margin: 0;
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+}
+
+.eb-qa__answer {
+  margin: 0.7rem 0 0;
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: #d5e0f0;
+  max-width: 48rem;
+}
+
+.eb-qa__foot {
+  margin: 0.85rem 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 1rem;
+  align-items: baseline;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.eb-qa__foot span {
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+}
+
+.eb-qa__foot em {
+  margin-left: auto;
+  font-style: normal;
+  color: var(--primary);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+  .eb-shell {
+    width: min(100% - 1.5rem, 920px);
+    padding-top: 1.5rem;
+  }
+
+  .eb-brand {
+    max-width: none;
+  }
+
+  .eb-qa__foot em {
+    margin-left: 0;
+  }
+}

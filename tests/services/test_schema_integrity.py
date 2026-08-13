@@ -298,6 +298,10 @@ REQUIRED_CORE_TABLES = {
     "cc_visibility_signals",
     "cc_situation_items",
     "cc_feed_items",
+    # Peacock Executive Brain
+    "executive_brain_briefs",
+    "eb_answers",
+    "eb_role_summaries",
 }
 
 
