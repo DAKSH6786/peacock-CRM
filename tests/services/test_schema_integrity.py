@@ -293,6 +293,11 @@ REQUIRED_CORE_TABLES = {
     "ask_peacock_sessions",
     "ap_answers",
     "ap_evidence",
+    # Peacock Command Centre
+    "command_centre_snapshots",
+    "cc_visibility_signals",
+    "cc_situation_items",
+    "cc_feed_items",
 }
 
 
