@@ -301,6 +301,17 @@ from db_models.executive_brain import (
     EbRoleSummary,
     ExecutiveBrainBrief,
 )
+from db_models.proprietary_metrics import (
+    METHODOLOGY as PM_METHODOLOGY,
+    METHODOLOGY_NOTE as PM_METHODOLOGY_NOTE,
+    METRIC_KEYS as PM_METRIC_KEYS,
+    METRIC_LABELS as PM_METRIC_LABELS,
+    NOT_OFFICIAL_PLATFORMS as PM_NOT_OFFICIAL_PLATFORMS,
+    PROPRIETARY_DISCLAIMER as PM_PROPRIETARY_DISCLAIMER,
+    PmMetricComponent,
+    PmMetricScore,
+    ProprietaryMetricScorecard,
+)
 from db_models.competitors import (
     Competitor,
     CompetitorContent,
@@ -673,6 +684,15 @@ __all__ = [
     "ExecutiveBrainBrief",
     "EbAnswer",
     "EbRoleSummary",
+    "PM_METHODOLOGY",
+    "PM_METHODOLOGY_NOTE",
+    "PM_METRIC_KEYS",
+    "PM_METRIC_LABELS",
+    "PM_NOT_OFFICIAL_PLATFORMS",
+    "PM_PROPRIETARY_DISCLAIMER",
+    "ProprietaryMetricScorecard",
+    "PmMetricScore",
+    "PmMetricComponent",
     "INFO_GAIN_PENALTIES",
     "INFO_GAIN_REWARDS",
     "MOAT_FORMAT_PRIORS",
