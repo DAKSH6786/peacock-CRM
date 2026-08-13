@@ -302,6 +302,10 @@ REQUIRED_CORE_TABLES = {
     "executive_brain_briefs",
     "eb_answers",
     "eb_role_summaries",
+    # Peacock Proprietary Metrics
+    "proprietary_metric_scorecards",
+    "pm_metric_scores",
+    "pm_metric_components",
 }
 
 
