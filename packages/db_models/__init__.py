@@ -291,6 +291,16 @@ from db_models.command_centre import (
     CcVisibilitySignal,
     CommandCentreSnapshot,
 )
+from db_models.executive_brain import (
+    EXECUTIVE_QUESTION_LABELS as EB_EXECUTIVE_QUESTION_LABELS,
+    EXECUTIVE_QUESTIONS as EB_EXECUTIVE_QUESTIONS,
+    METHODOLOGY as EB_METHODOLOGY,
+    METHODOLOGY_NOTE as EB_METHODOLOGY_NOTE,
+    SUMMARY_ROLES as EB_SUMMARY_ROLES,
+    EbAnswer,
+    EbRoleSummary,
+    ExecutiveBrainBrief,
+)
 from db_models.competitors import (
     Competitor,
     CompetitorContent,
@@ -655,6 +665,14 @@ __all__ = [
     "CcVisibilitySignal",
     "CcSituationItem",
     "CcFeedItem",
+    "EB_EXECUTIVE_QUESTION_LABELS",
+    "EB_EXECUTIVE_QUESTIONS",
+    "EB_METHODOLOGY",
+    "EB_METHODOLOGY_NOTE",
+    "EB_SUMMARY_ROLES",
+    "ExecutiveBrainBrief",
+    "EbAnswer",
+    "EbRoleSummary",
     "INFO_GAIN_PENALTIES",
     "INFO_GAIN_REWARDS",
     "MOAT_FORMAT_PRIORS",
