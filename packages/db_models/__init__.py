@@ -257,6 +257,16 @@ from db_models.temporal_intelligence import (
     TiQueryAnswer,
     TiTimelineEvent,
 )
+from db_models.anomaly_engine import (
+    ANOMALY_LABELS as AE_ANOMALY_LABELS,
+    ANOMALY_TYPES as AE_ANOMALY_TYPES,
+    IMPACT_PRIORS as AE_IMPACT_PRIORS,
+    METHODOLOGY as AE_METHODOLOGY,
+    METHODOLOGY_NOTE as AE_METHODOLOGY_NOTE,
+    SEVERITY_LEVELS as AE_SEVERITY_LEVELS,
+    AeAnomaly,
+    AnomalyScan,
+)
 from db_models.competitors import (
     Competitor,
     CompetitorContent,
@@ -593,6 +603,14 @@ __all__ = [
     "TiChangePoint",
     "TiQueryAnswer",
     "TiTimelineEvent",
+    "AE_ANOMALY_LABELS",
+    "AE_ANOMALY_TYPES",
+    "AE_IMPACT_PRIORS",
+    "AE_METHODOLOGY",
+    "AE_METHODOLOGY_NOTE",
+    "AE_SEVERITY_LEVELS",
+    "AnomalyScan",
+    "AeAnomaly",
     "INFO_GAIN_PENALTIES",
     "INFO_GAIN_REWARDS",
     "MOAT_FORMAT_PRIORS",
