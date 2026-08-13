@@ -97,6 +97,7 @@ Everything else is relational columns, unique constraints, or EAV attribute tabl
 | Peacock Learning Engine 2.0 | `learning2_records`, `le2_context_factors`, `le2_industry_policies`, `le2_dimension_insights`, `le2_learning_runs` |
 | Peacock Temporal Intelligence | `temporal_timelines`, `ti_timeline_events`, `ti_change_points`, `ti_query_answers` |
 | Peacock Anomaly Engine | `anomaly_scans`, `ae_anomalies` |
+| Ask Peacock 2.0 | `ask_peacock_sessions`, `ap_answers`, `ap_evidence` |
 | Learning | `recommendations`, `recommendation_executions`, `recommendation_metrics`, `recommendation_outcomes`, `feature_weights`, `model_evaluations` |
 
 Aliases: `Organization` → `Organisation`; `LLMProvider` → `AiProvider`; `LLMModel` → `AiProviderModel`.
@@ -262,3 +263,4 @@ Also seeded generative engines (`chatgpt`, `gemini`, `claude`, `perplexity`, `de
 | `0028_learning_engine2` | Peacock Learning Engine 2.0 closed-loop industry learning |
 | `0029_temporal_intelligence` | Peacock Temporal Intelligence Visibility Timeline |
 | `0030_anomaly_engine` | Peacock Anomaly Engine impact-ranked detection |
+| `0031_ask_peacock` | Ask Peacock 2.0 structured NL intelligence-graph interface |

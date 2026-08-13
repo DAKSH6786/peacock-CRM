@@ -289,6 +289,10 @@ REQUIRED_CORE_TABLES = {
     # Peacock Anomaly Engine
     "anomaly_scans",
     "ae_anomalies",
+    # Ask Peacock 2.0
+    "ask_peacock_sessions",
+    "ap_answers",
+    "ap_evidence",
 }
 
 
