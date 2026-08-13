@@ -306,6 +306,12 @@ REQUIRED_CORE_TABLES = {
     "proprietary_metric_scorecards",
     "pm_metric_scores",
     "pm_metric_components",
+    # Peacock Research Mode
+    "research_studies",
+    "rm_pages",
+    "rm_prompts",
+    "rm_observations",
+    "rm_findings",
 }
 
 
