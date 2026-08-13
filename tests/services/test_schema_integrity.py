@@ -286,6 +286,9 @@ REQUIRED_CORE_TABLES = {
     "ti_timeline_events",
     "ti_change_points",
     "ti_query_answers",
+    # Peacock Anomaly Engine
+    "anomaly_scans",
+    "ae_anomalies",
 }
 
 
