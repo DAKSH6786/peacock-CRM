@@ -124,7 +124,17 @@ class ProbabilisticVisibilityService:
             max_repetitions=campaign.max_repetitions,
         ).clamped()
         limiter = RateLimiter(policy)
-        probe_fn = mock_visibility_probe if use_mock else mock_visibility_probe
+        if use_mock:
+            probe_fn = mock_visibility_probe
+        else:
+            # Live adapters are scaffolded but not callable from the API process.
+            # Refuse silent "live" labeling — callers must keep use_mock=True until
+            # real VISIBILITY_PROBE providers are registered.
+            raise RuntimeError(
+                "Live visibility probes are not enabled: LLM adapters raise "
+                "NotImplementedError and the API registers only NullLLMProvider. "
+                "Re-run with use_mock=True (deterministic mock probes)."
+            )
 
         campaign.campaign_status = "running"
         self.session.commit()
@@ -371,6 +381,15 @@ class ProbabilisticVisibilityService:
             f"Single-shot measurements are rejected."
         )
         now = datetime.now(UTC)
+        probe_sources = {
+            (o.probe_source or "mock") for o in campaign.observations
+        }
+        if probe_sources == {"mock"} or not probe_sources:
+            probe_mode = "mock_deterministic"
+        elif "mock" in probe_sources:
+            probe_mode = "mixed"
+        else:
+            probe_mode = "live"
         card = VisibilityScoreCard(
             id=new_uuid(),
             organisation_id=campaign.organisation_id,
@@ -408,6 +427,7 @@ class ProbabilisticVisibilityService:
             distributions=distributions,
             summary=summary,
             computed_at=now,
+            probe_mode=probe_mode,
         )
 
     def get_score_card(
@@ -466,4 +486,5 @@ class ProbabilisticVisibilityService:
             ],
             summary=card.summary,
             computed_at=card.computed_at,
+            probe_mode="mock_deterministic",
         )

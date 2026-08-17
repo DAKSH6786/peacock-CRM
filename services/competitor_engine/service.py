@@ -14,7 +14,7 @@ class CompetitorEngine:
         return {
             "service": "competitor_engine",
             "organisation_id": self.organisation_id,
-            "ready": True,
+            "ready": False,
             "features_implemented": False,
             "superseded_by": "deep_competitor",
             "note": (

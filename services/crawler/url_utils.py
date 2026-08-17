@@ -13,6 +13,14 @@ _DEFAULT_PORTS = {"http": 80, "https": 443}
 _HOST_RE = re.compile(
     r"^(?=.{1,253}$)(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))*\.?$"
 )
+_BLOCKED_HOSTNAMES = frozenset(
+    {
+        "localhost",
+        "metadata.google.internal",
+        "metadata",
+        "instance-data",
+    }
+)
 
 
 class UrlValidationError(ValueError):
@@ -28,6 +36,53 @@ class NormalisedUrl:
     port: int | None
     path: str
     is_ip_host: bool
+
+
+def is_private_or_local_ip(value: str) -> bool:
+    """True for loopback, private, link-local, multicast, and unspecified addresses."""
+    try:
+        ip = ipaddress.ip_address(value)
+    except ValueError:
+        return False
+    return bool(
+        ip.is_private
+        or ip.is_loopback
+        or ip.is_link_local
+        or ip.is_multicast
+        or ip.is_reserved
+        or ip.is_unspecified
+    )
+
+
+def is_blocked_crawl_host(hostname: str) -> bool:
+    """True when the hostname must not be crawled (SSRF / metadata protection)."""
+    host = (hostname or "").strip().lower().rstrip(".")
+    if not host:
+        return True
+    if host in _BLOCKED_HOSTNAMES:
+        return True
+    if host.endswith(".localhost") or host.endswith(".local") or host.endswith(".internal"):
+        return True
+    if host.startswith("169.254."):
+        return True
+    try:
+        return is_private_or_local_ip(host)
+    except ValueError:
+        return False
+
+
+def assert_public_crawl_target(hostname: str, *, resolved_ips: list[str] | None = None) -> None:
+    """Reject private/local/metadata crawl targets (SSRF protection)."""
+    host = (hostname or "").strip().lower().rstrip(".")
+    if is_blocked_crawl_host(host):
+        raise UrlValidationError(
+            f"Blocked crawl target (private/local/metadata host): {hostname}"
+        )
+    for ip in resolved_ips or []:
+        if is_private_or_local_ip(ip):
+            raise UrlValidationError(
+                f"Blocked crawl target (DNS resolves to private address {ip}): {hostname}"
+            )
 
 
 def validate_domain(hostname: str) -> str:

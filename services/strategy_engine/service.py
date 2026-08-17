@@ -14,6 +14,7 @@ class StrategyEngine:
         return {
             "service": "strategy_engine",
             "organisation_id": self.organisation_id,
-            "ready": True,
+            "ready": False,
             "features_implemented": False,
+            "honesty": "Scaffold only — prefer intelligence (PINE) for strategic runs.",
         }
