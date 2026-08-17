@@ -328,6 +328,15 @@ REQUIRED_CORE_TABLES = {
     "er_dead_letter_events",
     "er_circuit_states",
     "er_workflow_checkpoints",
+    # Peacock Security for AI Connectors
+    "ai_connector_security_scans",
+    "acs_content_segments",
+    "acs_injection_findings",
+    "acs_permission_checks",
+    "acs_url_safety_checks",
+    "acs_pii_findings",
+    "acs_output_validations",
+    "acs_control_activations",
 }
 
 
