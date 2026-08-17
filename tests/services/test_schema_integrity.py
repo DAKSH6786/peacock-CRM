@@ -318,6 +318,9 @@ REQUIRED_CORE_TABLES = {
     "moat_pathway_nodes",
     "moat_pathway_edges",
     "moat_pathway_outcomes",
+    # Peacock Cost Intelligence
+    "intelligence_budget_estimates",
+    "ibe_method_candidates",
 }
 
 
