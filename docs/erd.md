@@ -273,3 +273,4 @@ Also seeded generative engines (`chatgpt`, `gemini`, `claude`, `perplexity`, `de
 | `0034_proprietary_metrics` | Peacock Proprietary Metrics documented scoring framework |
 | `0035_research_mode` | Peacock Research Mode search intelligence laboratory |
 | `0036_moat_data_model` | Peacock Moat Data Model proprietary pathway accumulation |
+| `0037_cost_intelligence` | Peacock Cost Intelligence / Intelligence Budget Engine |

@@ -34,6 +34,7 @@ from api.routes import (
     proprietary_metrics,
     research_mode,
     moat_data_model,
+    cost_intelligence,
     scenario_engine,
     prompt_universe,
     retrieval_pathway,
@@ -113,6 +114,7 @@ def create_app() -> FastAPI:
     application.include_router(proprietary_metrics.router)
     application.include_router(research_mode.router)
     application.include_router(moat_data_model.router)
+    application.include_router(cost_intelligence.router)
 
     # Soft static role fallbacks only — PINE should prefer CapabilityRouter
     # dynamic selection (request.provider / request.model). Never treat these
