@@ -337,6 +337,10 @@ REQUIRED_CORE_TABLES = {
     "acs_pii_findings",
     "acs_output_validations",
     "acs_control_activations",
+    # Peacock One Quality Bar
+    "quality_bar_assessments",
+    "qb_gate_results",
+    "qb_remediation_actions",
 }
 
 
