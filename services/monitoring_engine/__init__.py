@@ -1,5 +1,5 @@
-"""Continuous monitoring (stub)."""
+"""Continuous monitoring."""
 
-from monitoring_engine.service import MonitoringEngine
+from monitoring_engine.service import MonitoringEngine, MonitoringService
 
-__all__ = ["MonitoringEngine"]
+__all__ = ["MonitoringEngine", "MonitoringService"]

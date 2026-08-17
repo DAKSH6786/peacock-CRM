@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from api.db import get_db
-from api.deps import AuthContext, get_auth_context
+from api.deps import AuthContext, get_auth_context, require_writer
 from api.schemas_visibility import (
     VisibilityCampaignRequest,
     VisibilityCampaignResponse,
@@ -25,6 +26,16 @@ router = APIRouter(prefix="/visibility", tags=["probabilistic-ai-visibility"])
 audit_logger = AuditLogger()
 
 
+class VisibilityRunRequest(BaseModel):
+    use_mock: bool = Field(
+        default=False,
+        description=(
+            "When false (default), probes run through LLMGateway VISIBILITY_PROBE. "
+            "When true, use deterministic mock probes (tests / offline)."
+        ),
+    )
+
+
 def _workspace_id(ctx: AuthContext, explicit: str | None) -> str:
     workspace_id = explicit or (ctx.workspace.id if ctx.workspace else None)
     if not workspace_id:
@@ -40,7 +51,7 @@ def visibility_status(ctx: AuthContext = Depends(get_auth_context)) -> dict:
 @router.post("/campaigns", response_model=VisibilityCampaignResponse, status_code=201)
 def create_visibility_campaign(
     body: VisibilityCampaignRequest,
-    ctx: AuthContext = Depends(get_auth_context),
+    ctx: AuthContext = Depends(require_writer),
     db: Session = Depends(get_db),
 ) -> VisibilityCampaignResponse:
     ws = _workspace_id(ctx, body.workspace_id)
@@ -97,14 +108,19 @@ def create_visibility_campaign(
 @router.post("/campaigns/{campaign_id}/run", response_model=VisibilityScoreCardResponse)
 async def run_visibility_campaign(
     campaign_id: str,
-    ctx: AuthContext = Depends(get_auth_context),
+    request: Request,
+    body: VisibilityRunRequest | None = None,
+    ctx: AuthContext = Depends(require_writer),
     db: Session = Depends(get_db),
 ) -> VisibilityScoreCardResponse:
+    use_mock = bool(body.use_mock) if body is not None else False
+    gateway = None if use_mock else getattr(request.app.state, "llm_gateway", None)
     try:
         card = await ProbabilisticVisibilityService(db).run_campaign(
             campaign_id=campaign_id,
             organisation_id=ctx.organisation.id,
-            use_mock=True,
+            use_mock=use_mock,
+            gateway=gateway,
         )
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -123,6 +139,8 @@ async def run_visibility_campaign(
                 "observations": card.observation_count,
                 "score": card.ai_visibility_score,
                 "confidence": card.measurement_confidence,
+                "probe_mode": card.probe_mode,
+                "use_mock": use_mock,
             },
         )
     )

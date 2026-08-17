@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from datetime import UTC, datetime
+from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
@@ -38,6 +39,25 @@ from geo_engine.probabilistic_stats import (
 )
 
 
+def _encode_campaign_notes(competitors: list[str], notes: str | None) -> str | None:
+    parts: list[str] = []
+    cleaned = [c.strip() for c in competitors if c and str(c).strip()]
+    if cleaned:
+        parts.append("COMPETITORS:" + ",".join(cleaned))
+    if notes and notes.strip():
+        parts.append(notes.strip())
+    return "\n".join(parts) if parts else None
+
+
+def _decode_competitors(notes: str | None) -> list[str]:
+    if not notes:
+        return []
+    for line in notes.splitlines():
+        if line.startswith("COMPETITORS:"):
+            return [c.strip() for c in line.removeprefix("COMPETITORS:").split(",") if c.strip()]
+    return []
+
+
 class ProbabilisticVisibilityService:
     """Create campaigns, run rate-limited repetitions, compute distributions."""
 
@@ -68,7 +88,7 @@ class ProbabilisticVisibilityService:
             max_total_calls=policy.max_total_calls,
             min_interval_ms=policy.min_interval_ms,
             campaign_status="ready",
-            notes=spec.notes,
+            notes=_encode_campaign_notes(spec.competitors, spec.notes),
         )
         self.session.add(campaign)
         self.session.flush()
@@ -103,6 +123,7 @@ class ProbabilisticVisibilityService:
         campaign_id: str,
         organisation_id: str,
         use_mock: bool = True,
+        gateway: Any | None = None,
     ) -> VisibilityScoreCardView:
         campaign = self.session.get(
             VisibilityCampaign,
@@ -124,17 +145,31 @@ class ProbabilisticVisibilityService:
             max_repetitions=campaign.max_repetitions,
         ).clamped()
         limiter = RateLimiter(policy)
+        raw_competitors = _decode_competitors(campaign.notes)
+        competitors_list = raw_competitors
         if use_mock:
             probe_fn = mock_visibility_probe
+            probe_source = "mock"
         else:
-            # Live adapters are scaffolded but not callable from the API process.
-            # Refuse silent "live" labeling — callers must keep use_mock=True until
-            # real VISIBILITY_PROBE providers are registered.
-            raise RuntimeError(
-                "Live visibility probes are not enabled: LLM adapters raise "
-                "NotImplementedError and the API registers only NullLLMProvider. "
-                "Re-run with use_mock=True (deterministic mock probes)."
+            if gateway is None:
+                raise RuntimeError(
+                    "Gateway visibility probes require an LLMGateway instance. "
+                    "Pass gateway= or use_mock=True for deterministic mock probes."
+                )
+            from geo_engine.llm_visibility_probe import make_llm_visibility_probe
+
+            probe_fn = make_llm_visibility_probe(
+                gateway=gateway,
+                organisation_id=organisation_id,
+                workspace_id=campaign.workspace_id,
+                brand_name=campaign.brand_name,
+                competitors=competitors_list,
             )
+            try:
+                provider = gateway.provider_for_role("VISIBILITY_PROBE")
+                probe_source = f"gateway:{provider.name}"
+            except Exception:  # noqa: BLE001
+                probe_source = "gateway"
 
         campaign.campaign_status = "running"
         self.session.commit()
@@ -182,7 +217,7 @@ class ProbabilisticVisibilityService:
                         competitor_mentions=",".join(outcome.competitor_mentions) or None,
                         raw_excerpt=outcome.raw_excerpt,
                         structured_summary=outcome.structured_summary,
-                        probe_source="mock" if use_mock else "live",
+                        probe_source=probe_source,
                     )
                 )
             cell.completed_repetitions += len(outcomes)
@@ -386,6 +421,8 @@ class ProbabilisticVisibilityService:
         }
         if probe_sources == {"mock"} or not probe_sources:
             probe_mode = "mock_deterministic"
+        elif all(str(s).startswith("gateway:") for s in probe_sources):
+            probe_mode = "gateway"
         elif "mock" in probe_sources:
             probe_mode = "mixed"
         else:

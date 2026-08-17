@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from api.db import get_db
-from api.deps import AuthContext, get_auth_context
+from api.deps import AuthContext, get_auth_context, require_reader, require_writer
 from api.schemas_intelligence import (
     IntelligenceCaseResponse,
     IntelligenceCaseUpsertRequest,
@@ -85,7 +85,7 @@ def _case_from_request(
 @router.post("/runs", response_model=StrategicRunResponse, status_code=201)
 async def create_strategic_run(
     body: StrategicRunRequest,
-    ctx: AuthContext = Depends(get_auth_context),
+    ctx: AuthContext = Depends(require_writer),
 ) -> StrategicRunResponse:
     workspace_id = _workspace_id(ctx, body.workspace_id)
     orchestrator = IntelligenceOrchestrator(organisation_id=ctx.organisation.id)
@@ -154,7 +154,7 @@ def list_peacock_modes(ctx: AuthContext = Depends(get_auth_context)) -> dict:
 @router.post("/cases", response_model=IntelligenceCaseResponse, status_code=201)
 def upsert_intelligence_case(
     body: IntelligenceCaseUpsertRequest,
-    ctx: AuthContext = Depends(get_auth_context),
+    ctx: AuthContext = Depends(require_writer),
     db: Session = Depends(get_db),
 ) -> IntelligenceCaseResponse:
     workspace_id = _workspace_id(ctx, body.workspace_id)

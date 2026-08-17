@@ -10,7 +10,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from api.db import SessionLocal, get_db
-from api.deps import AuthContext, get_auth_context
+from api.deps import AuthContext, get_auth_context, require_reader, require_writer
 from api.schemas_crawler import (
     CrawlProgressResponse,
     CrawlResponse,
@@ -102,7 +102,7 @@ def _serialize_crawl(crawl: StoredCrawl, *, include_pages: bool = True) -> Crawl
 @router.post("/websites", response_model=WebsiteResponse, status_code=201)
 def ingest_website(
     body: WebsiteIngestRequest,
-    ctx: AuthContext = Depends(get_auth_context),
+    ctx: AuthContext = Depends(require_writer),
     db: Session = Depends(get_db),
 ) -> WebsiteResponse:
     workspace_id = _workspace_id(ctx, body.workspace_id)
@@ -170,7 +170,7 @@ def list_websites(
 @router.post("/crawls", response_model=CrawlResponse, status_code=202)
 async def start_crawl(
     body: CrawlStartRequest,
-    ctx: AuthContext = Depends(get_auth_context),
+    ctx: AuthContext = Depends(require_writer),
     db: Session = Depends(get_db),
 ) -> CrawlResponse:
     workspace_id = _workspace_id(ctx, body.workspace_id)
@@ -314,7 +314,7 @@ def _control(crawl_id: str, ctx: AuthContext, db: Session, action: str) -> Crawl
 @router.post("/crawls/{crawl_id}/pause", response_model=CrawlResponse)
 def pause_crawl(
     crawl_id: str,
-    ctx: AuthContext = Depends(get_auth_context),
+    ctx: AuthContext = Depends(require_writer),
     db: Session = Depends(get_db),
 ) -> CrawlResponse:
     return _control(crawl_id, ctx, db, "pause")
@@ -323,7 +323,7 @@ def pause_crawl(
 @router.post("/crawls/{crawl_id}/resume", response_model=CrawlResponse)
 def resume_crawl(
     crawl_id: str,
-    ctx: AuthContext = Depends(get_auth_context),
+    ctx: AuthContext = Depends(require_writer),
     db: Session = Depends(get_db),
 ) -> CrawlResponse:
     return _control(crawl_id, ctx, db, "resume")
@@ -332,7 +332,7 @@ def resume_crawl(
 @router.post("/crawls/{crawl_id}/cancel", response_model=CrawlResponse)
 def cancel_crawl(
     crawl_id: str,
-    ctx: AuthContext = Depends(get_auth_context),
+    ctx: AuthContext = Depends(require_writer),
     db: Session = Depends(get_db),
 ) -> CrawlResponse:
     return _control(crawl_id, ctx, db, "cancel")
@@ -341,7 +341,7 @@ def cancel_crawl(
 @router.post("/crawls/{crawl_id}/restart", response_model=CrawlResponse)
 async def restart_crawl(
     crawl_id: str,
-    ctx: AuthContext = Depends(get_auth_context),
+    ctx: AuthContext = Depends(require_writer),
     db: Session = Depends(get_db),
 ) -> CrawlResponse:
     store = SqlAlchemyCrawlStore(db)
@@ -360,7 +360,7 @@ async def restart_crawl(
 @router.post("/crawls/{crawl_id}/retry-failed", response_model=CrawlResponse)
 async def retry_failed_urls(
     crawl_id: str,
-    ctx: AuthContext = Depends(get_auth_context),
+    ctx: AuthContext = Depends(require_writer),
     db: Session = Depends(get_db),
 ) -> CrawlResponse:
     store = SqlAlchemyCrawlStore(db)

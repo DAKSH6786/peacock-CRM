@@ -12,7 +12,7 @@ from action_engine import (
     catalog,
 )
 from api.db import get_db
-from api.deps import AuthContext, get_auth_context
+from api.deps import AuthContext, get_auth_context, require_reader, require_writer
 from api.schemas_action_engine import (
     ActionCatalogResponse,
     ActionResponse,
@@ -74,7 +74,7 @@ def actions_catalog(
 @router.post("", response_model=ActionResponse, status_code=201)
 def create_action(
     body: CreateActionRequest,
-    ctx: AuthContext = Depends(get_auth_context),
+    ctx: AuthContext = Depends(require_writer),
     db: Session = Depends(get_db),
 ) -> ActionResponse:
     ws = _workspace_id(ctx, body.workspace_id)
@@ -126,7 +126,7 @@ def get_action(
 @router.post("/{action_id}/submit", response_model=ActionResponse)
 def submit_action(
     action_id: str,
-    ctx: AuthContext = Depends(get_auth_context),
+    ctx: AuthContext = Depends(require_writer),
     db: Session = Depends(get_db),
 ) -> ActionResponse:
     try:
@@ -156,7 +156,7 @@ def submit_action(
 def approve_action_route(
     action_id: str,
     body: ApprovalRequest,
-    ctx: AuthContext = Depends(get_auth_context),
+    ctx: AuthContext = Depends(require_writer),
     db: Session = Depends(get_db),
 ) -> ActionResponse:
     try:
@@ -187,7 +187,7 @@ def approve_action_route(
 def reject_action_route(
     action_id: str,
     body: ApprovalRequest,
-    ctx: AuthContext = Depends(get_auth_context),
+    ctx: AuthContext = Depends(require_writer),
     db: Session = Depends(get_db),
 ) -> ActionResponse:
     try:
@@ -207,7 +207,7 @@ def reject_action_route(
 @router.post("/{action_id}/execute", response_model=ActionResponse)
 def execute_action_route(
     action_id: str,
-    ctx: AuthContext = Depends(get_auth_context),
+    ctx: AuthContext = Depends(require_writer),
     db: Session = Depends(get_db),
 ) -> ActionResponse:
     try:
@@ -240,7 +240,7 @@ def execute_action_route(
 def revert_action_route(
     action_id: str,
     body: RevertRequest,
-    ctx: AuthContext = Depends(get_auth_context),
+    ctx: AuthContext = Depends(require_writer),
     db: Session = Depends(get_db),
 ) -> ActionResponse:
     try:
@@ -260,7 +260,7 @@ def revert_action_route(
 @router.post("/permissions/grant", response_model=PermissionResponse, status_code=201)
 def grant_permission(
     body: GrantPermissionRequest,
-    ctx: AuthContext = Depends(get_auth_context),
+    ctx: AuthContext = Depends(require_writer),
     db: Session = Depends(get_db),
 ) -> PermissionResponse:
     ws = _workspace_id(ctx, body.workspace_id)

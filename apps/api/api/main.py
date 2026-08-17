@@ -49,17 +49,24 @@ from api.routes import (
     temporal_intelligence,
     visibility,
     writer_intelligence,
+    aeo,
+    monitoring,
 )
-from llm_gateway import LLMGateway, NullLLMProvider
-from llm_gateway.ports import LLMProviderName
+from llm_gateway import build_gateway_from_settings, live_provider_codes
 from observability.logging import configure_logging, get_logger
 
 
 @asynccontextmanager
-async def lifespan(_app: FastAPI):
+async def lifespan(app: FastAPI):
     settings = get_settings()
     configure_logging(settings.log_level, json_logs=settings.app_env != "local")
-    get_logger("api").info("api_starting", env=settings.app_env, job_backend=settings.job_backend)
+    live = live_provider_codes(app.state.llm_gateway) if hasattr(app.state, "llm_gateway") else []
+    get_logger("api").info(
+        "api_starting",
+        env=settings.app_env,
+        job_backend=settings.job_backend,
+        live_llm_providers=live,
+    )
     yield
     get_logger("api").info("api_stopping")
 
@@ -123,21 +130,12 @@ def create_app() -> FastAPI:
     application.include_router(ai_connector_security.router)
     application.include_router(quality_bar.router)
     application.include_router(final_architecture.router)
+    application.include_router(aeo.router)
+    application.include_router(monitoring.router)
 
-    # Soft static role fallbacks only — PINE should prefer CapabilityRouter
-    # dynamic selection (request.provider / request.model). Never treat these
-    # as permanent Claude=critic / Perplexity=research / GPT=strategy locks.
-    application.state.llm_gateway = LLMGateway(
-        providers={LLMProviderName.NULL: NullLLMProvider()},
-        role_routing={
-            "WEB_RESEARCH": LLMProviderName.NULL,
-            "SYNTHESIS": LLMProviderName.NULL,
-            "VERIFY_ADVERSARIAL": LLMProviderName.NULL,
-            "VISIBILITY_PROBE": LLMProviderName.NULL,
-        },
-        max_retries=settings.llm_max_retries,
-        default_timeout_seconds=settings.llm_default_timeout_seconds,
-    )
+    # Soft role fallbacks only — prefer CapabilityRouter dynamic selection.
+    # Live adapters register when API keys are present; Null always available.
+    application.state.llm_gateway = build_gateway_from_settings(settings)
     return application
 
 

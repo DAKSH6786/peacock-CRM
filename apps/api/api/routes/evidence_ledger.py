@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from api.db import get_db
-from api.deps import AuthContext, get_auth_context
+from api.deps import AuthContext, get_auth_context, require_reader, require_writer
 from api.schemas_evidence_ledger import (
     ClaimEvidenceRequest,
     EvidenceGraphResponse,
@@ -51,7 +51,7 @@ def list_evidence_types(ctx: AuthContext = Depends(get_auth_context)) -> dict:
 @router.post("/evidences", response_model=LedgerNodeResponse, status_code=201)
 def create_evidence(
     body: LedgerEvidenceRequest,
-    ctx: AuthContext = Depends(get_auth_context),
+    ctx: AuthContext = Depends(require_writer),
     db: Session = Depends(get_db),
 ) -> LedgerNodeResponse:
     workspace_id = _workspace_id(ctx, body.workspace_id)
@@ -103,7 +103,7 @@ def create_evidence(
 @router.post("/findings", response_model=LedgerNodeResponse, status_code=201)
 def create_finding(
     body: LedgerFindingRequest,
-    ctx: AuthContext = Depends(get_auth_context),
+    ctx: AuthContext = Depends(require_writer),
     db: Session = Depends(get_db),
 ) -> LedgerNodeResponse:
     workspace_id = _workspace_id(ctx, body.workspace_id)
@@ -131,7 +131,7 @@ def create_finding(
 @router.post("/recommendations", response_model=LedgerNodeResponse, status_code=201)
 def create_recommendation(
     body: LedgerRecommendationRequest,
-    ctx: AuthContext = Depends(get_auth_context),
+    ctx: AuthContext = Depends(require_writer),
     db: Session = Depends(get_db),
 ) -> LedgerNodeResponse:
     workspace_id = _workspace_id(ctx, body.workspace_id)
@@ -161,7 +161,7 @@ def create_recommendation(
 @router.post("/actions", response_model=LedgerNodeResponse, status_code=201)
 def create_action(
     body: LedgerActionRequest,
-    ctx: AuthContext = Depends(get_auth_context),
+    ctx: AuthContext = Depends(require_writer),
     db: Session = Depends(get_db),
 ) -> LedgerNodeResponse:
     workspace_id = _workspace_id(ctx, body.workspace_id)
@@ -189,7 +189,7 @@ def create_action(
 @router.post("/outcomes", response_model=LedgerNodeResponse, status_code=201)
 def create_outcome(
     body: LedgerOutcomeRequest,
-    ctx: AuthContext = Depends(get_auth_context),
+    ctx: AuthContext = Depends(require_writer),
     db: Session = Depends(get_db),
 ) -> LedgerNodeResponse:
     workspace_id = _workspace_id(ctx, body.workspace_id)
@@ -217,7 +217,7 @@ def create_outcome(
 @router.post("/claim-links", response_model=LedgerNodeResponse, status_code=201)
 def link_claim(
     body: ClaimEvidenceRequest,
-    ctx: AuthContext = Depends(get_auth_context),
+    ctx: AuthContext = Depends(require_writer),
     db: Session = Depends(get_db),
 ) -> LedgerNodeResponse:
     workspace_id = _workspace_id(ctx, body.workspace_id)
