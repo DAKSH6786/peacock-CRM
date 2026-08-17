@@ -276,3 +276,4 @@ Also seeded generative engines (`chatgpt`, `gemini`, `claude`, `perplexity`, `de
 | `0037_cost_intelligence` | Peacock Cost Intelligence / Intelligence Budget Engine |
 | `0038_enterprise_reliability` | Peacock Enterprise Reliability partial multi-provider controls |
 | `0039_ai_connector_security` | Peacock Security for AI Connectors untrusted LLM I/O |
+| `0040_quality_bar` | Peacock One Quality Bar module completeness gates |
