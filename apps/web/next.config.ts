@@ -1,7 +1,18 @@
 import type { NextConfig } from "next";
 
+const apiProxyTarget =
+  process.env.API_PROXY_TARGET?.replace(/\/$/, "") ?? "http://127.0.0.1:8000";
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  async rewrites() {
+    return [
+      {
+        source: "/backend/:path*",
+        destination: `${apiProxyTarget}/:path*`,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

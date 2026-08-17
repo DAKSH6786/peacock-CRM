@@ -1,5 +1,14 @@
+/**
+ * Browser calls go through the Next.js `/backend` rewrite to FastAPI.
+ * That keeps the product URL on :3000 and avoids CORS / wrong-port 404s.
+ * Override with NEXT_PUBLIC_API_URL when the API is on another origin.
+ */
 export function getApiBaseUrl(): string {
-  return process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+  const configured = process.env.NEXT_PUBLIC_API_URL?.trim();
+  if (configured) {
+    return configured.replace(/\/$/, "");
+  }
+  return "/backend";
 }
 
 export async function apiFetch<T>(
@@ -11,7 +20,8 @@ export async function apiFetch<T>(
   if (init?.token) {
     headers.set("Authorization", `Bearer ${init.token}`);
   }
-  const response = await fetch(`${getApiBaseUrl()}${path}`, {
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  const response = await fetch(`${getApiBaseUrl()}${normalized}`, {
     ...init,
     headers,
   });

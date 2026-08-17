@@ -88,6 +88,26 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
+    @application.get("/", include_in_schema=False)
+    def root() -> dict:
+        """Avoid a bare FastAPI 404 when someone opens the API port as the UI."""
+        return {
+            "app": settings.app_name,
+            "message": (
+                "This is the Peacock One API — not the product UI. "
+                "Open the Next.js app on port 3000."
+            ),
+            "web_ui": settings.web_url,
+            "docs": "/docs",
+            "health": "/health",
+            "ready": "/ready",
+            "ui_routes": {
+                "command_centre": "/",
+                "peacock_os": "/os",
+                "platform_ops": "/ops",
+            },
+        }
+
     application.include_router(health.router)
     application.include_router(auth.router)
     application.include_router(services.router)
