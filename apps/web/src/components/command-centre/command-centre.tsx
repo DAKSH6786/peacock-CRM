@@ -34,13 +34,17 @@ export function CommandCentre() {
             Peacock Command Centre
           </h1>
           <p className="cc-hero__lede">
-            Generative visibility command — not another SEO dashboard. One index,
-            the situation that matters, and detections you can act on.
+            Generative visibility command — Adaptive Search, Answer &amp; Generative
+            Intelligence OS. Not Semrush + an AI dashboard. One index, the situation
+            that matters, and detections you can act on.
           </p>
           <div className="cc-hero__actions">
             <a href="#intelligence-feed" className="cc-btn cc-btn--primary">
               Open intelligence feed
             </a>
+            <Link href="/os" className="cc-btn cc-btn--ghost">
+              Peacock One OS
+            </Link>
             <Link href="/executive" className="cc-btn cc-btn--ghost">
               Executive Brain
             </Link>
