@@ -341,6 +341,12 @@ REQUIRED_CORE_TABLES = {
     "quality_bar_assessments",
     "qb_gate_results",
     "qb_remediation_actions",
+    # Final Peacock Architecture
+    "final_architecture_maps",
+    "fa_pipeline_stages",
+    "fa_observation_sources",
+    "fa_pine_lanes",
+    "fa_product_questions",
 }
 
 

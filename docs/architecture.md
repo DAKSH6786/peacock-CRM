@@ -21,8 +21,15 @@ apps/web  ──HTTP──►  apps/api (FastAPI)
 6. **Embeddings in Postgres** — `pgvector` on `embedding_chunks`.
 7. **Relational modelling first** — see [`docs/erd.md`](./erd.md) for FKs, cascades, and JSONB policy.
 
-## Cognitive loop (future features)
+## Cognitive loop
 
-OBSERVE → THINK → VERIFY → DECIDE → EXECUTE → MEASURE → LEARN
+See **Final Peacock Architecture**: [`docs/final-architecture.md`](./final-architecture.md)
 
-This stage only scaffolds orchestrator/engine packages.
+```text
+OBSERVE → EVIDENCE → PINE → COUNCIL → CRITIC → VERIFY → JUDGE
+  → SIMULATE → RECOMMEND → ACT → EXECUTE → MONITOR → EXPERIMENT
+  → OUTCOMES → LEARN → PINE
+```
+
+Product standard: not only “How visible are we?” — certainty, why, competitors,
+sources, entities, intents, change, EV, ownership, inaction, outcomes, learning.
