@@ -33,3 +33,9 @@ OBSERVE → EVIDENCE → PINE → COUNCIL → CRITIC → VERIFY → JUDGE
 
 Product standard: not only “How visible are we?” — certainty, why, competitors,
 sources, entities, intents, change, EV, ownership, inaction, outcomes, learning.
+
+**Absolute product:** [`docs/peacock-one-os.md`](./peacock-one-os.md) —
+Adaptive Search, Answer & Generative Intelligence Operating System (not Semrush + AI dashboard).
+
+**Execution discipline:** [`docs/cursor-execution-rule.md`](./cursor-execution-rule.md) ·
+honest status: [`docs/functional-status.md`](./functional-status.md).

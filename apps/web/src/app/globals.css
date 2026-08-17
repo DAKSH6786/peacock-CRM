@@ -951,3 +951,154 @@ a {
     max-width: none;
   }
 }
+
+/* —— Peacock One OS hub —— */
+
+.os-hero {
+  padding: 1rem 0 2.5rem;
+  animation: cc-rise 0.85s ease-out both;
+}
+
+.os-lede {
+  margin: 0.4rem 0 1rem;
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(1.15rem, 2.2vw, 1.55rem);
+  color: var(--primary);
+  max-width: 36rem;
+  line-height: 1.35;
+}
+
+.os-moat,
+.os-standard,
+.os-grid {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.os-moat p,
+.os-honesty {
+  color: var(--muted);
+  line-height: 1.55;
+  max-width: 48rem;
+}
+
+.os-callout {
+  margin: 0 0 1rem;
+  padding: 1rem 1.15rem;
+  border-left: 3px solid var(--accent);
+  background: rgba(240, 180, 41, 0.08);
+  line-height: 1.5;
+}
+
+.os-questions,
+.os-stage-list {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.os-questions li,
+.os-stage-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(36, 48, 73, 0.7);
+  color: var(--foreground);
+}
+
+.os-stage-list li {
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.os-stage-list span,
+.os-meta {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.os-tag {
+  flex-shrink: 0;
+  font-style: normal;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.os-tag--warn {
+  color: var(--accent);
+}
+
+.os-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.85rem;
+  margin-top: 1.25rem;
+}
+
+.os-card {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1rem 1.1rem;
+  background: rgba(16, 26, 44, 0.85);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.os-card:hover {
+  border-color: rgba(45, 212, 191, 0.45);
+  transform: translateY(-2px);
+}
+
+.os-card span {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.os-diagram {
+  overflow: auto;
+  padding: 1.1rem;
+  background: rgba(4, 16, 22, 0.55);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: var(--muted);
+  white-space: pre;
+}
+
+.os-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.85rem;
+  margin: 1.25rem 0;
+}
+
+.os-stats div {
+  padding: 0.85rem 1rem;
+  background: rgba(16, 26, 44, 0.85);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.os-stats dt {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.os-stats dd {
+  margin: 0.35rem 0 0;
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+}
