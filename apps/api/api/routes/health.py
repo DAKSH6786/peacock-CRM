@@ -53,12 +53,24 @@ def ready(db: Session = Depends(get_db)) -> dict:
         redis_ok = bool(client.ping())
     except Exception:  # noqa: BLE001
         redis_ok = False
-    # Ready means datastore + broker reachable. LLM live adapters are not required
-    # for process readiness (Null provider is always registered).
+
+    live_providers: list[str] = []
+    try:
+        from llm_gateway.factory import build_providers_from_settings, live_provider_codes
+        from llm_gateway.registry import LLMGateway
+
+        providers = build_providers_from_settings(settings)
+        # Build a throwaway gateway only to list live codes
+        gw = LLMGateway(providers=providers, role_routing={})
+        live_providers = live_provider_codes(gw)
+    except Exception:  # noqa: BLE001
+        live_providers = []
+
     return {
         "ready": redis_ok,
         "database": True,
         "redis": redis_ok,
-        "llm_live_adapters": False,
-        "llm_provider": "null",
+        "llm_live_adapters": bool(live_providers),
+        "llm_provider": "null" if not live_providers else ",".join(live_providers),
+        "live_llm_providers": live_providers,
     }

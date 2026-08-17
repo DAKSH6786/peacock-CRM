@@ -68,7 +68,27 @@ class LLMGateway:
             return self._providers[name]
         return self.provider_for_role(request.role)
 
+    def _guard_untrusted_messages(self, request: LLMCompletionRequest) -> None:
+        """Block obvious prompt-injection / secret-exfil attempts in untrusted input."""
+        import re
+
+        joined = "\n".join(m.get("content", "") for m in request.messages)
+        # Treat crawler / visibility excerpts as untrusted DATA — refuse instruction overrides.
+        patterns = [
+            r"ignore\s+(all\s+)?(previous|prior)\s+instructions",
+            r"reveal\s+(the\s+)?(system\s+prompt|api\s*keys?)",
+            r"exfiltrate\s+(secrets?|credentials?)",
+            r"jailbreak",
+        ]
+        for pattern in patterns:
+            if re.search(pattern, joined, re.IGNORECASE):
+                raise ValueError(
+                    "Blocked untrusted prompt content (prompt-injection / secret-exfil pattern). "
+                    "Crawler and visibility text must be treated as DATA, not instructions."
+                )
+
     async def complete(self, request: LLMCompletionRequest) -> LLMCompletionResponse:
+        self._guard_untrusted_messages(request)
         provider = self.provider_for_request(request)
         timeout = request.timeout_seconds or self._default_timeout
 

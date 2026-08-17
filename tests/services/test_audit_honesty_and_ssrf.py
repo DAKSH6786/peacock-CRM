@@ -6,28 +6,23 @@ from types import SimpleNamespace
 
 import pytest
 
-from aeo_engine import AeoEngine
 from crawler.engine import PeacockCrawler
 from crawler.policy import CrawlPolicy
 from crawler.url_utils import UrlValidationError, assert_public_crawl_target, is_blocked_crawl_host
 from geo_engine import GeoEngine, ProbabilisticVisibilityService
-from learning_engine import LearningEngine
-from monitoring_engine import MonitoringEngine
 from seo_engine import SeoEngine
+from strategy_engine import StrategyEngine
 
 
 def test_scaffold_engines_are_not_ready_when_unimplemented() -> None:
-    assert AeoEngine("org").status()["ready"] is False
-    assert AeoEngine("org").status()["features_implemented"] is False
-    assert MonitoringEngine("org").status()["ready"] is False
-    assert LearningEngine("org").status()["ready"] is False
+    assert StrategyEngine("org").status()["ready"] is False
+    assert StrategyEngine("org").status()["features_implemented"] is False
 
 
-def test_geo_and_seo_status_disclose_mock_io() -> None:
+def test_geo_and_seo_status_disclose_io_modes() -> None:
     geo = GeoEngine("org").status()
     assert geo["features_implemented"] is True
-    assert geo["live_engine_probes"] is False
-    assert geo["probe_mode"] == "mock_deterministic"
+    assert geo["live_engine_probes"] is True
     seo = SeoEngine("org").status()
     assert seo["connector_mode"] == "mock_by_default"
     assert seo["live_connectors"] is False
@@ -75,13 +70,14 @@ def test_invalid_peacock_mode_raises_clear_value_error() -> None:
 
 
 @pytest.mark.asyncio
-async def test_visibility_refuses_fake_live_probe_mode() -> None:
-    """use_mock=False must raise — never silently fall back to mock labeled as live."""
-
+async def test_visibility_refuses_gateway_without_instance() -> None:
     class _Session:
         def get(self, *_args, **_kwargs):  # noqa: ANN001
             return SimpleNamespace(
                 organisation_id="org",
+                workspace_id="ws",
+                brand_name="Acme",
+                notes="COMPETITORS:Rival",
                 max_calls_per_minute=6,
                 max_concurrent=1,
                 max_total_calls=50,
@@ -96,9 +92,10 @@ async def test_visibility_refuses_fake_live_probe_mode() -> None:
             return None
 
     svc = ProbabilisticVisibilityService(_Session())  # type: ignore[arg-type]
-    with pytest.raises(RuntimeError, match="Live visibility probes are not enabled"):
+    with pytest.raises(RuntimeError, match="LLMGateway"):
         await svc.run_campaign(
             campaign_id="camp",
             organisation_id="org",
             use_mock=False,
+            gateway=None,
         )

@@ -1,5 +1,5 @@
-"""Answer engine optimisation analysis (stub)."""
+"""Answer engine optimisation analysis."""
 
-from aeo_engine.service import AeoEngine
+from aeo_engine.service import AeoAnalysisService, AeoEngine
 
-__all__ = ["AeoEngine"]
+__all__ = ["AeoAnalysisService", "AeoEngine"]

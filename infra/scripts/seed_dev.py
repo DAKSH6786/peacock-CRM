@@ -141,6 +141,35 @@ def seed_capability_priors(db) -> int:
     return CapabilityProfileRepository(db).seed_soft_priors()
 
 
+def seed_standard_roles(db, organisation_id: str) -> dict[str, str]:
+    """Ensure owner/admin/editor/viewer roles exist for an organisation."""
+    now = datetime.now(UTC)
+    wanted = {
+        "owner": "Owner",
+        "admin": "Admin",
+        "editor": "Editor",
+        "viewer": "Viewer",
+    }
+    ids: dict[str, str] = {}
+    for code, name in wanted.items():
+        role = db.scalar(
+            select(Role).where(Role.organisation_id == organisation_id, Role.code == code)
+        )
+        if role is None:
+            role = Role(
+                id=str(uuid.uuid4()),
+                organisation_id=organisation_id,
+                code=code,
+                name=name,
+                created_at=now,
+                updated_at=now,
+            )
+            db.add(role)
+            db.flush()
+        ids[code] = role.id
+    return ids
+
+
 def seed_permissions(db) -> None:
     now = datetime.now(UTC)
     catalog = [
@@ -167,13 +196,18 @@ def seed_permissions(db) -> None:
 def seed_admin(db, settings) -> None:
     existing = db.scalar(select(User).where(User.email == settings.seed_admin_email.lower()))
     if existing:
+        # Ensure standard roles exist for the user's organisation(s).
+        memberships = list(
+            db.scalars(select(Membership).where(Membership.user_id == existing.id)).all()
+        )
+        for membership in memberships:
+            seed_standard_roles(db, membership.organisation_id)
         print(f"Admin already present for {settings.seed_admin_email}")
         return
 
     now = datetime.now(UTC)
     org_id = str(uuid.uuid4())
     user_id = str(uuid.uuid4())
-    role_id = str(uuid.uuid4())
     workspace_id = str(uuid.uuid4())
 
     org = Organisation(
@@ -192,14 +226,8 @@ def seed_admin(db, settings) -> None:
         created_at=now,
         updated_at=now,
     )
-    role = Role(
-        id=role_id,
-        organisation_id=org_id,
-        code="owner",
-        name="Owner",
-        created_at=now,
-        updated_at=now,
-    )
+    role_ids = seed_standard_roles(db, org_id)
+    role_id = role_ids["owner"]
     workspace = Workspace(
         id=workspace_id,
         organisation_id=org_id,
@@ -216,7 +244,7 @@ def seed_admin(db, settings) -> None:
         created_at=now,
         updated_at=now,
     )
-    db.add_all([org, user, role, workspace, membership])
+    db.add_all([org, user, workspace, membership])
     db.flush()
 
     permissions = list(db.scalars(select(Permission)).all())

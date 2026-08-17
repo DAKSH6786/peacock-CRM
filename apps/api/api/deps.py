@@ -74,9 +74,20 @@ def get_auth_context(
 
 
 def require_roles(*allowed: str):
+    """Enforce that the membership role is one of ``allowed`` (owner always allowed)."""
+
     def _dep(ctx: AuthContext = Depends(get_auth_context)) -> AuthContext:
-        if not set(ctx.role_codes) & set(allowed) and "owner" not in ctx.role_codes:
+        codes = set(ctx.role_codes)
+        if "owner" in codes:
+            return ctx
+        if not codes & set(allowed):
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient role")
         return ctx
 
     return _dep
+
+
+# Canonical role gates used across write/read routes.
+require_reader = require_roles("owner", "admin", "editor", "viewer")
+require_writer = require_roles("owner", "admin", "editor")
+require_admin = require_roles("owner", "admin")
