@@ -226,7 +226,7 @@ PEACOCK_MODE_PROFILES: dict[PeacockMode, ModeProfile] = {
         token_budget=10_000,
         skip_layers=[],
         model_router_complexity="high",
-        notes="Sandbox for experimental PINE research — still budget-capped.",
+        notes="Sandbox for experimental PINE research — budget-capped. Product surface: Peacock Research Mode (/research-mode API, /research UI) for hypothesis → baseline → treatment → findings.",
     ),
 }
 
