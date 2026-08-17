@@ -157,6 +157,10 @@ Unit `0–1`. Confidence in a recommendation — not a guaranteed win probabilit
 | `POST` | `/proprietary-metrics/scorecards` | Persist scorecard |
 | `GET` | `/proprietary-metrics/scorecards/{id}` | Retrieve scorecard |
 
+## UI
+
+`/metrics` — Proprietary Metrics scorecard with published formulas (linked from Command Centre)
+
 ## Tables
 
 `proprietary_metric_scorecards`, `pm_metric_scores`, `pm_metric_components`

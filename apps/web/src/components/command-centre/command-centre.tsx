@@ -44,6 +44,12 @@ export function CommandCentre() {
             <Link href="/executive" className="cc-btn cc-btn--ghost">
               Executive Brain
             </Link>
+            <Link href="/research" className="cc-btn cc-btn--ghost">
+              Research Mode
+            </Link>
+            <Link href="/metrics" className="cc-btn cc-btn--ghost">
+              Proprietary Metrics
+            </Link>
             <Link href="/ops" className="cc-btn cc-btn--ghost">
               Platform ops
             </Link>

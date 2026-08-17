@@ -37,6 +37,10 @@ Experimental research mode. Can perform:
 - controlled comparisons
 - hypothesis tests
 
+Product surface: **Peacock Research Mode** (`/research` UI, `/research-mode` API) —
+define hypothesis, metric, pages, prompts; collect baseline; measure treatment;
+repeat observations; calculate uncertainty; generate findings.
+
 ## Budgets (defaults)
 
 | Mode | max_cost | max_calls | max_iterations | max_runtime |

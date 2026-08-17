@@ -37,6 +37,10 @@ Research Mode **does not** auto-conclude that treatment caused the lift. Finding
 | `POST` | `/research-mode/studies` | Run / persist a controlled study |
 | `GET` | `/research-mode/studies/{id}` | Retrieve study |
 
+## UI
+
+`/research` — Peacock Research Mode laboratory surface (linked from Command Centre)
+
 ## Tables
 
 `research_studies`, `rm_pages`, `rm_prompts`, `rm_observations`, `rm_findings`
