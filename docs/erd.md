@@ -274,3 +274,4 @@ Also seeded generative engines (`chatgpt`, `gemini`, `claude`, `perplexity`, `de
 | `0035_research_mode` | Peacock Research Mode search intelligence laboratory |
 | `0036_moat_data_model` | Peacock Moat Data Model proprietary pathway accumulation |
 | `0037_cost_intelligence` | Peacock Cost Intelligence / Intelligence Budget Engine |
+| `0038_enterprise_reliability` | Peacock Enterprise Reliability partial multi-provider controls |

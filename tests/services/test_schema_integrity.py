@@ -321,6 +321,13 @@ REQUIRED_CORE_TABLES = {
     # Peacock Cost Intelligence
     "intelligence_budget_estimates",
     "ibe_method_candidates",
+    # Peacock Enterprise Reliability
+    "enterprise_reliability_runs",
+    "er_provider_measurements",
+    "er_control_activations",
+    "er_dead_letter_events",
+    "er_circuit_states",
+    "er_workflow_checkpoints",
 }
 
 
