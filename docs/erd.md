@@ -272,3 +272,4 @@ Also seeded generative engines (`chatgpt`, `gemini`, `claude`, `perplexity`, `de
 | `0033_executive_brain` | Peacock Executive Brain CEO/CMO executive view |
 | `0034_proprietary_metrics` | Peacock Proprietary Metrics documented scoring framework |
 | `0035_research_mode` | Peacock Research Mode search intelligence laboratory |
+| `0036_moat_data_model` | Peacock Moat Data Model proprietary pathway accumulation |
