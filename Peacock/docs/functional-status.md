@@ -69,6 +69,7 @@ Job runtime ports exist (`packages/job_runtime`). Features 0036–0041 run **syn
 Follow [`cursor-execution-rule.md`](./cursor-execution-rule.md):
 
 ```bash
+# From repo-root Peacock/ (or: make -C .. test)
 JOB_BACKEND=memory PYTHONPATH=.:apps/api:services:packages \
   python3 -m pytest tests/services/test_moat_data_model.py \
   tests/services/test_cost_intelligence.py \

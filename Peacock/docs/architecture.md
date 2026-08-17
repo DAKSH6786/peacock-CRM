@@ -2,6 +2,8 @@
 
 ## Composition
 
+Paths below are relative to the monorepo root **`Peacock/`**.
+
 ```text
 apps/web  ──HTTP──►  apps/api (FastAPI)
                         │
