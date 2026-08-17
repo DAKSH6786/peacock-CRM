@@ -38,6 +38,7 @@ from api.routes import (
     enterprise_reliability,
     ai_connector_security,
     quality_bar,
+    final_architecture,
     scenario_engine,
     prompt_universe,
     retrieval_pathway,
@@ -121,6 +122,7 @@ def create_app() -> FastAPI:
     application.include_router(enterprise_reliability.router)
     application.include_router(ai_connector_security.router)
     application.include_router(quality_bar.router)
+    application.include_router(final_architecture.router)
 
     # Soft static role fallbacks only — PINE should prefer CapabilityRouter
     # dynamic selection (request.provider / request.model). Never treat these
