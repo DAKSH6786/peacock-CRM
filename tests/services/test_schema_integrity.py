@@ -312,6 +312,12 @@ REQUIRED_CORE_TABLES = {
     "rm_prompts",
     "rm_observations",
     "rm_findings",
+    # Peacock Moat Data Model
+    "moat_intelligence_runs",
+    "moat_pathways",
+    "moat_pathway_nodes",
+    "moat_pathway_edges",
+    "moat_pathway_outcomes",
 }
 
 
