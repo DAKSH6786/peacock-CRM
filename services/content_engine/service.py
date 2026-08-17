@@ -14,7 +14,7 @@ class ContentEngine:
         return {
             "service": "content_engine",
             "organisation_id": self.organisation_id,
-            "ready": True,
+            "ready": False,
             "features_implemented": False,
             "superseded_by": "content_lab + content_digital_twin",
             "note": (

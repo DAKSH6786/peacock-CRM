@@ -61,3 +61,4 @@ class VisibilityScoreCardResponse(BaseModel):
     computed_at: str | None = None
     single_shot_rejected: bool = True
     defensible: bool = False
+    probe_mode: str = "mock_deterministic"

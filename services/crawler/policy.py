@@ -30,6 +30,9 @@ class CrawlPolicy:
     js_heavy_script_threshold: int = 8
     js_heavy_body_char_threshold: int = 120
     require_dns: bool = False
+    # When False (default), reject localhost/private/metadata hosts and private DNS (SSRF).
+    # Local integration tests may set True for loopback mock servers only.
+    allow_private_hosts: bool = False
     follow_redirects: bool = True
     max_redirects: int = 8
     discover_sitemaps: bool = True

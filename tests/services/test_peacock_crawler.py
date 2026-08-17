@@ -194,6 +194,7 @@ async def test_peacock_crawler_against_mock_site(mock_site: str) -> None:
         max_pages=20,
         max_depth=3,
         require_dns=False,
+        allow_private_hosts=True,  # loopback mock HTTP server only
         allow_js_render=False,
         discover_sitemaps=True,
         parse_sitemaps=True,
@@ -246,7 +247,7 @@ async def test_crawl_respects_max_pages_limit(mock_site: str) -> None:
         organisation_id="org",
         workspace_id="ws",
         seed_url=mock_site + "/",
-        policy=CrawlPolicy(max_pages=2, max_depth=5, allow_js_render=False),
+        policy=CrawlPolicy(max_pages=2, max_depth=5, allow_js_render=False, allow_private_hosts=True),
     )
     assert crawl.progress.pages_crawled <= 2
     assert crawl.status == "completed"
@@ -259,7 +260,12 @@ async def test_malformed_html_does_not_crash_worker(mock_site: str) -> None:
         organisation_id="org",
         workspace_id="ws",
         seed_url=mock_site + "/malformed",
-        policy=CrawlPolicy(max_pages=1, discover_sitemaps=False, allow_js_render=False),
+        policy=CrawlPolicy(
+            max_pages=1,
+            discover_sitemaps=False,
+            allow_js_render=False,
+            allow_private_hosts=True,
+        ),
     )
     assert crawl.status == "completed"
     assert crawl.progress.pages_crawled == 1
@@ -274,7 +280,13 @@ async def test_pause_cancel_restart_retry_controls(mock_site: str) -> None:
         organisation_id="org",
         workspace_id="ws",
         seed_url=mock_site + "/broken",
-        policy=CrawlPolicy(max_pages=1, discover_sitemaps=False, allow_js_render=False, max_retries_per_url=0),
+        policy=CrawlPolicy(
+            max_pages=1,
+            discover_sitemaps=False,
+            allow_js_render=False,
+            max_retries_per_url=0,
+            allow_private_hosts=True,
+        ),
     )
     assert crawl.progress.pages_failed >= 1 or any(p.status_code == 404 for p in crawl.pages.values())
 

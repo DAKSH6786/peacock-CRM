@@ -14,6 +14,7 @@ class MonitoringEngine:
         return {
             "service": "monitoring_engine",
             "organisation_id": self.organisation_id,
-            "ready": True,
+            "ready": False,
             "features_implemented": False,
+            "honesty": "Scaffold only — prefer temporal/anomaly surfaces where implemented.",
         }

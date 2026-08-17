@@ -128,6 +128,7 @@ class VisibilityScoreCardView:
     summary: str = ""
     computed_at: datetime | None = None
     single_shot_rejected: bool = True
+    probe_mode: str = "mock_deterministic"
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -148,6 +149,7 @@ class VisibilityScoreCardView:
             "summary": self.summary,
             "computed_at": self.computed_at.isoformat() if self.computed_at else None,
             "single_shot_rejected": True,
+            "probe_mode": self.probe_mode,
             "defensible": self.measurement_confidence in {"HIGH", "MEDIUM"}
             and self.observation_count >= 5,
         }

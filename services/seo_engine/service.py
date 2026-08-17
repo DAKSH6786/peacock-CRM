@@ -28,6 +28,11 @@ class SeoEngine:
             "scoring": "deterministic",
             "connectors": ["pagespeed", "core_web_vitals", "search_console", "analytics"],
             "connector_mode": "mock_by_default",
+            "live_connectors": False,
+            "honesty": (
+                "Crawl→audit analyzers and Peacock SEO score are deterministic. "
+                "PageSpeed/CWV/GSC/Analytics connectors default to mocks."
+            ),
         }
 
     async def run_audit(

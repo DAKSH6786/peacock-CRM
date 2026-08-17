@@ -43,5 +43,22 @@ def health(db: Session = Depends(get_db)) -> HealthResponse:
 
 @router.get("/ready")
 def ready(db: Session = Depends(get_db)) -> dict:
+    settings = get_settings()
     db.execute(text("SELECT 1"))
-    return {"ready": True}
+    redis_ok = False
+    try:
+        import redis
+
+        client = redis.Redis.from_url(settings.redis_url, socket_connect_timeout=1)
+        redis_ok = bool(client.ping())
+    except Exception:  # noqa: BLE001
+        redis_ok = False
+    # Ready means datastore + broker reachable. LLM live adapters are not required
+    # for process readiness (Null provider is always registered).
+    return {
+        "ready": redis_ok,
+        "database": True,
+        "redis": redis_ok,
+        "llm_live_adapters": False,
+        "llm_provider": "null",
+    }

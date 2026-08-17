@@ -449,14 +449,7 @@ def analyse_security_scan(spec: SecurityScanSpec) -> SecurityScanResult:
     ]
 
     injections = _detect_injections("crawler_body", crawler_text)
-    secrets_blocked = any(
-        f.pattern_key in ("exfiltrate_secrets", "reveal_system_prompt") for f in injections
-    ) or True  # policy always blocks secret exposure from content
-    behaviour_blocked = any(
-        f.pattern_key == "change_system_behaviour" for f in injections
-    ) or True
-
-    # Force block flags true when patterns present; always enforce policy stance
+    # Fail-closed: crawler/model text never grants secret_read or system-behaviour change.
     secrets_blocked = True
     behaviour_blocked = True
 

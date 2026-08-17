@@ -14,6 +14,7 @@ class AeoEngine:
         return {
             "service": "aeo_engine",
             "organisation_id": self.organisation_id,
-            "ready": True,
+            "ready": False,
             "features_implemented": False,
+            "honesty": "Scaffold only — AEO business features are not implemented.",
         }

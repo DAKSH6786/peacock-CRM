@@ -23,7 +23,7 @@ from crawler.engine import PeacockCrawler
 from crawler.policy import resolve_policy
 from crawler.sqlalchemy_store import SqlAlchemyCrawlStore, ensure_website_for_url
 from crawler.store import StoredCrawl
-from crawler.url_utils import UrlValidationError, normalise_url
+from crawler.url_utils import UrlValidationError, assert_public_crawl_target, normalise_url
 from db_models import BackgroundJob, Crawl, Website
 from job_runtime import JobSubmission
 from observability.audit import AuditEvent, AuditLogger
@@ -108,6 +108,7 @@ def ingest_website(
     workspace_id = _workspace_id(ctx, body.workspace_id)
     try:
         normalised = normalise_url(body.url)
+        assert_public_crawl_target(normalised.hostname)
     except UrlValidationError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
@@ -200,6 +201,11 @@ async def start_crawl(
         overrides=body.policy,
         max_pages=body.max_pages,
     )
+    if not policy.allow_private_hosts:
+        try:
+            assert_public_crawl_target(normalised.hostname)
+        except UrlValidationError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     store = SqlAlchemyCrawlStore(db)
     engine = PeacockCrawler(store=store)

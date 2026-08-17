@@ -327,7 +327,13 @@ def resolve_mode(
 ) -> PeacockMode:
     """Resolve Peacock mode from explicit override, depth, or request text cues."""
     if explicit is not None:
-        return PeacockMode(str(explicit))
+        try:
+            return PeacockMode(str(explicit))
+        except ValueError as exc:
+            valid = ", ".join(m.value for m in PeacockMode)
+            raise ValueError(
+                f"Invalid peacock_mode {explicit!r}. Valid modes: {valid}"
+            ) from exc
 
     lower = request_text.lower()
     if any(k in lower for k in ("peacock lab", "lab mode", "experiment", "hypothesis test", "a/b test", "prompt experiment")):

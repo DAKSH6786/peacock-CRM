@@ -46,6 +46,12 @@ class IntelligenceOrchestrator:
                 "deterministic_evidence_separated_from_llm_inference",
                 "mode_budget_envelopes",
             ],
+            "llm_mode": "null_provider_by_default",
+            "honesty": (
+                "Layers 0–10 orchestration is real and deterministic by default. "
+                "Research connectors and demo context may fill when evidence is absent; "
+                "live multi-LLM calls require registered adapters (not wired in create_app)."
+            ),
         }
 
     async def run_strategy(self, request: StrategicRequest) -> PipelineResult:

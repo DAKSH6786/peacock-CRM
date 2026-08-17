@@ -14,6 +14,8 @@ class LearningEngine:
         return {
             "service": "learning_engine",
             "organisation_id": self.organisation_id,
-            "ready": True,
+            "ready": False,
             "features_implemented": False,
+            "superseded_by": "learning_engine2",
+            "honesty": "Legacy scaffold — use learning_engine2 for outcome recording.",
         }

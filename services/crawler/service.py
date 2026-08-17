@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 from crawler.engine import PeacockCrawler
@@ -16,6 +16,8 @@ class CrawlerService:
 
     organisation_id: str
     store: CrawlStore | None = None
+    _store: CrawlStore = field(init=False, repr=False)
+    _engine: PeacockCrawler = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         self._store = self.store or InMemoryCrawlStore()
@@ -35,6 +37,8 @@ class CrawlerService:
             "adapters": ["httpx", "beautifulsoup", "playwright"],
             "policy_presets": sorted(POLICY_PRESETS.keys()),
             "controls": ["pause", "resume", "cancel", "restart", "retry_failed"],
+            "ssrf_protection": True,
+            "allow_private_hosts_default": False,
         }
 
     async def ingest_and_crawl(

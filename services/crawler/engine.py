@@ -25,7 +25,13 @@ from crawler.store import (
     StoredPage,
     page_from_extraction,
 )
-from crawler.url_utils import UrlValidationError, normalise_url, resolve_dns, validate_domain
+from crawler.url_utils import (
+    UrlValidationError,
+    assert_public_crawl_target,
+    normalise_url,
+    resolve_dns,
+    validate_domain,
+)
 
 
 @dataclass(slots=True)
@@ -66,7 +72,17 @@ class PeacockCrawler:
         try:
             normalised = normalise_url(seed_url)
             validate_domain(normalised.hostname)
-            if policy.require_dns and not normalised.is_ip_host:
+            resolved: list[str] = []
+            if not normalised.is_ip_host and (policy.require_dns or not policy.allow_private_hosts):
+                try:
+                    resolved = resolve_dns(normalised.hostname)
+                except OSError:
+                    if policy.require_dns:
+                        raise
+                    resolved = []
+            if not policy.allow_private_hosts:
+                assert_public_crawl_target(normalised.hostname, resolved_ips=resolved)
+            elif policy.require_dns and not normalised.is_ip_host and not resolved:
                 resolve_dns(normalised.hostname)
         except (UrlValidationError, OSError) as exc:
             raise UrlValidationError(str(exc)) from exc

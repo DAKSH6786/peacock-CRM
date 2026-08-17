@@ -89,19 +89,22 @@ async def create_strategic_run(
 ) -> StrategicRunResponse:
     workspace_id = _workspace_id(ctx, body.workspace_id)
     orchestrator = IntelligenceOrchestrator(organisation_id=ctx.organisation.id)
-    result = await orchestrator.run_strategy(
-        StrategicRequest(
-            organisation_id=ctx.organisation.id,
-            workspace_id=workspace_id,
-            request_text=body.request_text,
-            website_id=body.website_id,
-            crawl_id=body.crawl_id,
-            audit_id=body.audit_id,
-            requested_output=body.requested_output,
-            peacock_mode=body.peacock_mode,
-            metadata=body.metadata,
+    try:
+        result = await orchestrator.run_strategy(
+            StrategicRequest(
+                organisation_id=ctx.organisation.id,
+                workspace_id=workspace_id,
+                request_text=body.request_text,
+                website_id=body.website_id,
+                crawl_id=body.crawl_id,
+                audit_id=body.audit_id,
+                requested_output=body.requested_output,
+                peacock_mode=body.peacock_mode,
+                metadata=body.metadata,
+            )
         )
-    )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     payload = result.to_dict()
     _RUNS[result.id] = payload
     audit_logger.log(
