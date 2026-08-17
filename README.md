@@ -83,12 +83,16 @@ Services:
 
 | Service | URL |
 | --- | --- |
-| Web | http://localhost:3000 |
-| API | http://localhost:8000 |
+| **Web UI (open this in the browser)** | http://localhost:3000/ |
+| Peacock OS hub | http://localhost:3000/os |
+| Platform ops | http://localhost:3000/ops |
+| API (JSON only — not the UI) | http://localhost:8000/ |
 | API docs | http://localhost:8000/docs |
 | Health | http://localhost:8000/health |
 | Postgres | localhost:5432 |
 | Redis | localhost:6379 |
+
+The frontend calls the API through the same-origin `/backend/*` rewrite (see `apps/web/next.config.ts`). Do not open port `8000` expecting product pages.
 
 Default local admin (seeded):
 

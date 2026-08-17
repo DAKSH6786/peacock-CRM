@@ -8,6 +8,16 @@ Peacock One = Adaptive Search, Answer & Generative Intelligence Operating System
 
 ## What is functional today
 
+### Browser URLs (avoid 404 confusion)
+
+| What you want | Correct URL |
+| --- | --- |
+| Product UI | `http://localhost:3000/` (Next.js) |
+| API docs / health | `http://localhost:8000/docs` · `/health` |
+| Frontend → API | same-origin `/backend/...` rewrite to FastAPI |
+
+Port **8000** is API-only. Opening it as the UI used to show a bare FastAPI 404; `/` now returns a JSON pointer to the web UI.
+
 ### Product UI surfaces (live preview + demo fallback)
 
 | Surface | Route | API | Notes |
