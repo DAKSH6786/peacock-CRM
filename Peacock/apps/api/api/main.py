@@ -23,6 +23,7 @@ from api.routes import (
     entity_intelligence,
     evidence_ledger,
     executive_brain,
+    geo_intelligence,
     geo_lab,
     health,
     intelligence,
@@ -152,6 +153,7 @@ def create_app() -> FastAPI:
     application.include_router(final_architecture.router)
     application.include_router(aeo.router)
     application.include_router(monitoring.router)
+    application.include_router(geo_intelligence.router)
 
     # Soft role fallbacks only — prefer CapabilityRouter dynamic selection.
     # Live adapters register when API keys are present; Null always available.
