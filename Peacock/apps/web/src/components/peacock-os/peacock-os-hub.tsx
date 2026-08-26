@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 
 import {
   DEMO_ARCHITECTURE,
+  PRODUCT_MODULE_LINKS,
   SUBSYSTEM_LINKS,
   fetchArchitecturePreview,
   type ArchitectureMap,
@@ -75,6 +76,22 @@ export function PeacockOsHub() {
           Coverage {map.product_standard_coverage}% · Learning loops to PINE:{" "}
           {map.learning_loops_to_pine ? "yes" : "no"}
         </p>
+      </section>
+
+      <section className="os-grid">
+        <h2 style={{ fontFamily: "var(--font-display)" }}>Product modules</h2>
+        <p className="os-honesty">
+          The five main Peacock One modules — each opens with live backend data where
+          available, and falls back to a deterministic preview otherwise.
+        </p>
+        <div className="os-cards">
+          {PRODUCT_MODULE_LINKS.map((item) => (
+            <Link key={item.href} href={item.href} className="os-card">
+              <strong>{item.label}</strong>
+              <span>{item.blurb}</span>
+            </Link>
+          ))}
+        </div>
       </section>
 
       <section className="os-grid">

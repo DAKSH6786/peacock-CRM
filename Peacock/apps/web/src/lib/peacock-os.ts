@@ -308,6 +308,34 @@ export async function fetchSecurityPreview(
   }
 }
 
+export const PRODUCT_MODULE_LINKS = [
+  {
+    href: "/modules/seo-audit",
+    label: "Website SEO/AEO/GEO Audit",
+    blurb: "Peacock SEO Engine + AEO + GEO Lab, one audit",
+  },
+  {
+    href: "/modules/blog-topics",
+    label: "Blog & Topic Recommendations",
+    blurb: "Content Lab — opportunity, information gain, moat",
+  },
+  {
+    href: "/modules/keyword-backlinks",
+    label: "Keyword & Backlink Recommendations",
+    blurb: "Opportunity Engine — always-on ranked opportunities",
+  },
+  {
+    href: "/modules/ai-visibility",
+    label: "AI Visibility",
+    blurb: "Probabilistic AI Visibility across engines",
+  },
+  {
+    href: "/modules/content-optimizer",
+    label: "Content Optimizer",
+    blurb: "Writer Intelligence 2.0 — writer × topic × client fit",
+  },
+] as const;
+
 export const SUBSYSTEM_LINKS = [
   { href: "/architecture", label: "Final Architecture", blurb: "System map + product questions" },
   { href: "/quality", label: "Quality Bar", blurb: "Seven shipping completeness gates" },

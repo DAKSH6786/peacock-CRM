@@ -11,6 +11,7 @@ import {
   fetchCommandCentrePreview,
   type CommandCentreSnapshot,
 } from "@/lib/command-centre";
+import { PRODUCT_MODULE_LINKS } from "@/lib/peacock-os";
 
 export function CommandCentre() {
   const [snapshot, setSnapshot] = useState<CommandCentreSnapshot>(DEMO_SNAPSHOT);
@@ -66,6 +67,24 @@ export function CommandCentre() {
           signals={snapshot.signals}
         />
       </header>
+
+      <section className="os-grid" aria-labelledby="cc-modules-title">
+        <h2 id="cc-modules-title" style={{ fontFamily: "var(--font-display)" }}>
+          Modules
+        </h2>
+        <p className="os-honesty">
+          Open a Peacock One module directly. Each connects to the FastAPI backend where
+          available and falls back to a deterministic preview otherwise.
+        </p>
+        <div className="os-cards">
+          {PRODUCT_MODULE_LINKS.map((item) => (
+            <Link key={item.href} href={item.href} className="os-card">
+              <strong>{item.label}</strong>
+              <span>{item.blurb}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
 
       <SituationLayer situations={snapshot.situations} />
 
