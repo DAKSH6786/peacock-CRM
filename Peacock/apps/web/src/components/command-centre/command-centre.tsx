@@ -11,7 +11,7 @@ import {
   fetchCommandCentrePreview,
   type CommandCentreSnapshot,
 } from "@/lib/command-centre";
-import { PRODUCT_MODULE_LINKS } from "@/lib/peacock-os";
+import { INTELLIGENCE_LAYER_LINKS, PRODUCT_MODULE_LINKS } from "@/lib/peacock-os";
 
 export function CommandCentre() {
   const [snapshot, setSnapshot] = useState<CommandCentreSnapshot>(DEMO_SNAPSHOT);
@@ -67,6 +67,25 @@ export function CommandCentre() {
           signals={snapshot.signals}
         />
       </header>
+
+      <section className="os-grid" aria-labelledby="cc-intelligence-title">
+        <h2 id="cc-intelligence-title" style={{ fontFamily: "var(--font-display)" }}>
+          AI Gateway &amp; GEO Intelligence
+        </h2>
+        <p className="os-honesty">
+          AI Plugins → Peacock AI Gateway → Multi-LLM Response Collection → Peacock GEO
+          Intelligence Layer → Keyword/Entity/Citation Extraction → Platform-Specific GEO
+          Recommendations. This layer feeds every module below.
+        </p>
+        <div className="os-cards">
+          {INTELLIGENCE_LAYER_LINKS.map((item) => (
+            <Link key={item.href} href={item.href} className="os-card">
+              <strong>{item.label}</strong>
+              <span>{item.blurb}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
 
       <section className="os-grid" aria-labelledby="cc-modules-title">
         <h2 id="cc-modules-title" style={{ fontFamily: "var(--font-display)" }}>

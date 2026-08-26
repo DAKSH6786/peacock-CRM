@@ -8,14 +8,19 @@ import {
   fetchAiVisibilityPreview,
   type AiVisibilityScoreCard,
 } from "@/lib/ai-visibility";
+import { DEMO_GEO_INTELLIGENCE, fetchGeoIntelligencePreview, type GeoIntelligenceReport } from "@/lib/geo-intelligence";
 
 export function AiVisibilityModule() {
   const [data, setData] = useState<AiVisibilityScoreCard>(DEMO_AI_VISIBILITY);
+  const [geoIntelligence, setGeoIntelligence] = useState<GeoIntelligenceReport>(DEMO_GEO_INTELLIGENCE);
 
   useEffect(() => {
     let active = true;
     void fetchAiVisibilityPreview("Acme").then((result) => {
       if (active) setData(result);
+    });
+    void fetchGeoIntelligencePreview("Acme").then((result) => {
+      if (active) setGeoIntelligence(result);
     });
     return () => {
       active = false;
@@ -90,6 +95,28 @@ export function AiVisibilityModule() {
         Probe mode: {data.probe_mode}. Single-shot measurement rejected —{" "}
         {data.defensible ? "measurement is defensible" : "more repetitions recommended before reporting"}.
       </p>
+
+      <section style={{ marginTop: "2.5rem", paddingTop: "1.5rem", borderTop: "1px solid var(--border)" }}>
+        <h2 style={{ fontFamily: "var(--font-display)" }}>
+          Platform-specific GEO recommendations (ChatGPT, Gemini, Claude, Perplexity, DeepSeek)
+        </h2>
+        <p className="os-honesty">{geoIntelligence.disclaimer}</p>
+        {geoIntelligence.recommendations.map((rec) => (
+          <article key={rec.engine_code} className="os-card" style={{ marginBottom: "0.85rem", display: "block" }}>
+            <strong>{rec.platform_label}</strong>
+            <ul className="lab-list" style={{ marginTop: "0.5rem" }}>
+              {rec.opportunities.slice(0, 3).map((opp) => (
+                <li key={opp}>{opp}</li>
+              ))}
+            </ul>
+          </article>
+        ))}
+        <p style={{ marginTop: "0.75rem" }}>
+          <a href="/modules/geo-intelligence" className="cc-btn cc-btn--ghost">
+            Open full Peacock GEO Intelligence
+          </a>
+        </p>
+      </section>
     </ModuleShell>
   );
 }

@@ -308,6 +308,14 @@ export async function fetchSecurityPreview(
   }
 }
 
+export const INTELLIGENCE_LAYER_LINKS = [
+  {
+    href: "/modules/geo-intelligence",
+    label: "Peacock GEO Intelligence",
+    blurb: "AI Gateway + multi-LLM extraction + platform recommendations",
+  },
+] as const;
+
 export const PRODUCT_MODULE_LINKS = [
   {
     href: "/modules/seo-audit",

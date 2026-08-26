@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { ModuleShell } from "@/components/module-shell";
+import { DEMO_GEO_INTELLIGENCE, fetchGeoIntelligencePreview, type GeoIntelligenceReport } from "@/lib/geo-intelligence";
 import {
   DEMO_AEO_AUDIT,
   DEMO_GEO_AUDIT,
@@ -19,12 +20,14 @@ export function SeoAeoGeoAuditModule() {
   const [seo, setSeo] = useState<SeoAuditPreview>(DEMO_SEO_AUDIT);
   const [aeo, setAeo] = useState<AeoAuditPreview>(DEMO_AEO_AUDIT);
   const [geo, setGeo] = useState<GeoAuditPreview>(DEMO_GEO_AUDIT);
+  const [geoIntelligence, setGeoIntelligence] = useState<GeoIntelligenceReport>(DEMO_GEO_INTELLIGENCE);
 
   useEffect(() => {
     let active = true;
     void fetchSeoAuditPreview("Acme").then((data) => active && setSeo(data));
     void fetchAeoAuditPreview("Acme").then((data) => active && setAeo(data));
     void fetchGeoAuditPreview("Acme").then((data) => active && setGeo(data));
+    void fetchGeoIntelligencePreview("Acme").then((data) => active && setGeoIntelligence(data));
     return () => {
       active = false;
     };
@@ -113,6 +116,34 @@ export function SeoAeoGeoAuditModule() {
         <aside className="lab-warning" role="note">
           {geo.causality_warning}
         </aside>
+      </section>
+
+      <section style={{ marginTop: "2.5rem", paddingTop: "1.5rem", borderTop: "1px solid var(--border)" }}>
+        <h2 style={{ fontFamily: "var(--font-display)" }}>AI platform signals (GEO Intelligence Layer)</h2>
+        <p className="os-honesty">
+          Extracted from the same multi-LLM broadcast used by{" "}
+          <a href="/modules/geo-intelligence">Peacock GEO Intelligence</a> — {geoIntelligence.disclaimer}
+        </p>
+        <h3 style={{ marginTop: "1rem" }}>Missing topics across AI platforms</h3>
+        <ul className="os-questions">
+          {geoIntelligence.missing_topics.map((topic) => (
+            <li key={topic}>
+              <span>{topic}</span>
+              <em className="os-tag os-tag--warn">gap</em>
+            </li>
+          ))}
+        </ul>
+        <h3 style={{ marginTop: "1.5rem" }}>Domains cited by AI platforms</h3>
+        <ul className="os-questions">
+          {geoIntelligence.citations.slice(0, 6).map((c) => (
+            <li key={c.url}>
+              <span>{c.domain}</span>
+              <em className="os-tag">
+                {c.source_class} · {c.engine_code}
+              </em>
+            </li>
+          ))}
+        </ul>
       </section>
     </ModuleShell>
   );

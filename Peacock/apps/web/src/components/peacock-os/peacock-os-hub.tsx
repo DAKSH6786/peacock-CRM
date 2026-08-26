@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 
 import {
   DEMO_ARCHITECTURE,
+  INTELLIGENCE_LAYER_LINKS,
   PRODUCT_MODULE_LINKS,
   SUBSYSTEM_LINKS,
   fetchArchitecturePreview,
@@ -76,6 +77,23 @@ export function PeacockOsHub() {
           Coverage {map.product_standard_coverage}% · Learning loops to PINE:{" "}
           {map.learning_loops_to_pine ? "yes" : "no"}
         </p>
+      </section>
+
+      <section className="os-grid">
+        <h2 style={{ fontFamily: "var(--font-display)" }}>AI Gateway &amp; GEO Intelligence</h2>
+        <p className="os-honesty">
+          AI Plugins → Peacock AI Gateway → Multi-LLM Response Collection → Peacock GEO
+          Intelligence Layer → Keyword/Entity/Citation Extraction → Platform-Specific GEO
+          Recommendations → Peacock One Dashboard.
+        </p>
+        <div className="os-cards">
+          {INTELLIGENCE_LAYER_LINKS.map((item) => (
+            <Link key={item.href} href={item.href} className="os-card">
+              <strong>{item.label}</strong>
+              <span>{item.blurb}</span>
+            </Link>
+          ))}
+        </div>
       </section>
 
       <section className="os-grid">

@@ -8,14 +8,19 @@ import {
   fetchContentOptimizerPreview,
   type ContentOptimizerResult,
 } from "@/lib/content-optimizer";
+import { DEMO_GEO_INTELLIGENCE, fetchGeoIntelligencePreview, type GeoIntelligenceReport } from "@/lib/geo-intelligence";
 
 export function ContentOptimizerModule() {
   const [data, setData] = useState<ContentOptimizerResult>(DEMO_CONTENT_OPTIMIZER);
+  const [geoIntelligence, setGeoIntelligence] = useState<GeoIntelligenceReport>(DEMO_GEO_INTELLIGENCE);
 
   useEffect(() => {
     let active = true;
     void fetchContentOptimizerPreview("Acme").then((result) => {
       if (active) setData(result);
+    });
+    void fetchGeoIntelligencePreview("Acme").then((result) => {
+      if (active) setGeoIntelligence(result);
     });
     return () => {
       active = false;
@@ -77,6 +82,23 @@ export function ContentOptimizerModule() {
       <p className="os-honesty" style={{ marginTop: "1.5rem" }}>
         {data.summary}
       </p>
+
+      <section style={{ marginTop: "2.5rem", paddingTop: "1.5rem", borderTop: "1px solid var(--border)" }}>
+        <h2 style={{ fontFamily: "var(--font-display)" }}>Terminology by AI platform (GEO Intelligence)</h2>
+        <p className="os-honesty">
+          How each LLM tends to phrase this topic — use this to guide word choice and content
+          structure per platform. Sourced from{" "}
+          <a href="/modules/geo-intelligence">Peacock GEO Intelligence</a>.
+        </p>
+        <dl className="os-stats">
+          {geoIntelligence.terminology_by_engine.map((t) => (
+            <div key={t.engine_code}>
+              <dt>{t.engine_name}</dt>
+              <dd style={{ fontSize: "0.95rem" }}>{t.top_terms.slice(0, 3).join(", ") || "—"}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
     </ModuleShell>
   );
 }
