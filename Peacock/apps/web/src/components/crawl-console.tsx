@@ -5,7 +5,6 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api";
-import { useAuthStore } from "@/stores/auth";
 
 type CrawlProgress = {
   pages_discovered: number;
@@ -48,7 +47,6 @@ export function CrawlConsole({
 }: {
   onCrawlIdChange?: (crawlId: string | null) => void;
 }) {
-  const { accessToken, workspaceId } = useAuthStore();
   const queryClient = useQueryClient();
   const [url, setUrl] = useState("https://example.com");
   const [preset, setPreset] = useState<(typeof PRESETS)[number]["id"]>("free_trial");
@@ -62,26 +60,21 @@ export function CrawlConsole({
   const [error, setError] = useState<string | null>(null);
 
   const crawl = useQuery({
-    queryKey: ["crawl", crawlId, accessToken],
-    enabled: Boolean(accessToken && crawlId),
+    queryKey: ["crawl", crawlId],
+    enabled: Boolean(crawlId),
     refetchInterval: (query) => {
       const status = query.state.data?.status;
       return status === "running" || status === "paused" || status === "queued" ? 1200 : false;
     },
-    queryFn: () =>
-      apiFetch<CrawlResponse>(`/crawls/${crawlId}`, {
-        token: accessToken ?? undefined,
-      }),
+    queryFn: () => apiFetch<CrawlResponse>(`/crawls/${crawlId}`),
   });
 
   const start = useMutation({
     mutationFn: () =>
       apiFetch<CrawlResponse>("/crawls", {
         method: "POST",
-        token: accessToken ?? undefined,
         body: JSON.stringify({
           url,
-          workspace_id: workspaceId,
           policy_preset: preset,
           max_pages: preset === "enterprise" ? enterprisePages : undefined,
           run_inline: true,
@@ -90,7 +83,7 @@ export function CrawlConsole({
     onSuccess: (data) => {
       setError(null);
       updateCrawlId(data.id);
-      queryClient.setQueryData(["crawl", data.id, accessToken], data);
+      queryClient.setQueryData(["crawl", data.id], data);
     },
     onError: (err: Error) => setError(err.message),
   });
@@ -99,25 +92,13 @@ export function CrawlConsole({
     mutationFn: (action: "pause" | "resume" | "cancel" | "restart" | "retry-failed") =>
       apiFetch<CrawlResponse>(`/crawls/${crawlId}/${action}`, {
         method: "POST",
-        token: accessToken ?? undefined,
       }),
     onSuccess: (data) => {
       updateCrawlId(data.id);
-      queryClient.setQueryData(["crawl", data.id, accessToken], data);
+      queryClient.setQueryData(["crawl", data.id], data);
     },
     onError: (err: Error) => setError(err.message),
   });
-
-  if (!accessToken) {
-    return (
-      <section className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-6">
-        <h2 className="text-xl font-semibold" style={{ fontFamily: "var(--font-display)" }}>
-          Peacock Crawler
-        </h2>
-        <p className="mt-2 text-sm text-[var(--muted)]">Sign in to ingest a website and watch crawl progress.</p>
-      </section>
-    );
-  }
 
   const progress = crawl.data?.progress;
 

@@ -5,7 +5,6 @@ import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api";
-import { useAuthStore } from "@/stores/auth";
 
 type ScoreResult = {
   code: string;
@@ -109,7 +108,6 @@ function FindingList({ title, items }: { title: string; items: Finding[] }) {
 }
 
 export function SeoAuditPanel({ crawlId }: { crawlId: string | null }) {
-  const { accessToken } = useAuthStore();
   const [auditId, setAuditId] = useState<string | null>(null);
   const [tab, setTab] = useState<"overview" | "issues" | "pages" | "recommendations">("overview");
   const [error, setError] = useState<string | null>(null);
@@ -118,7 +116,6 @@ export function SeoAuditPanel({ crawlId }: { crawlId: string | null }) {
     mutationFn: () =>
       apiFetch<SeoAudit>("/seo/audits", {
         method: "POST",
-        token: accessToken ?? undefined,
         body: JSON.stringify({
           crawl_id: crawlId,
           fetch_connectors: true,
@@ -134,12 +131,9 @@ export function SeoAuditPanel({ crawlId }: { crawlId: string | null }) {
   });
 
   const audit = useQuery({
-    queryKey: ["seo-audit", auditId, accessToken],
-    enabled: Boolean(accessToken && auditId),
-    queryFn: () =>
-      apiFetch<SeoAudit>(`/seo/audits/${auditId}/overview`, {
-        token: accessToken ?? undefined,
-      }),
+    queryKey: ["seo-audit", auditId],
+    enabled: Boolean(auditId),
+    queryFn: () => apiFetch<SeoAudit>(`/seo/audits/${auditId}/overview`),
     initialData: run.data,
   });
 
@@ -147,17 +141,6 @@ export function SeoAuditPanel({ crawlId }: { crawlId: string | null }) {
     () => Object.values(audit.data?.scores ?? {}),
     [audit.data?.scores],
   );
-
-  if (!accessToken) {
-    return (
-      <section className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-6">
-        <h2 className="text-xl font-semibold" style={{ fontFamily: "var(--font-display)" }}>
-          Peacock SEO Engine
-        </h2>
-        <p className="mt-2 text-sm text-[var(--muted)]">Sign in and run a crawl to generate an SEO audit.</p>
-      </section>
-    );
-  }
 
   return (
     <section className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-6">

@@ -5,7 +5,6 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api";
-import { useAuthStore } from "@/stores/auth";
 
 type LayerResult = {
   layer: number;
@@ -49,7 +48,6 @@ type StrategicRun = {
 };
 
 export function StrategicIntelligencePanel() {
-  const { accessToken, workspaceId } = useAuthStore();
   const [requestText, setRequestText] = useState(
     "Urgent SEO audit review: fix critical crawl issues and raise visibility.",
   );
@@ -60,10 +58,8 @@ export function StrategicIntelligencePanel() {
     mutationFn: () =>
       apiFetch<StrategicRun>("/intelligence/runs", {
         method: "POST",
-        token: accessToken ?? undefined,
         body: JSON.stringify({
           request_text: requestText,
-          workspace_id: workspaceId,
           metadata: {
             crawl: { pages_crawled: 42, pages_failed: 3, issues_found: 11 },
             seo_audit: {
@@ -83,19 +79,6 @@ export function StrategicIntelligencePanel() {
     },
     onError: (err: Error) => setError(err.message),
   });
-
-  if (!accessToken) {
-    return (
-      <section className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-6">
-        <h2 className="text-xl font-semibold" style={{ fontFamily: "var(--font-display)" }}>
-          Strategic Intelligence
-        </h2>
-        <p className="mt-2 text-sm text-[var(--muted)]">
-          Sign in to run Layers 0–10 on a strategic request.
-        </p>
-      </section>
-    );
-  }
 
   return (
     <section className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-6">

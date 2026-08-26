@@ -6,7 +6,6 @@ import { useState } from "react";
 import { ArchitecturePanel } from "@/components/architecture-panel";
 import { CrawlConsole } from "@/components/crawl-console";
 import { HealthCard } from "@/components/health-card";
-import { LoginForm } from "@/components/login-form";
 import { SeoAuditPanel } from "@/components/seo-audit-panel";
 import { StrategicIntelligencePanel } from "@/components/strategic-intelligence-panel";
 
@@ -35,7 +34,6 @@ export default function OpsPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <HealthCard />
-        <LoginForm />
       </div>
 
       <CrawlConsole onCrawlIdChange={setCrawlId} />
