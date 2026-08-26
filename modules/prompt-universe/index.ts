@@ -1,0 +1,15 @@
+export {
+  PROMPT_TYPES,
+  PROMPT_SOURCE_KINDS,
+  FUNNEL_STAGES,
+  SYNTHETIC_PERSONAS,
+  expandPromptUniverse,
+  promptUniverseCatalog,
+  type PromptType,
+  type PromptSourceKind,
+  type FunnelStage,
+  type SourceSignal,
+  type UniversePrompt,
+  type ExpandOptions,
+  type SyntheticPersona,
+} from "./expand";

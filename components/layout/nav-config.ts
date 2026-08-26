@@ -150,6 +150,16 @@ export const navigationSections: NavSection[] = [
         permission: "intelligence:view",
       },
       {
+        href: "/intelligence/prompt-universe",
+        label: "Prompt Universe",
+        permission: "intelligence:view",
+      },
+      {
+        href: "/intelligence/share-of-answer",
+        label: "Share of Answer",
+        permission: "intelligence:view",
+      },
+      {
         href: "/intelligence/strategy",
         label: "90-Day Strategy",
         permission: "intelligence:view",

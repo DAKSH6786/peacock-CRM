@@ -116,6 +116,8 @@ model VisibilityProperty {
   recommendations   Recommendation[]
   strategyPlans     StrategyPlan[]
   backlinkSnapshots BacklinkSnapshot[]
+  promptUniverses   PromptUniverse[]
+  shareOfAnswerAnalyses ShareOfAnswerAnalysis[]
 
   @@unique([organizationId, primaryDomain])
   @@index([organizationId, deletedAt])

@@ -98,4 +98,6 @@ Failed VERIFY blocks EXECUTE unless an admin overrides with audit.
 
 ## Extensibility
 
-Domain engines under `modules/{crawl,seo,aeo,geo,visibility,strategy,knowledge}` expose pure functions + services. The orchestrator in `modules/intelligence` is the only place that sequences the cognitive loop.
+Domain engines under `modules/{crawl,seo,aeo,geo,visibility,strategy,knowledge,prompt-universe,share-of-answer}` expose pure functions + services. The orchestrator in `modules/intelligence` is the only place that sequences the cognitive loop.
+
+See also [`docs/prompt-universe-share-of-answer.md`](./prompt-universe-share-of-answer.md) for Prompt Universe (full intent landscape) and Share of Answer (multi-indicator generative influence).

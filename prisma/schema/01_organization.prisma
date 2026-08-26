@@ -120,6 +120,8 @@ model Organization {
   recommendations       Recommendation[]
   strategyPlans         StrategyPlan[]
   recommendationWeights RecommendationWeight[]
+  promptUniverses       PromptUniverse[]
+  shareOfAnswerAnalyses ShareOfAnswerAnalysis[]
 
   @@index([deletedAt])
   @@map("organizations")
