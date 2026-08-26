@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+from statistics import mean
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from aeo_engine import AeoAnalysisService, AeoEngine
+from aeo_engine.scoring import analyse_page
 from api.db import get_db
 from api.deps import AuthContext, get_auth_context, require_writer
 from api.schemas_aeo import AeoAnalysisRequest, AeoAnalysisResponse
@@ -20,6 +23,62 @@ def _workspace_id(ctx: AuthContext, explicit: str | None) -> str:
     if not workspace_id:
         raise HTTPException(status_code=400, detail="workspace_id is required")
     return workspace_id
+
+
+_PREVIEW_PAGES: list[dict] = [
+    {
+        "url": "https://example.com/faq/pricing",
+        "title": "Pricing FAQ — What does Acme cost?",
+        "meta_description": "Answers to common pricing questions about Acme, including plans and discounts.",
+        "h1": ["Pricing FAQ"],
+        "h2": ["What is Acme?", "How much does Acme cost?", "Is there a free trial?"],
+        "h3": [],
+        "body_text": (
+            "What is Acme? Acme is a generative visibility platform. "
+            "How much does Acme cost? Plans start at $99/month. "
+            "Is there a free trial? Yes, Acme offers a 14-day free trial. "
+            "Who should use Acme? Marketing and SEO teams comparing tools."
+        ),
+        "schema": [{"@type": "FAQPage"}],
+    },
+    {
+        "url": "https://example.com/blog/thin-update",
+        "title": "Product update",
+        "meta_description": None,
+        "h1": ["Update"],
+        "h2": [],
+        "h3": [],
+        "body_text": "We shipped a small update this week.",
+        "schema": [],
+    },
+]
+
+
+@router.get("/preview")
+def aeo_preview(brand: str = "Acme") -> AeoAnalysisResponse:
+    """Public demo AEO analysis for the Website SEO/AEO/GEO Audit module."""
+    scores = [analyse_page(page) for page in _PREVIEW_PAGES]
+    recommendations: list[str] = []
+    for score in scores:
+        recommendations.extend(score.recommendations)
+    # Deduplicate while preserving order.
+    recommendations = list(dict.fromkeys(recommendations))
+
+    return AeoAnalysisResponse(
+        analysis_id="preview",
+        name=f"{brand} — Answer readiness preview",
+        website_id="preview",
+        crawl_id="preview",
+        page_count=len(scores),
+        aeo_score=round(mean(s.answerability_score for s in scores), 2),
+        answerability_score=round(mean(s.answerability_score for s in scores), 2),
+        faq_coverage_score=round(mean(s.faq_coverage_score for s in scores), 2),
+        citation_readiness_score=round(mean(s.citation_readiness_score for s in scores), 2),
+        entity_coverage=round(mean(s.entity_coverage for s in scores), 2),
+        question_coverage=round(mean(s.question_coverage for s in scores), 2),
+        pages=[s.to_dict() for s in scores],
+        recommendations=recommendations,
+    )
 
 
 @router.get("/catalog")

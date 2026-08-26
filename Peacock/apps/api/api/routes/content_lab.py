@@ -24,12 +24,48 @@ from content_lab import (
     OPPORTUNITY_DIMENSIONS,
     ContentLabService,
     ProposalInput,
+    evaluate_proposals,
 )
 from content_lab.models import ContentLabSpec
 from observability.audit import AuditEvent, AuditLogger
 
 router = APIRouter(prefix="/content-lab", tags=["content-lab"])
 audit_logger = AuditLogger()
+
+
+def _preview_proposals() -> list[ProposalInput]:
+    """Example blog & topic recommendations for the public preview."""
+    return [
+        ProposalInput(
+            title="2025 AI Visibility Benchmark: 500 Brands Compared",
+            slug="ai-visibility-benchmark-2025",
+            content_format="proprietary_benchmark_study",
+            angle="Original dataset comparing brand mention and citation rates across 5 AI engines.",
+            outline_text="We surveyed 500 brands and ran a controlled experiment across engines with original data.",
+            business_value=0.82,
+            audience_relevance=0.7,
+            competitor_gap=0.75,
+        ),
+        ProposalInput(
+            title="What Is AEO? A Practical Definition for Marketers",
+            slug="what-is-aeo",
+            content_format="generic_listicle",
+            angle="Top 10 tips and tricks for answer engine optimisation basics.",
+            outline_text="Everything you need to know: what is AEO, basics, and top tips.",
+            business_value=0.4,
+            audience_relevance=0.6,
+        ),
+        ProposalInput(
+            title="Inside Peacock's Content Moat: An Interview with Our Head of Content",
+            slug="content-moat-expert-interview",
+            content_format="expert_interview",
+            angle="Interview with our Head of Content on building citable, defensible content.",
+            outline_text="An interview where we cite expert first-party insight and original framework.",
+            business_value=0.6,
+            audience_relevance=0.65,
+            competitor_gap=0.5,
+        ),
+    ]
 
 
 def _workspace_id(ctx: AuthContext, explicit: str | None) -> str:
@@ -72,6 +108,29 @@ def _to_response(report) -> ContentLabResponse:
         proposals=[_proposal(p) for p in report.proposals],
         example_moat=report.example_moat,
         top_recommendation=report.top_recommendation,
+    )
+
+
+@router.get("/preview", response_model=ContentLabResponse)
+def content_lab_preview(brand: str = "Acme") -> ContentLabResponse:
+    """Public demo analysis for the Blog & Topic Recommendations module."""
+    scores = evaluate_proposals(_preview_proposals())
+    top = scores[0] if scores else None
+    return ContentLabResponse(
+        analysis_id="preview",
+        client_brand=brand,
+        methodology="peacock_content_lab_multi_opportunity_evaluation",
+        citability_is_proprietary_estimate=True,
+        citability_disclaimer=CITABILITY_DISCLAIMER,
+        proposals=[_proposal(p) for p in scores],
+        example_moat=[{"content_format": k, "moat_prior": v} for k, v in MOAT_FORMAT_PRIORS.items()],
+        top_recommendation={
+            "title": top.title,
+            "slug": top.slug,
+            "lab_priority_score": top.lab_priority_score,
+        }
+        if top
+        else None,
     )
 
 

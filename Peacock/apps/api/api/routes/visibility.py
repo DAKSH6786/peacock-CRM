@@ -20,10 +20,30 @@ from geo_engine import (
     ProbabilisticVisibilityService,
     RateLimitPolicy,
 )
+from geo_engine.probabilistic_stats import (
+    ai_visibility_score,
+    bernoulli_estimate,
+    engine_disagreement,
+    peacock_visibility_confidence,
+    temporal_volatility,
+)
 from observability.audit import AuditEvent, AuditLogger
 
 router = APIRouter(prefix="/visibility", tags=["probabilistic-ai-visibility"])
 audit_logger = AuditLogger()
+
+# engine_code -> (brand_mention_successes, citation_successes, top3_successes, repetitions)
+_PREVIEW_ENGINE_OBSERVATIONS: dict[str, tuple[int, int, int, int]] = {
+    "openai": (8, 5, 6, 10),
+    "anthropic": (7, 4, 5, 10),
+    "google_ai_overviews": (6, 3, 4, 10),
+    "perplexity": (9, 6, 7, 10),
+}
+_PREVIEW_PERIOD_PROBABILITIES: list[float] = [0.58, 0.63, 0.7, 0.72]
+_PREVIEW_COMPETITOR_PROBABILITIES: dict[str, float] = {
+    "competitor_a": 0.42,
+    "competitor_b": 0.35,
+}
 
 
 class VisibilityRunRequest(BaseModel):
@@ -46,6 +66,86 @@ def _workspace_id(ctx: AuthContext, explicit: str | None) -> str:
 @router.get("/status")
 def visibility_status(ctx: AuthContext = Depends(get_auth_context)) -> dict:
     return GeoEngine(ctx.organisation.id).status()
+
+
+@router.get("/preview", response_model=VisibilityScoreCardResponse)
+def visibility_preview(brand: str = "Acme") -> VisibilityScoreCardResponse:
+    """Public demo AI Visibility scorecard from controlled repeated probes."""
+    mention_estimates = {
+        engine: bernoulli_estimate(mentions, reps)
+        for engine, (mentions, _citations, _top3, reps) in _PREVIEW_ENGINE_OBSERVATIONS.items()
+    }
+    citation_estimates = {
+        engine: bernoulli_estimate(citations, reps)
+        for engine, (_mentions, citations, _top3, reps) in _PREVIEW_ENGINE_OBSERVATIONS.items()
+    }
+    top3_estimates = {
+        engine: bernoulli_estimate(top3, reps)
+        for engine, (_mentions, _citations, top3, reps) in _PREVIEW_ENGINE_OBSERVATIONS.items()
+    }
+
+    brand_mention_p = sum(e.probability for e in mention_estimates.values()) / len(mention_estimates)
+    citation_p = sum(e.probability for e in citation_estimates.values()) / len(citation_estimates)
+    top3_p = sum(e.probability for e in top3_estimates.values()) / len(top3_estimates)
+    competitor_gap = max(0.0, brand_mention_p - max(_PREVIEW_COMPETITOR_PROBABILITIES.values(), default=0.0))
+
+    score = ai_visibility_score(
+        brand_mention_p=brand_mention_p,
+        citation_p=citation_p,
+        top3_p=top3_p,
+        competitor_gap=competitor_gap,
+    )
+
+    disagreement = engine_disagreement([e.probability for e in mention_estimates.values()])
+    volatility = temporal_volatility(_PREVIEW_PERIOD_PROBABILITIES)
+    mean_variance = sum(e.variance for e in mention_estimates.values()) / len(mention_estimates)
+    total_reps = sum(reps for *_ignored, reps in _PREVIEW_ENGINE_OBSERVATIONS.values())
+
+    confidence_score, confidence_label = peacock_visibility_confidence(
+        sample_size=total_reps,
+        engine_count=len(_PREVIEW_ENGINE_OBSERVATIONS),
+        prompt_count=len(_PREVIEW_ENGINE_OBSERVATIONS) * 3,
+        period_count=len(_PREVIEW_PERIOD_PROBABILITIES),
+        mean_variance=mean_variance,
+        mean_engine_disagreement=disagreement,
+        mean_temporal_volatility=volatility,
+    )
+
+    summary = (
+        f"{brand} AI Visibility Score {score}/100 from {total_reps} controlled repetitions "
+        f"across {len(_PREVIEW_ENGINE_OBSERVATIONS)} engines. Measurement confidence {confidence_label} "
+        f"({confidence_score:.2f}). Never a single-shot measurement."
+    )
+
+    return VisibilityScoreCardResponse(
+        ai_visibility_score=score,
+        measurement_confidence=confidence_label,
+        peacock_visibility_confidence=round(confidence_score, 3),
+        based_on={
+            "engines": len(_PREVIEW_ENGINE_OBSERVATIONS),
+            "repetitions": total_reps,
+            "periods": len(_PREVIEW_PERIOD_PROBABILITIES),
+        },
+        brand_mention_probability=round(brand_mention_p, 3),
+        citation_probability=round(citation_p, 3),
+        top3_recommendation_probability=round(top3_p, 3),
+        competitor_probabilities=_PREVIEW_COMPETITOR_PROBABILITIES,
+        distributions=[
+            {
+                "engine": engine,
+                "brand_mention_probability": round(mention_estimates[engine].probability, 3),
+                "citation_probability": round(citation_estimates[engine].probability, 3),
+                "top3_probability": round(top3_estimates[engine].probability, 3),
+                "repetitions": reps,
+            }
+            for engine, (_m, _c, _t, reps) in _PREVIEW_ENGINE_OBSERVATIONS.items()
+        ],
+        summary=summary,
+        computed_at=None,
+        single_shot_rejected=True,
+        defensible=confidence_label in {"HIGH", "MEDIUM"},
+        probe_mode="mock_deterministic",
+    )
 
 
 @router.post("/campaigns", response_model=VisibilityCampaignResponse, status_code=201)

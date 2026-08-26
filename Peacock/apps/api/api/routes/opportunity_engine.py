@@ -30,11 +30,117 @@ from opportunity_engine import (
     OpportunityScanSpec,
     OutcomeFeedbackInput,
     SignalInput,
+    detect_and_rank,
     example_signals_catalog,
 )
 
 router = APIRouter(prefix="/opportunities", tags=["opportunities"])
 audit_logger = AuditLogger()
+
+
+def _preview_signals() -> list[SignalInput]:
+    """Example keyword & backlink opportunity signals for the public preview."""
+    return [
+        SignalInput(
+            opportunity_type="high_value_topic_available",
+            title="'AI visibility monitoring' keyword cluster is underserved",
+            description=(
+                "Search demand for 'AI visibility monitoring' and related keywords rose "
+                "34% quarter-over-quarter with no dominant ranking page in the niche."
+            ),
+            impact=82.0,
+            urgency=70.0,
+            confidence=76.0,
+            difficulty=38.0,
+            expected_value=88.0,
+            recommended_action=(
+                "Brief and publish a pillar guide targeting the keyword cluster, "
+                "supported by 3 linked cluster pages."
+            ),
+            evidence=[
+                EvidenceInput(
+                    evidence_type="keyword_demand",
+                    statement="Search volume for the cluster rose 34% QoQ across 12 tracked keywords.",
+                    strength=80.0,
+                )
+            ],
+            related_entity="AI visibility monitoring",
+        ),
+        SignalInput(
+            opportunity_type="backlink_source_gained_influence",
+            title="Referring domain 'martech-review.com' gained authority",
+            description=(
+                "A previously low-authority review site jumped in domain authority after a "
+                "funding announcement and now ranks for high-intent comparison queries."
+            ),
+            impact=68.0,
+            urgency=55.0,
+            confidence=64.0,
+            difficulty=45.0,
+            expected_value=70.0,
+            recommended_action=(
+                "Pursue an ethical placement (comparison listing or guest data) on the "
+                "newly-influential referring domain."
+            ),
+            evidence=[
+                EvidenceInput(
+                    evidence_type="backlink_signal",
+                    statement="martech-review.com domain authority increased and now sends referral traffic to 2 competitors.",
+                    strength=62.0,
+                )
+            ],
+            related_entity="martech-review.com",
+        ),
+        SignalInput(
+            opportunity_type="competitor_content_outdated",
+            title="Top-ranking competitor guide on 'backlink audits' is 3 years old",
+            description=(
+                "The #1 ranking page for 'backlink audit checklist' has not been updated since "
+                "2021 and omits AI-citation considerations."
+            ),
+            impact=74.0,
+            urgency=60.0,
+            confidence=71.0,
+            difficulty=42.0,
+            expected_value=76.0,
+            recommended_action=(
+                "Publish an updated, higher information-gain backlink audit guide that "
+                "covers AI-citation backlinks."
+            ),
+            evidence=[
+                EvidenceInput(
+                    evidence_type="competitor_content",
+                    statement="Competitor page last modified 2021-03; missing AI-citation coverage.",
+                    strength=68.0,
+                )
+            ],
+            related_entity="backlink audit checklist",
+        ),
+        SignalInput(
+            opportunity_type="existing_article_decaying",
+            title="'Best SEO tools' article traffic decayed 22% in 90 days",
+            description=(
+                "An existing high-value article is losing organic traffic and keyword "
+                "rankings versus 90 days ago."
+            ),
+            impact=58.0,
+            urgency=64.0,
+            confidence=69.0,
+            difficulty=30.0,
+            expected_value=60.0,
+            recommended_action=(
+                "Refresh evidence, entities, and internal links; re-promote the updated URL."
+            ),
+            evidence=[
+                EvidenceInput(
+                    evidence_type="traffic_signal",
+                    statement="Organic sessions down 22% and average position dropped from 4.2 to 7.8.",
+                    strength=66.0,
+                )
+            ],
+            related_entity="Best SEO tools",
+        ),
+    ]
 
 
 def _workspace_id(ctx: AuthContext, explicit: str | None) -> str:
@@ -51,6 +157,51 @@ def _to_response(report) -> OpportunityScanResponse:
         name=report.name,
         client_brand=report.client_brand,
         methodology=report.methodology,
+        always_on_layer=True,
+        ranking_model_version=r.ranking_model_version,
+        ranking_is_adaptive=r.ranking_is_adaptive,
+        fixed_formula_rejected=True,
+        always_on_note=r.always_on_note,
+        methodology_note=r.methodology_note,
+        summary=r.summary,
+        ranking_weights=[RankingWeightResponse(**w.to_dict()) for w in r.ranking_weights],
+        opportunities=[
+            OpportunityResponse(
+                opportunity_key=o.opportunity_key,
+                opportunity_type=o.opportunity_type,
+                title=o.title,
+                description=o.description,
+                impact=o.impact,
+                urgency=o.urgency,
+                confidence=o.confidence,
+                difficulty=o.difficulty,
+                expected_value=o.expected_value,
+                recommended_action=o.recommended_action,
+                evidence=[EvidenceResponse(**e.to_dict()) for e in o.evidence],
+                rank=o.rank,
+                opportunity_score=o.opportunity_score,
+                ranking_explanation=o.ranking_explanation,
+                ranking_factors=[
+                    RankingFactorResponse(**f.to_dict()) for f in o.ranking_factors
+                ],
+                related_entity=o.related_entity,
+                related_url=o.related_url,
+            )
+            for o in r.opportunities
+        ],
+    )
+
+
+@router.get("/preview", response_model=OpportunityScanResponse)
+def opportunities_preview(brand: str = "Acme") -> OpportunityScanResponse:
+    """Public demo scan for the Keyword & Backlink Recommendations module."""
+    result = detect_and_rank(_preview_signals())
+    r = result
+    return OpportunityScanResponse(
+        scan_id="preview",
+        name=f"{brand} — Keyword & backlink opportunities (preview)",
+        client_brand=brand,
+        methodology=METHODOLOGY,
         always_on_layer=True,
         ranking_model_version=r.ranking_model_version,
         ranking_is_adaptive=r.ranking_is_adaptive,

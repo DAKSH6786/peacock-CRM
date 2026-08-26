@@ -30,6 +30,7 @@ from geo_lab import (
     PageSpec,
     VariantSpec,
 )
+from geo_lab.analysis import ExperimentAnalysisInput, analyse_experiment, default_variants
 from observability.audit import AuditEvent, AuditLogger
 
 router = APIRouter(prefix="/geo-lab", tags=["geo-lab"])
@@ -64,6 +65,56 @@ def _to_response(report) -> GeoLabExperimentResponse:
             for c in report.causality_assessments
         ],
         time_series=[TimeSeriesPointResponse(**t.to_dict()) for t in report.time_series],
+    )
+
+
+@router.get("/preview", response_model=GeoLabExperimentResponse)
+def geo_lab_preview(brand: str = "Acme") -> GeoLabExperimentResponse:
+    """Public demo GEO Lab experiment for the Website SEO/AEO/GEO Audit module."""
+    control_url = f"https://{brand.lower()}.example.com/blog/industry-overview"
+    test_url = f"https://{brand.lower()}.example.com/guides/benchmarks"
+    pages = [
+        PageSpec(url=control_url, page_role="control", title="Industry overview (control)"),
+        PageSpec(
+            url=test_url,
+            page_role="test",
+            variant_code="D",
+            title="Benchmarks hub (treatment)",
+            matched_group="benchmarks_vs_overview",
+        ),
+    ]
+    observations = [
+        ObservationSpec(page_url=control_url, metric_code="ai_citation", observed_at="2024-05-01", period="pre", value=0.18),
+        ObservationSpec(page_url=control_url, metric_code="ai_citation", observed_at="2024-06-01", period="post", value=0.2),
+        ObservationSpec(page_url=test_url, metric_code="ai_citation", observed_at="2024-05-01", period="pre", value=0.21),
+        ObservationSpec(page_url=test_url, metric_code="ai_citation", observed_at="2024-06-01", period="post", value=0.34),
+    ]
+    analysis = analyse_experiment(
+        ExperimentAnalysisInput(
+            variants=default_variants(),
+            pages=pages,
+            observations=observations,
+        )
+    )
+    return GeoLabExperimentResponse(
+        experiment_id="preview",
+        name=f"{brand} — Original dataset GEO experiment (preview)",
+        client_brand=brand,
+        hypothesis="Publishing an original benchmarks dataset increases AI citation probability.",
+        methodology=METHODOLOGY,
+        design_type="before_after_with_controls",
+        design_features=analysis.design_features,
+        causality_warning=analysis.causality_warning,
+        overall_causality_level=analysis.overall_causality_level,
+        overall_summary=analysis.overall_summary,
+        auto_causal_conclusion_rejected=True,
+        variants=[v.to_dict() for v in default_variants()],
+        pages=[p.to_dict() for p in pages],
+        deltas=[MetricDeltaResponse(**d.to_dict()) for d in analysis.deltas],
+        causality_assessments=[
+            CausalityAssessmentResponse(**c.to_dict()) for c in analysis.causality_assessments
+        ],
+        time_series=[TimeSeriesPointResponse(**t.to_dict()) for t in analysis.time_series],
     )
 
 
