@@ -1,0 +1,455 @@
+// ─── Generative Visibility Intelligence (SEO + AEO + GEO) ────────────────────
+
+enum IntelligenceRunStatus {
+  PENDING
+  OBSERVING
+  THINKING
+  VERIFYING
+  DECIDING
+  EXECUTING
+  MEASURING
+  LEARNING
+  COMPLETED
+  FAILED
+  CANCELLED
+  BLOCKED_ON_VERIFY
+}
+
+enum IntelligenceStageName {
+  OBSERVE
+  THINK
+  VERIFY
+  DECIDE
+  EXECUTE
+  MEASURE
+  LEARN
+}
+
+enum IntelligenceStageStatus {
+  PENDING
+  RUNNING
+  SUCCEEDED
+  FAILED
+  SKIPPED
+  BLOCKED
+}
+
+enum ConnectorProvider {
+  OPENAI
+  GEMINI
+  ANTHROPIC
+  PERPLEXITY
+  DEEPSEEK
+}
+
+enum ConnectorRole {
+  WEB_RESEARCH
+  CITATION_HUNT
+  STRUCTURAL_CRITIQUE
+  CONTENT_QUALITY
+  VERIFY_ADVERSARIAL
+  SYNTHESIS
+  STRATEGY_FRAME
+  WRITER_BRIEF
+  ENTITY_EXTRACTION
+  MULTIMODAL_PAGE
+  KNOWLEDGE_LINK
+  SECOND_OPINION
+  COST_SWEEP
+  VERIFY_CONSENSUS
+  VISIBILITY_PROBE
+}
+
+enum VisibilitySurface {
+  CHATGPT
+  GEMINI
+  CLAUDE
+  PERPLEXITY
+  DEEPSEEK
+  GOOGLE_AI_OVERVIEW
+  OTHER
+}
+
+enum RecommendationKind {
+  TECHNICAL_SEO
+  CONTENT
+  AEO
+  GEO
+  ENTITY
+  BACKLINK
+  KEYWORD
+  WRITER
+  STRATEGY
+  MONITORING
+}
+
+enum RecommendationStatus {
+  PROPOSED
+  APPROVED
+  IN_PROGRESS
+  DONE
+  DISMISSED
+  SUPERSEDED
+}
+
+model VisibilityProperty {
+  id             String    @id @default(cuid())
+  organizationId String
+  name           String
+  primaryDomain  String
+  rootUrl        String
+  industry       String?
+  locale         String    @default("en-US")
+  isActive       Boolean   @default(true)
+  metadata       Json?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization      Organization           @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  competitors       VisibilityCompetitor[]
+  crawlJobs         CrawlJob[]
+  intelligenceRuns  IntelligenceRun[]
+  keywords          KeywordTarget[]
+  entities          KnowledgeEntity[]
+  visibilitySamples AiVisibilitySample[]
+  recommendations   Recommendation[]
+  strategyPlans     StrategyPlan[]
+  backlinkSnapshots BacklinkSnapshot[]
+  promptUniverses   PromptUniverse[]
+  shareOfAnswerAnalyses ShareOfAnswerAnalysis[]
+
+  @@unique([organizationId, primaryDomain])
+  @@index([organizationId, deletedAt])
+  @@map("visibility_properties")
+}
+
+model VisibilityCompetitor {
+  id         String    @id @default(cuid())
+  propertyId String
+  name       String
+  domain     String
+  rootUrl    String?
+  notes      String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+
+  property VisibilityProperty @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([propertyId, domain])
+  @@index([propertyId, deletedAt])
+  @@map("visibility_competitors")
+}
+
+model CrawlJob {
+  id           String    @id @default(cuid())
+  propertyId   String
+  status       String    @default("PENDING")
+  startedAt    DateTime?
+  completedAt  DateTime?
+  pageCount    Int       @default(0)
+  errorSummary String?
+  config       Json?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  property VisibilityProperty @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  pages    CrawledPage[]
+
+  @@index([propertyId, createdAt])
+  @@map("crawl_jobs")
+}
+
+model CrawledPage {
+  id              String    @id @default(cuid())
+  crawlJobId      String
+  url             String
+  statusCode      Int?
+  title           String?
+  metaDescription String?
+  canonical       String?
+  wordCount       Int       @default(0)
+  headings        Json?
+  schemaTypes     Json?
+  technicalFlags  Json?
+  contentHash     String?
+  fetchedAt       DateTime  @default(now())
+
+  crawlJob CrawlJob @relation(fields: [crawlJobId], references: [id], onDelete: Cascade)
+
+  @@unique([crawlJobId, url])
+  @@index([crawlJobId])
+  @@map("crawled_pages")
+}
+
+model IntelligenceRun {
+  id             String                @id @default(cuid())
+  organizationId String
+  propertyId     String
+  status         IntelligenceRunStatus @default(PENDING)
+  trigger        String                @default("manual")
+  objective      String?
+  /// Pipeline config: role overrides, stage skips, confidence thresholds
+  config         Json?
+  currentStage   IntelligenceStageName?
+  confidence     Float?
+  summary        String?
+  errorSummary   String?
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  organization    Organization              @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  property        VisibilityProperty        @relation(fields: [propertyId], references: [id], onDelete: Restrict)
+  stages          IntelligenceStageResult[]
+  providerTraces  ConnectorTrace[]
+  recommendations Recommendation[]
+  strategyPlans   StrategyPlan[]
+  learnSignals    LearningSignal[]
+
+  @@index([organizationId, createdAt])
+  @@index([propertyId, status])
+  @@map("intelligence_runs")
+}
+
+model IntelligenceStageResult {
+  id           String                   @id @default(cuid())
+  runId        String
+  stage        IntelligenceStageName
+  status       IntelligenceStageStatus  @default(PENDING)
+  /// Structured stage output (findings, scores, artifact refs)
+  output       Json?
+  artifactRefs Json?
+  confidence   Float?
+  errorSummary String?
+  startedAt    DateTime?
+  completedAt  DateTime?
+  createdAt    DateTime                 @default(now())
+  updatedAt    DateTime                 @updatedAt
+
+  run IntelligenceRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@unique([runId, stage])
+  @@index([runId, status])
+  @@map("intelligence_stage_results")
+}
+
+model ConnectorTrace {
+  id           String            @id @default(cuid())
+  runId        String
+  stage        IntelligenceStageName
+  provider     ConnectorProvider
+  role         ConnectorRole
+  /// Hash of prompt template + inputs — never store raw secrets
+  promptHash   String
+  model        String?
+  latencyMs    Int?
+  tokenIn      Int?
+  tokenOut     Int?
+  success      Boolean           @default(true)
+  errorSummary String?
+  /// Redacted structured response summary
+  responseMeta Json?
+  createdAt    DateTime          @default(now())
+
+  run IntelligenceRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([runId, stage])
+  @@index([provider, role])
+  @@map("connector_traces")
+}
+
+model KeywordTarget {
+  id           String    @id @default(cuid())
+  propertyId   String
+  phrase       String
+  locale       String    @default("en-US")
+  intent       String?
+  volume       Int?
+  difficulty   Float?
+  priority     Priority  @default(MEDIUM)
+  metadata     Json?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  property VisibilityProperty @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([propertyId, phrase, locale])
+  @@index([propertyId, deletedAt])
+  @@map("keyword_targets")
+}
+
+model KnowledgeEntity {
+  id          String    @id @default(cuid())
+  propertyId  String
+  name        String
+  entityType  String
+  description String?
+  sameAs      Json?
+  attributes  Json?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  property  VisibilityProperty @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  edgesFrom KnowledgeEdge[]    @relation("EdgeFrom")
+  edgesTo   KnowledgeEdge[]    @relation("EdgeTo")
+
+  @@unique([propertyId, name, entityType])
+  @@index([propertyId, entityType])
+  @@map("knowledge_entities")
+}
+
+model KnowledgeEdge {
+  id         String   @id @default(cuid())
+  fromId     String
+  toId       String
+  relation   String
+  weight     Float    @default(1)
+  evidence   Json?
+  createdAt  DateTime @default(now())
+
+  from KnowledgeEntity @relation("EdgeFrom", fields: [fromId], references: [id], onDelete: Cascade)
+  to   KnowledgeEntity @relation("EdgeTo", fields: [toId], references: [id], onDelete: Cascade)
+
+  @@unique([fromId, toId, relation])
+  @@index([toId])
+  @@map("knowledge_edges")
+}
+
+model AiVisibilitySample {
+  id              String            @id @default(cuid())
+  propertyId      String
+  surface         VisibilitySurface
+  prompt          String
+  /// Hash of the probe prompt template (differs from THINK prompts)
+  promptHash      String
+  mentionedBrand  Boolean           @default(false)
+  citedUrl        Boolean           @default(false)
+  sentiment       Float?
+  rawExcerpt      String?
+  competitorHits  Json?
+  sampledAt       DateTime          @default(now())
+  createdAt       DateTime          @default(now())
+
+  property VisibilityProperty @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId, surface, sampledAt])
+  @@map("ai_visibility_samples")
+}
+
+model BacklinkSnapshot {
+  id            String   @id @default(cuid())
+  propertyId    String
+  capturedAt    DateTime @default(now())
+  referringDomains Int   @default(0)
+  backlinks     Int      @default(0)
+  sampleLinks   Json?
+  createdAt     DateTime @default(now())
+
+  property VisibilityProperty @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId, capturedAt])
+  @@map("backlink_snapshots")
+}
+
+model Recommendation {
+  id             String               @id @default(cuid())
+  organizationId String
+  propertyId     String
+  runId          String?
+  kind           RecommendationKind
+  title          String
+  summary        String
+  rationale      String?
+  impactScore    Float                @default(0)
+  effortScore    Float                @default(0)
+  confidence     Float                @default(0)
+  priority       Priority             @default(MEDIUM)
+  status         RecommendationStatus @default(PROPOSED)
+  payload        Json?
+  evidenceRefs   Json?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  property     VisibilityProperty @relation(fields: [propertyId], references: [id], onDelete: Restrict)
+  run          IntelligenceRun?   @relation(fields: [runId], references: [id], onDelete: SetNull)
+  outcomes     OutcomeEvent[]
+
+  @@index([organizationId, status])
+  @@index([propertyId, kind])
+  @@index([runId])
+  @@map("recommendations")
+}
+
+model StrategyPlan {
+  id             String    @id @default(cuid())
+  organizationId String
+  propertyId     String
+  runId          String?
+  title          String
+  horizonDays    Int       @default(90)
+  summary        String?
+  weeks          Json?
+  status         String    @default("DRAFT")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  property     VisibilityProperty @relation(fields: [propertyId], references: [id], onDelete: Restrict)
+  run          IntelligenceRun?   @relation(fields: [runId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, propertyId])
+  @@map("strategy_plans")
+}
+
+model OutcomeEvent {
+  id               String   @id @default(cuid())
+  recommendationId String
+  metricKey        String
+  metricValue      Float
+  notes            String?
+  observedAt       DateTime @default(now())
+  createdAt        DateTime @default(now())
+
+  recommendation Recommendation @relation(fields: [recommendationId], references: [id], onDelete: Cascade)
+
+  @@index([recommendationId, observedAt])
+  @@map("outcome_events")
+}
+
+model RecommendationWeight {
+  id             String   @id @default(cuid())
+  organizationId String
+  kind           RecommendationKind
+  featureKey     String
+  weight         Float    @default(1)
+  sampleSize     Int      @default(0)
+  updatedAt      DateTime @updatedAt
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, kind, featureKey])
+  @@map("recommendation_weights")
+}
+
+model LearningSignal {
+  id        String   @id @default(cuid())
+  runId     String
+  signalKey String
+  value     Float
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  run IntelligenceRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([runId, signalKey])
+  @@map("learning_signals")
+}

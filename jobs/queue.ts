@@ -12,7 +12,10 @@ export type JobName =
   | "process-import"
   | "process-export"
   | "deliver-webhook"
-  | "retry-email";
+  | "retry-email"
+  | "run-intelligence-pipeline"
+  | "run-visibility-probes"
+  | "run-site-crawl";
 
 export type JobPayload = Record<string, unknown>;
 

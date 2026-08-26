@@ -1,0 +1,290 @@
+// ─── Prompt Universe + Share of Answer ───────────────────────────────────────
+
+enum PromptType {
+  DISCOVERY
+  RECOMMENDATION
+  COMPARISON
+  PROBLEM_SOLVING
+  PURCHASE
+  RESEARCH
+  VALIDATION
+  ALTERNATIVE
+  PRICING
+  TRUST
+  RISK
+  TECHNICAL
+  EDUCATIONAL
+  TRANSACTIONAL
+}
+
+enum PromptSourceKind {
+  PRODUCT
+  SERVICE
+  KEYWORD
+  SEARCH_CONSOLE_QUERY
+  COMPETITOR_RANKING
+  FORUM
+  SERP
+  PEOPLE_ALSO_ASK
+  CUSTOMER_PERSONA
+  FUNNEL_STAGE
+  LOCATION
+  INDUSTRY_CONCEPT
+  AI_QUERY_PATTERN
+  PROMPT_TAXONOMY
+  MANUAL
+}
+
+enum PromptComplexity {
+  SIMPLE
+  CONTEXTUAL
+}
+
+enum FunnelStage {
+  AWARENESS
+  CONSIDERATION
+  DECISION
+  RETENTION
+  ADVOCACY
+}
+
+enum ComparisonOutcome {
+  WIN
+  LOSE
+  TIE
+  ABSENT
+  MIXED
+}
+
+model PromptUniverse {
+  id                String   @id @default(cuid())
+  organizationId    String
+  propertyId        String
+  name              String
+  brandName         String
+  industry          String?
+  primaryLocation   String   @default("global")
+  description       String?
+  generationStatus  String   @default("draft")
+  promptCount       Int      @default(0)
+  familyCount       Int      @default(0)
+  signalCount       Int      @default(0)
+  notes             String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  deletedAt         DateTime?
+
+  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  property     VisibilityProperty @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  signals      PromptSourceSignal[]
+  families     PromptFamily[]
+  prompts      UniversePrompt[]
+  personas     SyntheticPersona[]
+
+  @@index([organizationId, deletedAt])
+  @@index([propertyId])
+  @@map("prompt_universes")
+}
+
+model SyntheticPersona {
+  id               String   @id @default(cuid())
+  universeId       String
+  code             String
+  name             String
+  description      String?
+  queryStyle       String   @default("pragmatic")
+  isSystemSeed     Boolean  @default(true)
+  contextTemplate  String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  universe PromptUniverse   @relation(fields: [universeId], references: [id], onDelete: Cascade)
+  prompts  UniversePrompt[]
+
+  @@unique([universeId, code])
+  @@index([universeId])
+  @@map("synthetic_personas")
+}
+
+model PromptSourceSignal {
+  id           String           @id @default(cuid())
+  universeId   String
+  sourceKind   PromptSourceKind
+  signalText   String
+  signalKey    String
+  weight       Float            @default(1)
+  locationCode String?
+  productName  String?
+  topicHint    String?
+  externalRef  String?
+  createdAt    DateTime         @default(now())
+
+  universe PromptUniverse @relation(fields: [universeId], references: [id], onDelete: Cascade)
+  families PromptFamily[]
+
+  @@index([universeId, sourceKind])
+  @@map("prompt_source_signals")
+}
+
+model PromptFamily {
+  id           String   @id @default(cuid())
+  universeId   String
+  seedSignalId String?
+  name         String
+  slug         String
+  topic        String
+  summary      String?
+  memberCount  Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  universe   PromptUniverse      @relation(fields: [universeId], references: [id], onDelete: Cascade)
+  seedSignal PromptSourceSignal? @relation(fields: [seedSignalId], references: [id], onDelete: SetNull)
+  prompts    UniversePrompt[]
+
+  @@unique([universeId, slug])
+  @@index([universeId, topic])
+  @@map("prompt_families")
+}
+
+model UniversePrompt {
+  id               String           @id @default(cuid())
+  universeId       String
+  familyId         String?
+  personaId        String?
+  promptText       String
+  promptHash       String
+  topic            String
+  subtopic         String?
+  intent           String
+  personaCode      String           @default("general")
+  funnelStage      FunnelStage
+  location         String           @default("global")
+  product          String?
+  problem          String?
+  commercialValue  Float            @default(0.5)
+  brandRelevance   Float            @default(0.5)
+  promptType       PromptType
+  sourceKind       PromptSourceKind
+  complexity       PromptComplexity @default(SIMPLE)
+  isTracked        Boolean          @default(false)
+  priority         Priority         @default(MEDIUM)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  universe PromptUniverse    @relation(fields: [universeId], references: [id], onDelete: Cascade)
+  family   PromptFamily?     @relation(fields: [familyId], references: [id], onDelete: SetNull)
+  persona  SyntheticPersona? @relation(fields: [personaId], references: [id], onDelete: SetNull)
+
+  @@unique([universeId, promptHash, personaCode])
+  @@index([universeId, promptType])
+  @@index([universeId, complexity])
+  @@index([personaCode])
+  @@map("universe_prompts")
+}
+
+model ShareOfAnswerAnalysis {
+  id                       String   @id @default(cuid())
+  organizationId           String
+  propertyId               String
+  name                     String
+  queryCluster             String
+  clientBrand              String
+  analysisStatus           String   @default("draft")
+  observationCount         Int      @default(0)
+  entityCount              Int      @default(0)
+  methodology              String   @default("multi_indicator")
+  tokenCountAloneRejected  Boolean  @default(true)
+  notes                    String?
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+  deletedAt                DateTime?
+
+  organization Organization          @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  property     VisibilityProperty    @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  observations SoaAnswerObservation[]
+  brandScores  SoaBrandScore[]
+
+  @@index([organizationId, queryCluster])
+  @@index([propertyId])
+  @@map("share_of_answer_analyses")
+}
+
+model SoaAnswerObservation {
+  id             String   @id @default(cuid())
+  analysisId     String
+  promptText     String
+  engineCode     String
+  modelCode      String?
+  observedAt     DateTime @default(now())
+  rawExcerpt     String?
+  structuredSummary String?
+  answerTokenCount Int?
+  probeSource    String   @default("mock")
+  createdAt      DateTime @default(now())
+
+  analysis         ShareOfAnswerAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  entityIndicators SoaEntityIndicator[]
+
+  @@index([analysisId, engineCode])
+  @@map("soa_answer_observations")
+}
+
+model SoaEntityIndicator {
+  id                     String            @id @default(cuid())
+  observationId          String
+  entityName             String
+  isClient               Boolean           @default(false)
+  mention                Boolean           @default(false)
+  mentionCount           Int               @default(0)
+  position               Int?
+  recommendationStrength Float             @default(0)
+  answerSpace            Float             @default(0)
+  citationOwnership      Float             @default(0)
+  semanticProminence     Float             @default(0)
+  positiveClaims         Int               @default(0)
+  negativeClaims         Int               @default(0)
+  neutralClaims          Int               @default(0)
+  comparisonOutcome      ComparisonOutcome @default(ABSENT)
+  tokenSpanRatio         Float             @default(0)
+  influenceScore         Float             @default(0)
+  createdAt              DateTime          @default(now())
+
+  observation SoaAnswerObservation @relation(fields: [observationId], references: [id], onDelete: Cascade)
+
+  @@unique([observationId, entityName])
+  @@index([observationId])
+  @@map("soa_entity_indicators")
+}
+
+model SoaBrandScore {
+  id                         String   @id @default(cuid())
+  analysisId                 String
+  entityName                 String
+  isClient                   Boolean  @default(false)
+  shareOfAnswer              Float
+  mentionRate                Float
+  avgPositionScore           Float
+  avgRecommendationStrength  Float
+  avgAnswerSpace             Float
+  avgCitationOwnership       Float
+  avgSemanticProminence      Float
+  avgClaimBalance            Float
+  avgComparisonScore         Float
+  avgTokenSpanRatio          Float
+  tokenOnlyShare             Float
+  tokenVsInfluenceGap        Float
+  positiveClaimsTotal        Int      @default(0)
+  negativeClaimsTotal        Int      @default(0)
+  neutralClaimsTotal         Int      @default(0)
+  observationSampleSize      Int
+  meanInfluence              Float
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
+
+  analysis ShareOfAnswerAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+
+  @@unique([analysisId, entityName])
+  @@index([analysisId])
+  @@map("soa_brand_scores")
+}

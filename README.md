@@ -1,6 +1,16 @@
 # Peacock One
 
-Peacock One is the internal business operating system for **Digital Peacock**. It consolidates CRM, sales, delivery ERP, XYME goal management, HRMS, finance, documents, approvals, reporting, and audit into one modular monolith.
+Peacock One is Digital Peacock’s enterprise **SEO + AEO + GEO Search & Generative Visibility Intelligence Platform**, with an integrated business operating layer (CRM, delivery, finance, HR, XYME).
+
+It is **not** a thin wrapper around LLM APIs. Core workflows follow:
+
+```text
+OBSERVE → THINK → VERIFY → DECIDE → EXECUTE → MEASURE → LEARN
+```
+
+AI connectors (OpenAI / ChatGPT, Gemini, Claude, Perplexity, DeepSeek) sit underneath a role-bound reasoning fabric — each model gets specialist jobs and distinct prompts.
+
+See [`docs/product-philosophy.md`](./docs/product-philosophy.md) and [`docs/intelligence-architecture.md`](./docs/intelligence-architecture.md).
 
 ## Stack
 
@@ -17,7 +27,8 @@ Peacock One is the internal business operating system for **Digital Peacock**. I
 - Docker Compose for local infrastructure
 
 See [`docs/design-system.md`](./docs/design-system.md) for UI tokens and interaction rules.  
-See [`docs/database-model.md`](./docs/database-model.md) for the full entity relationship model.
+See [`docs/database-model.md`](./docs/database-model.md) for the full entity relationship model.  
+See [`docs/architecture.md`](./docs/architecture.md) for modular-monolith layers.
 
 ## Prerequisites
 
