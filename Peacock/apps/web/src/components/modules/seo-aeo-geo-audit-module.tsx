@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { ModuleShell } from "@/components/module-shell";
+import { Button } from "@/components/ui/button";
 import { DEMO_GEO_INTELLIGENCE, fetchGeoIntelligencePreview, type GeoIntelligenceReport } from "@/lib/geo-intelligence";
 import {
   DEMO_AEO_AUDIT,
@@ -15,12 +16,21 @@ import {
   type GeoAuditPreview,
   type SeoAuditPreview,
 } from "@/lib/seo-aeo-geo-audit";
+import { analyzeSite, SiteIntelligenceError, type SiteIntelligenceReport } from "@/lib/site-intelligence";
+
+import { SiteIntelligenceReportView } from "./site-intelligence-report";
 
 export function SeoAeoGeoAuditModule() {
   const [seo, setSeo] = useState<SeoAuditPreview>(DEMO_SEO_AUDIT);
   const [aeo, setAeo] = useState<AeoAuditPreview>(DEMO_AEO_AUDIT);
   const [geo, setGeo] = useState<GeoAuditPreview>(DEMO_GEO_AUDIT);
   const [geoIntelligence, setGeoIntelligence] = useState<GeoIntelligenceReport>(DEMO_GEO_INTELLIGENCE);
+
+  const [url, setUrl] = useState("");
+  const [competitorUrl, setCompetitorUrl] = useState("");
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analyzeError, setAnalyzeError] = useState<string | null>(null);
+  const [report, setReport] = useState<SiteIntelligenceReport | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -33,13 +43,94 @@ export function SeoAeoGeoAuditModule() {
     };
   }, []);
 
+  const runAnalysis = async () => {
+    if (!url.trim()) {
+      setAnalyzeError("Enter a website URL to analyse.");
+      return;
+    }
+    setAnalyzing(true);
+    setAnalyzeError(null);
+    try {
+      const result = await analyzeSite(url.trim(), {
+        competitorUrl: competitorUrl.trim() || undefined,
+        maxPages: 8,
+      });
+      setReport(result);
+    } catch (err) {
+      setAnalyzeError(err instanceof SiteIntelligenceError ? err.message : "Analysis failed. Please try again.");
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
   return (
     <ModuleShell
       title="Website SEO/AEO/GEO Audit"
-      kicker="Module · Peacock SEO Engine + AEO + GEO Lab"
-      lede="One audit across classic search (SEO), answer engines (AEO), and generative engines (GEO) — deterministic scoring first, cautious causality always."
+      kicker="Module · Peacock Site Intelligence — enterprise SEO + GEO reporting"
+      lede="Crawl → Understand → Benchmark → Query LLMs → Extract AI Signals → Compare Competitors → Identify Gaps → Prioritize Opportunities → Generate Exact Fixes."
     >
-      <section>
+      <section
+        className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-6"
+        aria-labelledby="analyze-heading"
+      >
+        <h2 id="analyze-heading" style={{ fontFamily: "var(--font-display)" }}>
+          Run a real Peacock analysis
+        </h2>
+        <p className="os-honesty">
+          Crawls the pages you specify in real time and queries the connected AI plugins — nothing here
+          is pre-recorded demo data.
+        </p>
+        <form
+          className="mt-4 grid gap-3 md:grid-cols-[1fr_1fr_auto]"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void runAnalysis();
+          }}
+        >
+          <label className="block text-sm">
+            <span className="text-[var(--muted)]">Website URL</span>
+            <input
+              className="mt-1 w-full rounded-[var(--radius)] border border-[var(--border)] bg-transparent px-3 py-2"
+              placeholder="https://example.com"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+            />
+          </label>
+          <label className="block text-sm">
+            <span className="text-[var(--muted)]">Competitor URL (optional)</span>
+            <input
+              className="mt-1 w-full rounded-[var(--radius)] border border-[var(--border)] bg-transparent px-3 py-2"
+              placeholder="https://competitor.com"
+              value={competitorUrl}
+              onChange={(e) => setCompetitorUrl(e.target.value)}
+            />
+          </label>
+          <div className="flex items-end">
+            <Button type="submit" disabled={analyzing}>
+              {analyzing ? "Analyzing…" : "Run Peacock Analysis"}
+            </Button>
+          </div>
+        </form>
+        {analyzing ? (
+          <p className="mt-3 text-sm text-[var(--muted)]">
+            Crawling pages, running SEO/AEO/GEO scoring, and broadcasting to AI plugins — this can take
+            up to a minute for a live LLM run.
+          </p>
+        ) : null}
+        {analyzeError ? <p className="mt-3 text-sm text-[var(--danger)]">{analyzeError}</p> : null}
+      </section>
+
+      {report ? (
+        <div style={{ marginTop: "2.5rem" }}>
+          <SiteIntelligenceReportView report={report} />
+        </div>
+      ) : (
+        <>
+          <p className="os-honesty" style={{ marginTop: "2.5rem" }}>
+            Example preview below (Acme demo data) — run a real analysis above to replace it with your
+            own site&apos;s report.
+          </p>
+          <section style={{ marginTop: "1rem" }}>
         <h2 style={{ fontFamily: "var(--font-display)" }}>SEO</h2>
         <p className="os-callout">{seo.summary}</p>
         <dl className="os-stats">
@@ -145,6 +236,8 @@ export function SeoAeoGeoAuditModule() {
           ))}
         </ul>
       </section>
+        </>
+      )}
     </ModuleShell>
   );
 }
