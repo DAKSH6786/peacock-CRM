@@ -58,8 +58,8 @@ def build_platform_recommendations(
 
         if response.simulated:
             opportunities.append(
-                f"{response.engine_name} plugin has no live API key configured — this preview "
-                "uses simulated example content; connect a real key to get live signals."
+                f"{response.engine_name} plugin has no live API key configured, so this response is "
+                "not from a live model call — connect the corresponding API key to get real signals."
             )
 
         if not opportunities:

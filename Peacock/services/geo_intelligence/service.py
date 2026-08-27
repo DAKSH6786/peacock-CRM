@@ -49,6 +49,7 @@ async def run_geo_intelligence(
     client_domains: list[str] | None = None,
     competitor_domains: list[str] | None = None,
     workspace_id: str | None = None,
+    simulated_responses: dict[str, str] | None = None,
 ) -> GeoIntelligenceReport:
     brand = (client_brand or "Acme").strip() or "Acme"
     competitors = [c.strip() for c in (competitors or DEFAULT_COMPETITORS) if c and c.strip()]
@@ -56,13 +57,16 @@ async def run_geo_intelligence(
     codes = [c for c in (engine_codes or list(DEFAULT_ENGINE_CODES)) if c]
     prompt = (research_prompt or "").strip() or build_research_prompt(brand, competitors)
 
+    if simulated_responses is None:
+        simulated_responses = default_simulated_responses(brand, competitors)
+
     gateway = PeacockAIGateway(llm_gateway)
     provider_responses = await gateway.broadcast(
         organisation_id=organisation_id,
         workspace_id=workspace_id,
         research_prompt=prompt,
         engine_codes=codes,
-        simulated_responses=default_simulated_responses(brand, competitors),
+        simulated_responses=simulated_responses,
     )
 
     extraction = extract_geo_intelligence(
