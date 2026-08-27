@@ -34,6 +34,7 @@ from api.routes import (
     peacock90,
     proprietary_metrics,
     research_mode,
+    site_intelligence,
     moat_data_model,
     cost_intelligence,
     enterprise_reliability,
@@ -154,6 +155,7 @@ def create_app() -> FastAPI:
     application.include_router(aeo.router)
     application.include_router(monitoring.router)
     application.include_router(geo_intelligence.router)
+    application.include_router(site_intelligence.router)
 
     # Soft role fallbacks only — prefer CapabilityRouter dynamic selection.
     # Live adapters register when API keys are present; Null always available.
