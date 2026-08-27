@@ -52,6 +52,7 @@ class StoredPage:
     is_near_duplicate: bool = False
     near_duplicate_of: str | None = None
     is_orphan_candidate: bool = False
+    viewport_meta: str | None = None
 
 
 @dataclass
@@ -187,6 +188,7 @@ def page_from_extraction(
         language=extraction.language,
         is_js_heavy=extraction.is_js_heavy,
         redirect_chain=list(extraction.redirect_chain),
+        viewport_meta=extraction.viewport_meta,
         fetch_mode=fetch_mode,
         status=status,
     )

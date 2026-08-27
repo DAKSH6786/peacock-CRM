@@ -45,6 +45,7 @@ class PageExtraction:
     redirect_chain: list[str] = field(default_factory=list)
     crawl_depth: int = 0
     headers: dict[str, str] = field(default_factory=dict)
+    viewport_meta: str | None = None
 
 
 _SCRIPT_SRC_HINTS = ("react", "vue", "angular", "next", "nuxt", "webpack", "vite")
@@ -218,6 +219,7 @@ def extract_page(
         except json.JSONDecodeError:
             schema_blocks.append({"raw": text[:5000], "parse_error": True})
 
+    viewport_meta = _meta_content(raw, name="viewport")
     robots = _robots_directive(raw, headers)
     indexability = _indexability(robots, status_code, canonical, final_url)
     language = _detect_language(raw, body_text)
@@ -254,4 +256,5 @@ def extract_page(
         redirect_chain=list(redirect_chain or []),
         crawl_depth=crawl_depth,
         headers={k.lower(): v for k, v in headers.items()},
+        viewport_meta=viewport_meta,
     )
