@@ -74,4 +74,4 @@ No JSON blob for the supporting value.
 - ORM: `packages/db_models/evidence_ledger.py`
 - Types: `services/evidence_ledger/models.py`
 - Repository: `services/evidence_ledger/repository.py`
-- Migration: `infra/migrations/versions/0007_evidence_ledger.py`
+- Migration: `database/migrations/versions/0007_evidence_ledger.py`

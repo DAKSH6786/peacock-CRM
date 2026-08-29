@@ -237,7 +237,7 @@ erDiagram
 | `perplexity` | Perplexity | Perplexity |
 | `deepseek` | DeepSeek | DeepSeek |
 
-Also seeded generative engines (`chatgpt`, `gemini`, `claude`, `perplexity`, `deepseek`, `google_ai_overview`) via `infra/scripts/seed_dev.py`.
+Also seeded generative engines (`chatgpt`, `gemini`, `claude`, `perplexity`, `deepseek`, `google_ai_overview`) via `scripts/seed_dev.py`.
 
 ## Migrations
 

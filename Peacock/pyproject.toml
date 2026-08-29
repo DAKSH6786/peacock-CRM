@@ -41,7 +41,28 @@ requires = ["setuptools>=75.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-where = ["apps/api", "services", "packages"]
+where = [
+  "backend",
+  "backend/packages",
+  "backend/services",
+  "engines/seo",
+  "engines/aeo",
+  "engines/geo",
+  "engines/crawler",
+  "engines/competitor-intelligence",
+  "engines/citation-intelligence",
+  "engines/content-intelligence",
+  "engines/opportunity-engine",
+  "engines/llm-intelligence",
+  "engines/ai-visibility",
+  "engines/measurement",
+  "engines/experiment-engine",
+  "engines/learning-engine",
+  "plugins",
+  "agents",
+  "experts",
+  "publishing",
+]
 include = ["*"]
 namespaces = false
 
@@ -49,7 +70,29 @@ namespaces = false
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
-pythonpath = [".", "apps/api", "services", "packages"]
+pythonpath = [
+  ".",
+  "backend",
+  "backend/packages",
+  "backend/services",
+  "engines/seo",
+  "engines/aeo",
+  "engines/geo",
+  "engines/crawler",
+  "engines/competitor-intelligence",
+  "engines/citation-intelligence",
+  "engines/content-intelligence",
+  "engines/opportunity-engine",
+  "engines/llm-intelligence",
+  "engines/ai-visibility",
+  "engines/measurement",
+  "engines/experiment-engine",
+  "engines/learning-engine",
+  "plugins",
+  "agents",
+  "experts",
+  "publishing",
+]
 
 [tool.ruff]
 line-length = 100

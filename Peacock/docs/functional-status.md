@@ -70,7 +70,7 @@ Follow [`cursor-execution-rule.md`](./cursor-execution-rule.md):
 
 ```bash
 # From repo-root Peacock/ (or: make -C .. test)
-JOB_BACKEND=memory PYTHONPATH=.:apps/api:services:packages \
+JOB_BACKEND=memory PYTHONPATH=".:backend:backend/packages:backend/services:engines/seo:engines/aeo:engines/geo:engines/crawler:engines/competitor-intelligence:engines/llm-intelligence:plugins" \
   python3 -m pytest tests/services/test_moat_data_model.py \
   tests/services/test_cost_intelligence.py \
   tests/services/test_enterprise_reliability.py \
@@ -79,7 +79,7 @@ JOB_BACKEND=memory PYTHONPATH=.:apps/api:services:packages \
   tests/services/test_final_architecture.py \
   tests/services/test_schema_integrity.py -q
 
-cd apps/web && npm test && npm run lint && npm run typecheck
+cd frontend && npm test && npm run lint && npm run typecheck
 ```
 
 ### Verified on this branch

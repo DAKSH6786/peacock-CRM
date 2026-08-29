@@ -5,10 +5,10 @@
 Paths below are relative to the monorepo root **`Peacock/`**.
 
 ```text
-apps/web  ──HTTP──►  apps/api (FastAPI)
+frontend  ──HTTP──►  backend/api (FastAPI)
                         │
                         ├── services/* domain engines
-                        ├── services/llm_gateway (adapters only)
+                        ├── plugins/llm_gateway (adapters only)
                         ├── packages/db_models + Alembic
                         └── packages/job_runtime → Celery (Temporal-ready)
 ```

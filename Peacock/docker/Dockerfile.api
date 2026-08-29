@@ -1,0 +1,30 @@
+FROM python:3.12-slim AS base
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PYTHONPATH=/app:/app/backend:/app/backend/packages:/app/backend/services:/app/engines/seo:/app/engines/aeo:/app/engines/geo:/app/engines/crawler:/app/engines/competitor-intelligence:/app/engines/citation-intelligence:/app/engines/content-intelligence:/app/engines/opportunity-engine:/app/engines/llm-intelligence:/app/engines/ai-visibility:/app/engines/measurement:/app/engines/experiment-engine:/app/engines/learning-engine:/app/plugins:/app/agents:/app/experts:/app/publishing
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY pyproject.toml README.md ./
+COPY backend ./backend
+COPY engines ./engines
+COPY plugins ./plugins
+COPY agents ./agents
+COPY experts ./experts
+COPY publishing ./publishing
+COPY database ./database
+COPY scripts ./scripts
+
+RUN pip install --upgrade pip && pip install -e ".[dev]"
+
+EXPOSE 8000
+
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -4,7 +4,7 @@
 
 Provider-specific logic (SDKs, HTTP quirks, auth headers) lives **only** in:
 
-`services/llm_gateway/adapters/*`
+`plugins/llm_gateway/adapters/*` (also exposed as `plugins/openai`, `plugins/gemini`, `plugins/claude`, `plugins/perplexity`, `plugins/deepseek`)
 
 Domain engines call `LLMGateway.complete(LLMCompletionRequest)` with a **role** + **template_id**.
 

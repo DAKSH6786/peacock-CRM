@@ -2,8 +2,8 @@
 .git
 .venv
 node_modules
-apps/web/node_modules
-apps/web/.next
+frontend/node_modules
+frontend/.next
 **/node_modules
 **/.next
 **/__pycache__

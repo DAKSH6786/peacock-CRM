@@ -66,4 +66,4 @@ Child rows CASCADE with the case. Tenant FKs denormalize `organisation_id` / `wo
 - ORM: `packages/db_models/intelligence_case.py`
 - Typed object: `services/intelligence/case.py`
 - Repository: `services/intelligence/case_repository.py`
-- Migration: `infra/migrations/versions/0006_pine_intelligence_case.py`
+- Migration: `database/migrations/versions/0006_pine_intelligence_case.py`

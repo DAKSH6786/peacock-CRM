@@ -82,4 +82,4 @@ Single-shot measurements are never presented as HIGH confidence.
 
 - ORM: `packages/db_models/probabilistic_visibility.py`
 - Service: `services/geo_engine/probabilistic_*.py`
-- Migration: `infra/migrations/versions/0009_probabilistic_visibility.py`
+- Migration: `database/migrations/versions/0009_probabilistic_visibility.py`

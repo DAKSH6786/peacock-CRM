@@ -84,4 +84,4 @@ Bridge into the LLM gateway via `route_completion_request()` which sets
 - ORM: `packages/db_models/capability_profiles.py`
 - Service: `services/capability_router/`
 - ModelRouter: `services/capability_router/model_router.py`
-- Migration: `infra/migrations/versions/0008_capability_profiles.py`
+- Migration: `database/migrations/versions/0008_capability_profiles.py`
