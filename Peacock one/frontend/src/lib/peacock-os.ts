@@ -308,6 +308,15 @@ export async function fetchSecurityPreview(
   }
 }
 
+export const GROWTH_LOOP_LINKS = [
+  {
+    href: "/modules/growth-loop",
+    label: "Peacock Growth Loop",
+    blurb:
+      "SEO+AEO+GEO → AI Visibility → LLM Intelligence → Opportunities → Content → AI Agents → Human Experts → Publishing → Measurement → Learning",
+  },
+] as const;
+
 export const INTELLIGENCE_LAYER_LINKS = [
   {
     href: "/modules/geo-intelligence",

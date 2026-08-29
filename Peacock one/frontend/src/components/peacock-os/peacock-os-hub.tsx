@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 
 import {
   DEMO_ARCHITECTURE,
+  GROWTH_LOOP_LINKS,
   INTELLIGENCE_LAYER_LINKS,
   PRODUCT_MODULE_LINKS,
   SUBSYSTEM_LINKS,
@@ -77,6 +78,23 @@ export function PeacockOsHub() {
           Coverage {map.product_standard_coverage}% · Learning loops to PINE:{" "}
           {map.learning_loops_to_pine ? "yes" : "no"}
         </p>
+      </section>
+
+      <section className="os-grid">
+        <h2 style={{ fontFamily: "var(--font-display)" }}>Peacock Growth Loop</h2>
+        <p className="os-honesty">
+          SEO+AEO+GEO → AI Visibility → LLM Intelligence → Opportunity Discovery → Content Strategy →
+          Content Creation → Optimization → AI Agents → Human Experts → Publishing → Measurement →
+          Experiments → Learning → Re-optimization. The flagship end-to-end workflow.
+        </p>
+        <div className="os-cards">
+          {GROWTH_LOOP_LINKS.map((item) => (
+            <Link key={item.href} href={item.href} className="os-card">
+              <strong>{item.label}</strong>
+              <span>{item.blurb}</span>
+            </Link>
+          ))}
+        </div>
       </section>
 
       <section className="os-grid">

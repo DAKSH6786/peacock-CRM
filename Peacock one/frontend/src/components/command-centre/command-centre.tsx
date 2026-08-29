@@ -11,7 +11,7 @@ import {
   fetchCommandCentrePreview,
   type CommandCentreSnapshot,
 } from "@/lib/command-centre";
-import { INTELLIGENCE_LAYER_LINKS, PRODUCT_MODULE_LINKS } from "@/lib/peacock-os";
+import { GROWTH_LOOP_LINKS, INTELLIGENCE_LAYER_LINKS, PRODUCT_MODULE_LINKS } from "@/lib/peacock-os";
 
 export function CommandCentre() {
   const [snapshot, setSnapshot] = useState<CommandCentreSnapshot>(DEMO_SNAPSHOT);
@@ -67,6 +67,25 @@ export function CommandCentre() {
           signals={snapshot.signals}
         />
       </header>
+
+      <section className="os-grid" aria-labelledby="cc-growth-loop-title">
+        <h2 id="cc-growth-loop-title" style={{ fontFamily: "var(--font-display)" }}>
+          Peacock Growth Loop
+        </h2>
+        <p className="os-honesty">
+          SEO+AEO+GEO → AI Visibility → LLM Intelligence → Opportunity Discovery → Content Strategy →
+          Content Creation → Optimization → AI Agents → Human Experts → Publishing → Measurement →
+          Experiments → Learning → Re-optimization. The flagship end-to-end workflow.
+        </p>
+        <div className="os-cards">
+          {GROWTH_LOOP_LINKS.map((item) => (
+            <Link key={item.href} href={item.href} className="os-card">
+              <strong>{item.label}</strong>
+              <span>{item.blurb}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
 
       <section className="os-grid" aria-labelledby="cc-intelligence-title">
         <h2 id="cc-intelligence-title" style={{ fontFamily: "var(--font-display)" }}>
