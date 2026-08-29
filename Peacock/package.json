@@ -1,0 +1,25 @@
+{
+  "name": "peacock-one",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Peacock One — SEO + AEO + GEO + AI Visibility growth platform",
+  "scripts": {
+    "postinstall": "npm --prefix frontend install && bash scripts/ensure-python.sh",
+    "dev": "concurrently -k --kill-signal SIGINT -n api,web -c magenta,cyan \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:api": "bash scripts/run-api.sh",
+    "dev:web": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "start": "npm --prefix frontend run start",
+    "lint": "npm --prefix frontend run lint",
+    "typecheck": "npm --prefix frontend run typecheck",
+    "test": "npm run test:api && npm --prefix frontend test",
+    "test:api": "bash -c 'source scripts/pythonpath.sh && JOB_BACKEND=memory .venv/bin/pytest tests/ -q'",
+    "test:web": "npm --prefix frontend test"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

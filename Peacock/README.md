@@ -18,14 +18,25 @@ Content Optimizer, and Peacock GEO Intelligence.
 
 ## Repository layout
 
-**`Peacock one/`** (exact name, with a space) is the **single project
-root** — every application file lives inside it; nothing sits outside it
-except this repo's root-level pointer files (`README.md`, `Makefile`,
-`.gitignore`, `.github/workflows/ci.yml`) that just delegate into this
-folder.
+**`Peacock/`** is the **single project root** — every application file lives
+inside it; nothing sits outside it except this repo's root-level pointer
+files (`README.md`, `Makefile`, `.gitignore`, `.github/workflows/ci.yml`)
+that just delegate into this folder.
+
+Run the complete application from this folder:
+
+```bash
+cd Peacock
+npm install
+npm run dev
+```
+
+`npm install` installs the Next.js frontend **and** the Python API
+environment. `npm run dev` starts both the FastAPI backend (`:8000`) and
+the Next.js dashboard (`:3000`) together.
 
 ```text
-Peacock one/
+Peacock/
 ├── frontend/                    # Next.js + React + TypeScript UI
 ├── backend/
 │   ├── api/                     # FastAPI composition root (HTTP API) + growth_loop route
@@ -73,6 +84,7 @@ Peacock one/
 ├── terranova/
 ├── docker/                         # Dockerfiles (api, web, worker)
 ├── docker-compose.yml
+├── package.json                 # npm install / npm run dev entry (orchestrates frontend + API)
 ├── pyproject.toml
 ├── .env.example
 └── README.md (this file)
@@ -161,10 +173,22 @@ workflow against a real URL in one call:
 - No agent or Autopilot cycle ever publishes, deletes, or modifies a production system without an explicit human approval step.
 - Do **not** store hidden/private chain-of-thought — only structured summaries.
 
-## Quick start (Docker)
+## Quick start
 
 ```bash
-cd "Peacock one"
+cd Peacock
+npm install
+npm run dev
+```
+
+Open **http://localhost:3000/** — the dashboard (Peacock Command Centre) loads
+directly, with no login. `npm run dev` starts the FastAPI API on port 8000
+and the Next.js UI on port 3000; the UI proxies `/backend/*` to the API.
+
+Docker (optional, for Postgres/Redis-backed routes):
+
+```bash
+cd Peacock
 cp .env.example .env
 docker compose up --build
 ```
@@ -205,20 +229,12 @@ Default local admin (seeded, only relevant once auth is re-enabled):
   SEO/AEO/GEO Audit module, and the Peacock Growth Loop, all of which run
   against a real crawl with no database.
 
-Work inside **`"Peacock one/"`** (paths below are relative to that folder;
-quote the path everywhere because of the space in the folder name):
+Work inside **`Peacock/`** (paths below are relative to that folder):
 
 ```bash
-cd "Peacock one"
-
-# PYTHONPATH covers backend + every engines/*, plugins/, agents/, experts/, and publishing/ directory
-export PYTHONPATH=".:backend:backend/packages:backend/services:engines/seo:engines/aeo:engines/geo:engines/crawler:engines/competitor-intelligence:engines/citation-intelligence:engines/content-intelligence:engines/opportunity-engine:engines/llm-intelligence:engines/ai-visibility:engines/measurement:engines/experiment-engine:engines/learning-engine:plugins:agents:experts:publishing"
-
-# Python API — Postgres/Redis are only required for auth/crawl-persistence/job routes
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -e ".[dev]"
-uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
+cd Peacock
+npm install    # installs frontend deps + Python API environment
+npm run dev    # API on :8000 + Next.js on :3000
 
 # Optional: enable full persistence-backed routes
 docker compose up -d postgres redis
@@ -226,10 +242,8 @@ alembic -c database/migrations/alembic.ini upgrade head
 python scripts/seed_dev.py
 
 # Celery worker (separate terminal, optional)
+source .venv/bin/activate
 celery -A api.worker.celery_app worker --loglevel=INFO
-
-# Frontend (separate terminal)
-cd frontend && npm install && npm run dev
 ```
 
 Open http://localhost:3000 — it opens directly on the Peacock Command Centre
@@ -260,11 +274,8 @@ environment variable — no code changes required:
 ## Tests
 
 ```bash
-cd "Peacock one"
-source .venv/bin/activate
-export PYTHONPATH=".:backend:backend/packages:backend/services:engines/seo:engines/aeo:engines/geo:engines/crawler:engines/competitor-intelligence:engines/citation-intelligence:engines/content-intelligence:engines/opportunity-engine:engines/llm-intelligence:engines/ai-visibility:engines/measurement:engines/experiment-engine:engines/learning-engine:plugins:agents:experts:publishing"
-JOB_BACKEND=memory pytest tests/ -q
-cd frontend && npm test
+cd Peacock
+npm test
 ```
 
 ## Environments

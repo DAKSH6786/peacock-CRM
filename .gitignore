@@ -1,5 +1,5 @@
 # All Peacock One application code, dependencies, and build artifacts live
-# inside "Peacock one/" — see "Peacock one/.gitignore" for the full list.
+# inside Peacock/ — see Peacock/.gitignore for the full list.
 # This file only covers stray OS/editor junk that could appear at the repo root.
 .DS_Store
 .idea/
