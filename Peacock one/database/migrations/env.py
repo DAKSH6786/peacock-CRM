@@ -19,8 +19,18 @@ sys.path[:0] = [
     str(ROOT / "engines" / "geo"),
     str(ROOT / "engines" / "crawler"),
     str(ROOT / "engines" / "competitor-intelligence"),
+    str(ROOT / "engines" / "citation-intelligence"),
+    str(ROOT / "engines" / "content-intelligence"),
+    str(ROOT / "engines" / "opportunity-engine"),
     str(ROOT / "engines" / "llm-intelligence"),
+    str(ROOT / "engines" / "ai-visibility"),
+    str(ROOT / "engines" / "measurement"),
+    str(ROOT / "engines" / "experiment-engine"),
+    str(ROOT / "engines" / "learning-engine"),
     str(ROOT / "plugins"),
+    str(ROOT / "agents"),
+    str(ROOT / "experts"),
+    str(ROOT / "publishing"),
 ]
 
 from api.config import get_settings  # noqa: E402

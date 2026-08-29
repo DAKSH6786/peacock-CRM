@@ -25,6 +25,7 @@ from api.routes import (
     executive_brain,
     geo_intelligence,
     geo_lab,
+    growth_loop,
     health,
     intelligence,
     jobs,
@@ -156,6 +157,7 @@ def create_app() -> FastAPI:
     application.include_router(monitoring.router)
     application.include_router(geo_intelligence.router)
     application.include_router(site_intelligence.router)
+    application.include_router(growth_loop.router)
 
     # Soft role fallbacks only — prefer CapabilityRouter dynamic selection.
     # Live adapters register when API keys are present; Null always available.

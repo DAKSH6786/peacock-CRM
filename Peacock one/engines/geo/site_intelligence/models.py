@@ -273,8 +273,10 @@ class SiteIntelligenceReport:
     url: str
     brand: str
     crawled_pages_count: int
+    total_word_count: int
     crawl_status: str
     executive_summary: str
+    site_text_sample: str
     peacock_visibility_score: float
     seo_score: float
     aeo_score: float
@@ -290,8 +292,10 @@ class SiteIntelligenceReport:
     top_actions: list[ImpactAction]
     keyword_opportunities: LlmKeywordMap
     entity_opportunities: list[str]
+    site_key_terms: list[str]
     content_gaps: list[str]
     citation_opportunities: list[str]
+    raw_citations: list[dict[str, Any]]
     backlink_opportunities: str
     top_performing_pages: list[PageOpportunity]
     weak_pages: list[PageOpportunity]
@@ -311,8 +315,10 @@ class SiteIntelligenceReport:
             "url": self.url,
             "brand": self.brand,
             "crawled_pages_count": self.crawled_pages_count,
+            "total_word_count": self.total_word_count,
             "crawl_status": self.crawl_status,
             "executive_summary": self.executive_summary,
+            "site_text_sample": self.site_text_sample,
             "peacock_visibility_score": self.peacock_visibility_score,
             "seo_score": self.seo_score,
             "aeo_score": self.aeo_score,
@@ -328,8 +334,10 @@ class SiteIntelligenceReport:
             "top_actions": [a.to_dict() for a in self.top_actions],
             "keyword_opportunities": self.keyword_opportunities.to_dict(),
             "entity_opportunities": list(self.entity_opportunities),
+            "site_key_terms": list(self.site_key_terms),
             "content_gaps": list(self.content_gaps),
             "citation_opportunities": list(self.citation_opportunities),
+            "raw_citations": list(self.raw_citations),
             "backlink_opportunities": self.backlink_opportunities,
             "top_performing_pages": [p.to_dict() for p in self.top_performing_pages],
             "weak_pages": [p.to_dict() for p in self.weak_pages],

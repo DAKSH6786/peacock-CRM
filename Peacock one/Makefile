@@ -2,7 +2,7 @@
 
 # Peacock One — single project root ("Peacock one/"). Run these targets from
 # inside this folder (or from the repo root via the top-level Makefile).
-PYTHONPATH_DIRS := .:backend:backend/packages:backend/services:engines/seo:engines/aeo:engines/geo:engines/crawler:engines/competitor-intelligence:engines/llm-intelligence:plugins
+PYTHONPATH_DIRS := .:backend:backend/packages:backend/services:engines/seo:engines/aeo:engines/geo:engines/crawler:engines/competitor-intelligence:engines/citation-intelligence:engines/content-intelligence:engines/opportunity-engine:engines/llm-intelligence:engines/ai-visibility:engines/measurement:engines/experiment-engine:engines/learning-engine:plugins:agents:experts:publishing
 
 install:
 	pip install -e ".[dev]"

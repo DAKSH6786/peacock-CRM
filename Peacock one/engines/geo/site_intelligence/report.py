@@ -294,6 +294,7 @@ async def run_site_intelligence_report(
     entity_opportunities = keyword_map.missing_semantic_entities
     content_gaps = geo_intel.extraction.missing_topics
     citation_opportunities = sorted({c.domain for c in geo_intel.extraction.citations})[:10]
+    raw_citations = [c.to_dict() for c in geo_intel.extraction.citations]
 
     data_availability = DataAvailability(measured=measured, unavailable=unavailable)
 
@@ -301,8 +302,10 @@ async def run_site_intelligence_report(
         url=url,
         brand=brand,
         crawled_pages_count=len(crawl.pages),
+        total_word_count=sum(p.word_count for p in crawl.pages.values()),
         crawl_status=crawl.status,
         executive_summary=executive_summary,
+        site_text_sample=site_text[:20000],
         peacock_visibility_score=peacock_visibility_score,
         seo_score=site_seo_score,
         aeo_score=site_aeo_score,
@@ -318,8 +321,10 @@ async def run_site_intelligence_report(
         top_actions=top_actions,
         keyword_opportunities=keyword_map,
         entity_opportunities=entity_opportunities,
+        site_key_terms=site_key_terms,
         content_gaps=content_gaps,
         citation_opportunities=citation_opportunities,
+        raw_citations=raw_citations,
         backlink_opportunities=DATA_UNAVAILABLE + " — no backlink data source configured for this deployment.",
         top_performing_pages=top_performing_pages,
         weak_pages=weak_pages,
