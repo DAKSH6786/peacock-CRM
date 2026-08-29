@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: peacock-one
+        working-directory: "Peacock one"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: peacock-one/frontend
+        working-directory: "Peacock one/frontend"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

@@ -1,6 +1,6 @@
 .PHONY: up down api web test migrate seed install
 
-# Peacock One — single project root (peacock-one/). Run these targets from
+# Peacock One — single project root ("Peacock one/"). Run these targets from
 # inside this folder (or from the repo root via the top-level Makefile).
 PYTHONPATH_DIRS := .:backend:backend/packages:backend/services:engines/seo:engines/aeo:engines/geo:engines/crawler:engines/competitor-intelligence:engines/llm-intelligence:plugins
 
